@@ -1,0 +1,369 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+}
+
+enum ReservationStatus {
+  DRAFT
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  CANCELLED
+}
+
+enum ContactStatus {
+  NEW
+  CONTACTED
+  PENDING
+  QUOTE_RECEIVED
+  CONFIRMED
+  REFUSED
+}
+
+enum QuoteStatus {
+  DRAFT
+  SUBMITTED
+  ACCEPTED
+  REJECTED
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      UserRole @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Client {
+  id        String        @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  notes     String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  reservations Reservation[]
+  invoices   Invoice[]
+  contactRequests ContactRequest[]
+  quotes     Quote[]
+}
+
+model ItemCategory {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String?
+  heroTitle   String?
+  heroImageUrl String?
+  sortOrder   Int    @default(0)
+  items       Item[]
+}
+
+model Item {
+  id          String @id @default(cuid())
+  name        String
+  description String?
+  sku         String? @unique
+  unit        String  @default("piece")
+  totalQty    Int     @default(0)
+  reservedQty Int     @default(0)
+  damageQty   Int     @default(0)
+  rentalPriceCents Int @default(0)
+  depositPriceCents Int @default(0)
+  active      Boolean @default(true)
+  categoryId  String?
+  category    ItemCategory? @relation(fields: [categoryId], references: [id])
+  images      ItemImage[]
+  reservationItems ReservationItem[]
+  quoteItems  QuoteItem[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([active])
+}
+
+model ItemImage {
+  id        String @id @default(cuid())
+  itemId    String
+  url       String
+  alt       String?
+  sortOrder Int    @default(0)
+  item      Item   @relation(fields: [itemId], references: [id])
+
+  @@index([itemId])
+}
+
+model Reservation {
+  id          String            @id @default(cuid())
+  code        String            @unique
+  status      ReservationStatus @default(PENDING)
+  startDate   DateTime
+  endDate     DateTime
+  eventDate   DateTime?
+  eventLocation String?
+  confirmationSentAt DateTime?
+  notes       String?
+  clientId    String
+  client      Client            @relation(fields: [clientId], references: [id])
+  items       ReservationItem[]
+  invoices    Invoice[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([clientId])
+  @@index([status])
+  @@index([startDate, endDate])
+}
+
+model ReservationItem {
+  id            String      @id @default(cuid())
+  reservationId String
+  itemId        String
+  quantity      Int         @default(1)
+  unitPriceCents Int        @default(0)
+  notes         String?
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  item          Item        @relation(fields: [itemId], references: [id])
+
+  @@index([reservationId])
+  @@index([itemId])
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  number      String        @unique
+  status      InvoiceStatus @default(DRAFT)
+  issueDate   DateTime
+  serviceDate DateTime?
+  dueDate     DateTime?
+  subtotalAmountCents Int   @default(0)
+  taxRateBps  Int           @default(0)
+  taxAmountCents Int        @default(0)
+  totalAmountCents Int      @default(0)
+  paymentTerms String?
+  paymentMethod String?
+  latePaymentPenalty String?
+  recoveryFeeCents Int      @default(4000)
+  notes       String?
+  pdfUrl      String?
+  sentAt      DateTime?
+  paidAt      DateTime?
+  cancelledAt DateTime?
+  clientId    String
+  reservationId String?
+  quoteId     String?       @unique
+  client      Client        @relation(fields: [clientId], references: [id])
+  reservation Reservation?  @relation(fields: [reservationId], references: [id])
+  quote       Quote?        @relation(fields: [quoteId], references: [id])
+  lines       InvoiceLine[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([clientId])
+  @@index([reservationId])
+  @@index([quoteId])
+  @@index([status])
+}
+
+model InvoiceLine {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  label       String
+  quantity    Int     @default(1)
+  unitPriceCents Int  @default(0)
+  sortOrder   Int     @default(0)
+  invoice     Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@index([invoiceId])
+}
+
+model CompanySetting {
+  id          String @id @default("company")
+  businessName String
+  address     String?
+  city        String?
+  postalCode  String?
+  phone       String?
+  email       String?
+  legalForm   String?
+  capital     String?
+  siren       String?
+  siret       String?
+  nafCode     String?
+  vatNumber   String?
+  vatApplicable Boolean @default(false)
+  vatRateBps Int @default(0)
+  paymentTerms String?
+  latePaymentPenalty String?
+  recoveryFeeCents Int @default(4000)
+  bankIban    String?
+  bankBic     String?
+  logoUrl     String?
+  spotlightTitle String?
+  spotlightDescription String?
+  spotlightImageUrl String?
+  spotlightActive Boolean @default(false)
+  updatedAt   DateTime @updatedAt
+}
+
+model Spotlight {
+  id          String @id @default(cuid())
+  title       String
+  description String?
+  imageUrl    String?
+  active      Boolean @default(true)
+  sortOrder   Int     @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([active])
+  @@index([sortOrder])
+}
+
+model Review {
+  id        String @id @default(cuid())
+  name      String
+  email     String?
+  rating    Int    @default(5)
+  text      String?
+  status    ReviewStatus @default(PENDING)
+  verifiedPurchase Boolean @default(false)
+  verifiedInvoiceId String? @unique
+  sortOrder Int     @default(0)
+  images    ReviewImage[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([sortOrder])
+  @@index([email])
+}
+
+model ReviewImage {
+  id       String @id @default(cuid())
+  reviewId String
+  url      String
+  alt      String?
+  sortOrder Int @default(0)
+  review   Review @relation(fields: [reviewId], references: [id])
+
+  @@index([reviewId])
+}
+
+model ContactRequest {
+  id          String @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  contactNotes String?
+  eventLocation String?
+  guestCount Int?
+  budgetCents Int?
+  startDate   DateTime?
+  endDate     DateTime?
+  eventDate   DateTime?
+  eventType   String?
+  message     String
+  status      ContactStatus @default(NEW)
+  clientId    String?
+  client      Client?       @relation(fields: [clientId], references: [id])
+  quote       Quote?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([clientId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Quote {
+  id               String      @id @default(cuid())
+  token            String      @unique
+  status           QuoteStatus @default(DRAFT)
+  holdStock        Boolean     @default(false)
+  startDate        DateTime
+  endDate          DateTime
+  eventDate        DateTime?
+  clientId         String
+  contactRequestId String      @unique
+  notes            String?
+  totalAmountCents Int         @default(0)
+  depositAmountCents Int       @default(0)
+  pdfUrl           String?
+  quoteNumber      String?     @unique
+  signedAt         DateTime?
+  signedName       String?
+  signatureData    String?
+  cgAcceptedAt     DateTime?
+  cgAcceptedIp     String?
+  cgAcceptedUserAgent String?
+  cgAcceptedVersion String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  client           Client      @relation(fields: [clientId], references: [id])
+  contactRequest   ContactRequest @relation(fields: [contactRequestId], references: [id])
+  invoice          Invoice?
+  items            QuoteItem[]
+  lines            QuoteLine[]
+
+  @@index([status])
+  @@index([clientId])
+}
+
+model QuoteLine {
+  id             String @id @default(cuid())
+  quoteId        String
+  label          String
+  quantity       Int    @default(1)
+  unitPriceCents Int    @default(0)
+  quote          Quote  @relation(fields: [quoteId], references: [id])
+
+  @@index([quoteId])
+}
+
+model NumberSequence {
+  id    String @id
+  value Int    @default(0)
+}
+
+model QuoteItem {
+  id        String @id @default(cuid())
+  quoteId   String
+  itemId    String
+  quantity  Int    @default(1)
+  unitPriceCents Int @default(0)
+  quote     Quote  @relation(fields: [quoteId], references: [id])
+  item      Item   @relation(fields: [itemId], references: [id])
+
+  @@index([quoteId])
+  @@index([itemId])
+}

@@ -1,0 +1,690 @@
+import { siteConfig } from "@/lib/site";
+import { prisma } from "@/lib/prisma";
+import SpotlightCarousel from "@/components/SpotlightCarousel";
+import DateRangePicker from "@/components/DateRangePicker";
+import ReviewsSection from "@/components/ReviewsSection";
+import { createContactRequest } from "@/app/actions/contact";
+import { submitReviewPublic } from "@/app/actions/reviews";
+
+const slugify = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .toLowerCase();
+
+const steps = [
+  {
+    title: "Choisir",
+    text: "Parcourez le catalogue et reperez vos essentiels.",
+  },
+  {
+    title: "Demander",
+    text: "Expliquez votre besoin et vos dates par email ou telephone.",
+  },
+  {
+    title: "Valider",
+    text: "Devis signe + acompte de 30% sous 7 jours pour confirmer la reservation.",
+  },
+];
+
+const highlights = [
+  {
+    title: "Devis clair et rapide",
+    text: "Une proposition lisible, ajustable jusqu'au dernier moment.",
+  },
+  {
+    title: "Retrait ou livraison",
+    text: "On s'adapte a votre organisation et a vos horaires.",
+  },
+  {
+    title: "Housses nettoyees",
+    text: "Proprete garantie, vous rendez la vaisselle sale.",
+  },
+  {
+    title: "Accompagnement pro",
+    text: "Conseil deco, quantites, logistique et timing.",
+  },
+];
+
+const trustPoints = [
+  "Recommande par 100% (10 avis)",
+  "Entreprise locale a Galgon (33)",
+  "Reponse rapide et suivi personnalise",
+];
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams?: Promise<{ sent?: string; review?: string }>;
+}) {
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const localBusinessSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: siteConfig.name,
+    alternateName: siteConfig.alternateName,
+    url: siteUrl,
+    telephone: siteConfig.phone,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "14 impasse Moustron",
+      addressLocality: siteConfig.city,
+      postalCode: siteConfig.postalCode,
+      addressCountry: "FR",
+    },
+    areaServed: [
+      {
+        "@type": "Place",
+        name: "Galgon (33133)",
+      },
+      {
+        "@type": "Place",
+        name: "Rayon de 150 km autour de Galgon",
+      },
+    ],
+    description:
+      "Location de vaisselle, decoration, mobilier, sonorisation et ambiance pour mariages, anniversaires et evenements festifs.",
+    priceRange: "EUR",
+    makesOffer: [
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Location de vaisselle",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Location de decoration et mobilier",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Location de sonorisation et ambiance",
+        },
+      },
+    ],
+  };
+  const resolvedParams = searchParams ? await searchParams : undefined;
+  const sentStatus = resolvedParams?.sent;
+  const reviewStatus = resolvedParams?.review;
+  const [spotlights, categories, reviews] = await Promise.all([
+    prisma.spotlight.findMany({
+      where: { active: true },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      take: 5,
+    }),
+    prisma.itemCategory.findMany({
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    }),
+    prisma.review.findMany({
+      where: { status: { not: "REJECTED" } },
+      include: { images: true },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      take: 6,
+    }),
+  ]);
+  const categoryImages: Record<string, string> = {
+    vaisselle: "/vitrine/vaisselle.jpg",
+    decoration: "/vitrine/mobilier.jpg",
+    mobilier: "/vitrine/mobilier.jpg",
+    meuble: "/vitrine/mobilier.jpg",
+    electro: "/vitrine/electromenager.jpg",
+    electromenager: "/vitrine/electromenager.jpg",
+    ambiance: "/vitrine/ambiance.jpg",
+  };
+  const normalizedCategories = categories.map((category) => ({
+    ...category,
+    slug: slugify(category.name),
+  }));
+  const decorCategories = normalizedCategories.filter((category) =>
+    /decor|mobilier|meuble/i.test(category.slug)
+  );
+  const otherCategories = normalizedCategories.filter(
+    (category) => !/decor|mobilier|meuble/i.test(category.slug)
+  );
+  const decorInsertIndex = decorCategories.length
+    ? Math.min(
+        ...decorCategories.map((category) =>
+          normalizedCategories.findIndex((entry) => entry.id === category.id)
+        )
+      )
+    : -1;
+  const decorDescription =
+    decorCategories.find((category) => category.description)?.description ||
+    "Tables, chaises, housses, centres de table et ambiances.";
+  const decorHero =
+    decorCategories.find((category) => category.heroImageUrl)?.heroImageUrl ||
+    categoryImages.decoration;
+  const displayCategories = decorCategories.length
+    ? [
+        ...otherCategories.slice(0, decorInsertIndex),
+        {
+          id: "decor-mobilier",
+          name: "Decoration & mobilier",
+          description: decorDescription,
+          heroImageUrl: decorHero,
+          slug: "decoration-mobilier",
+        },
+        ...otherCategories.slice(decorInsertIndex),
+      ]
+    : otherCategories;
+  const instagramHandle = siteConfig.instagram.replace("@", "");
+  const facebookSlug = siteConfig.facebook.replace(/ /g, "").toLowerCase();
+  const whatsappNumber = siteConfig.whatsapp.replace(/\D/g, "");
+
+  return (
+    <div className="min-h-screen text-[15px] text-[color:var(--ink)]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(localBusinessSchema),
+        }}
+      />
+      <header className="px-5 pt-8 sm:px-6 lg:absolute lg:left-0 lg:right-0 lg:top-0 lg:z-20 lg:pt-0">
+        <div className="mx-auto w-full max-w-6xl rounded-3xl border border-white/70 bg-white/80 px-5 py-5 shadow-[0_20px_60px_rgba(36,26,18,0.08)] backdrop-blur sm:px-6 lg:mx-0 lg:max-w-none lg:rounded-b-[28px] lg:rounded-t-none lg:border-x-0 lg:border-t-0 lg:bg-white/70 lg:px-12 lg:py-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <a className="flex items-center gap-3" href="/">
+              <img
+                src="/logo.png"
+                alt="Alternative Location"
+                className="h-14 w-auto"
+              />
+              <div className="leading-tight">
+                <p className="text-[10px] uppercase tracking-[0.28em] text-[color:var(--muted)]">
+                  {siteConfig.location}
+                </p>
+                <p className="text-lg font-semibold">{siteConfig.name}</p>
+              </div>
+            </a>
+            <nav className="hidden items-center gap-6 text-sm font-medium text-[color:var(--muted)] md:flex">
+              <a className="hover:text-[color:var(--ink)]" href="#univers">
+                Univers
+              </a>
+              <a className="hover:text-[color:var(--ink)]" href="/catalogue">
+                Catalogue
+              </a>
+              <a className="hover:text-[color:var(--ink)]" href="#contact">
+                Contact
+              </a>
+            </nav>
+          </div>
+          <div className="mt-4 flex gap-3 text-sm font-medium text-[color:var(--muted)] md:hidden">
+            <a className="rounded-full bg-white px-4 py-2" href="#univers">
+              Univers
+            </a>
+            <a className="rounded-full bg-white px-4 py-2" href="/catalogue">
+              Catalogue
+            </a>
+            <a
+              className="rounded-full bg-[color:var(--ink)] px-4 py-2 text-white"
+              href="#contact"
+            >
+              Contact
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <main className="pb-20 pt-12 lg:pt-0">
+        <section className="mx-auto w-full max-w-6xl px-5 sm:px-6 lg:max-w-none lg:px-0">
+          <div className="lg:hidden">
+            <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-2 rounded-full bg-[color:var(--surface)] px-4 py-2 text-xs uppercase tracking-[0.3em] text-[color:var(--accent)]">
+                  Location evenementielle
+                </div>
+                <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
+                  Une scenographie complete, simple et elegante.
+                </h1>
+                <p className="max-w-xl text-base text-[color:var(--muted)] md:text-lg">
+                  {siteConfig.description}
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <a
+                    className="w-full rounded-full bg-[color:var(--accent)] px-6 py-3 text-center text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)] sm:w-auto"
+                    href="/catalogue"
+                  >
+                    Acceder au catalogue
+                  </a>
+                  <a
+                    className="w-full rounded-full border border-[color:var(--ink)]/20 px-6 py-3 text-center text-sm font-semibold text-[color:var(--ink)] sm:w-auto"
+                    href="#contact"
+                  >
+                    Nous contacter
+                  </a>
+                </div>
+              </div>
+              <div className="relative">
+                <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[color:var(--accent-2)]/30 blur-2xl" />
+                <div className="absolute -bottom-10 left-8 h-36 w-36 rounded-full bg-[color:var(--accent)]/20 blur-2xl" />
+                <div className="space-y-4 rounded-[32px] border border-white/60 bg-white/85 p-6 shadow-[0_30px_60px_rgba(30,25,20,0.15)]">
+                  <div className="rounded-3xl bg-[color:var(--surface-2)] p-5">
+                    <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
+                      Nos atouts
+                    </p>
+                    <ul className="mt-4 space-y-2 text-sm text-[color:var(--muted)]">
+                      <li>- Devis clair et rapide</li>
+                      <li>- Retrait ou livraison</li>
+                      <li>- Caution et paiements geres hors ligne</li>
+                    </ul>
+                  </div>
+                  <div className="rounded-3xl bg-white/80 p-5">
+                    <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
+                      Comment ca marche
+                    </p>
+                    <ol className="mt-4 space-y-2 text-sm text-[color:var(--muted)]">
+                      <li>1. Parcourez le catalogue</li>
+                      <li>2. Contactez-nous avec vos dates</li>
+                      <li>3. Devis signe + acompte 30% sous 7 jours</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="hidden lg:block">
+            <div className="relative h-[100svh] w-full overflow-hidden rounded-b-[40px]">
+              <img
+                src="/vitrine/hero.jpg"
+                alt="Alternative Location"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/65 to-white/25" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(216,111,63,0.18),transparent_45%)]" />
+              <div className="relative z-10 flex h-full items-end px-12 pb-16">
+                <div className="max-w-3xl space-y-6">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-xs uppercase tracking-[0.3em] text-[color:var(--accent)] shadow-[0_12px_30px_rgba(30,25,20,0.08)]">
+                    Location evenementielle
+                  </div>
+                  <h1 className="text-5xl font-semibold leading-tight">
+                    Une scenographie complete pour vos evenements a Galgon et autour.
+                  </h1>
+                  <p className="max-w-2xl text-lg text-[color:var(--muted)]">
+                    {siteConfig.description}
+                  </p>
+                  <div className="flex flex-wrap gap-4">
+                    <a
+                      className="rounded-full bg-[color:var(--accent)] px-8 py-4 text-center text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)] transition hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-[0_24px_40px_rgba(216,111,63,0.25)]"
+                      href="/catalogue"
+                    >
+                      Voir le catalogue
+                    </a>
+                    <a
+                      className="rounded-full border border-[color:var(--ink)]/20 bg-white/80 px-8 py-4 text-center text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:scale-[1.02] hover:border-[color:var(--ink)]/40"
+                      href="#contact"
+                    >
+                      Parler du projet
+                    </a>
+                  </div>
+                  <div className="flex flex-wrap gap-3 text-xs text-[color:var(--muted)]">
+                    {trustPoints.map((point) => (
+                      <span
+                        key={point}
+                        className="rounded-full bg-white/70 px-3 py-1"
+                      >
+                        {point}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="absolute right-10 top-1/2 w-[620px] -translate-y-1/2 xl:w-[720px]">
+                <div className="h-[520px] overflow-hidden xl:h-[620px]">
+                  {spotlights.length > 0 ? (
+                    <SpotlightCarousel items={spotlights} />
+                  ) : (
+                    <div className="rounded-2xl bg-[color:var(--surface-2)] p-4 text-xs text-[color:var(--muted)]">
+                      Ajoutez une rubrique "Du moment" depuis l'admin.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="hidden lg:block">
+          <div className="mx-auto mt-12 w-full max-w-6xl px-5 sm:px-6 lg:px-12">
+            <div className="relative overflow-hidden rounded-[44px] border border-white/60 bg-[radial-gradient(circle_at_top_left,rgba(216,111,63,0.35),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(245,208,173,0.55),transparent_40%),linear-gradient(120deg,rgba(255,255,255,0.95),rgba(248,241,234,0.95))] p-10 shadow-[0_40px_80px_rgba(30,25,20,0.16)]">
+              <div className="pointer-events-none absolute -left-20 -top-20 h-56 w-56 rounded-full bg-[color:var(--accent)]/20 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-24 right-10 h-72 w-72 rounded-full bg-[color:var(--accent-2)]/30 blur-3xl" />
+              <div className="pointer-events-none absolute left-1/2 top-10 h-24 w-24 -translate-x-1/2 rounded-full border border-white/70 bg-white/40" />
+              <div className="pointer-events-none absolute right-16 top-28 h-14 w-14 rounded-full border border-white/70 bg-white/30" />
+              <div className="relative grid gap-8 lg:grid-cols-[1.5fr_1fr]">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
+                    Selection du moment
+                  </p>
+                  <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                    {highlights.map((item) => (
+                      <div
+                        key={item.title}
+                        className="rounded-3xl border border-white/70 bg-white/90 p-5 shadow-[0_18px_36px_rgba(30,25,20,0.12)] transition hover:-translate-y-1 hover:shadow-[0_26px_40px_rgba(30,25,20,0.16)]"
+                      >
+                        <p className="text-sm font-semibold text-[color:var(--ink)]">
+                          {item.title}
+                        </p>
+                        <p className="mt-2 text-xs text-[color:var(--muted)]">
+                          {item.text}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-3xl border border-white/70 bg-white/90 p-6 shadow-[0_20px_40px_rgba(30,25,20,0.12)]">
+                  <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
+                    Comment ca marche
+                  </p>
+                  <ol className="mt-4 space-y-3 text-sm text-[color:var(--muted)]">
+                    {steps.map((step, index) => (
+                      <li key={step.title}>
+                        {index + 1}. {step.title}: {step.text}
+                      </li>
+                    ))}
+                  </ol>
+                  <div className="mt-5 flex flex-wrap gap-2 text-xs text-[color:var(--muted)]">
+                    {trustPoints.map((point) => (
+                      <span
+                        key={point}
+                        className="rounded-full bg-[color:var(--surface)] px-3 py-1"
+                      >
+                        {point}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <a
+                      className="rounded-full bg-[color:var(--accent)] px-6 py-3 text-xs font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_36px_rgba(216,111,63,0.25)]"
+                      href="/catalogue"
+                    >
+                      Voir le catalogue
+                    </a>
+                    <a
+                      className="rounded-full border border-black/10 bg-white px-6 py-3 text-xs font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/30"
+                      href="#contact"
+                    >
+                      Parler du projet
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="univers"
+          className="mx-auto mt-16 w-full max-w-6xl px-5 sm:px-6 lg:px-12"
+        >
+          <div className="relative overflow-hidden rounded-[40px] border border-black/5 bg-white/90 p-8 shadow-[0_30px_60px_rgba(30,25,20,0.12)]">
+            <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[color:var(--accent-2)]/20 blur-3xl" />
+            <div className="pointer-events-none absolute -left-20 bottom-6 h-56 w-56 rounded-full bg-[color:var(--accent)]/15 blur-3xl" />
+            <div className="relative">
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.3em] text-[color:var(--accent-2)]">
+                    Univers
+                  </p>
+                  <h2 className="text-3xl font-semibold md:text-4xl">
+                    Tout pour une fete harmonieuse.
+                  </h2>
+                </div>
+              </div>
+              <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {displayCategories.map((category) => (
+                  <a
+                    key={category.id}
+                    href={`/catalogue#cat-${category.slug ?? slugify(category.name)}`}
+                    className="block rounded-[28px] border border-white/70 bg-white/90 p-6 shadow-[0_24px_40px_rgba(30,25,20,0.08)] transition hover:-translate-y-1 hover:scale-[1.01]"
+                  >
+                    <div className="group mb-4 overflow-hidden rounded-2xl bg-[color:var(--surface)]">
+                      <div className="relative h-36 w-full">
+                        <img
+                          src={
+                            category.heroImageUrl ||
+                            categoryImages[category.slug ?? slugify(category.name)] ||
+                            "/vitrine/hero.jpg"
+                          }
+                          alt={category.name}
+                          className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.06]"
+                        />
+                      </div>
+                    </div>
+                    <p className="mt-1 text-xl font-semibold">{category.name}</p>
+                    <p className="mt-2 text-sm text-[color:var(--muted)]">
+                      {category.description || "Decouvrez la selection disponible."}
+                    </p>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="contact" className="mx-auto mt-16 w-full max-w-6xl px-5 sm:px-6 lg:px-12">
+          <div className="rounded-[40px] border border-black/5 bg-white/90 p-8 shadow-[0_30px_60px_rgba(30,25,20,0.12)]">
+            <div className="grid gap-8 lg:grid-cols-2 lg:items-stretch">
+            <div className="h-full rounded-[32px] border border-black/5 bg-white/80 p-8">
+              <h2 className="text-3xl font-semibold">Nous contacter</h2>
+              <p className="mt-3 text-sm text-[color:var(--muted)]">
+                Decrivez votre besoin, meme si un article semble indisponible. Pour les demandes particulieres, le plus simple est d'appeler.
+              </p>
+              <p className="mt-2 text-xs text-[color:var(--muted)]">
+                La reservation est confirmee apres validation du devis et versement d'un acompte de 30% sous 7 jours.
+              </p>
+              {sentStatus === "1" && (
+                <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                  Merci ! Votre demande a bien été envoyée. Nous revenons vers vous rapidement.
+                </div>
+              )}
+              {sentStatus === "0" && (
+                <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  Merci de remplir le nom, l'email, les dates et le message.
+                </div>
+              )}
+              <form action={createContactRequest} className="mt-6 grid gap-4 text-sm">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <input
+                    className="rounded-2xl border border-black/10 bg-white px-4 py-3"
+                    name="name"
+                    placeholder="Nom et prenom"
+                    required
+                  />
+                  <input
+                    className="rounded-2xl border border-black/10 bg-white px-4 py-3"
+                    name="email"
+                    type="email"
+                    placeholder="Email"
+                    required
+                  />
+                  <input
+                    className="rounded-2xl border border-black/10 bg-white px-4 py-3"
+                    name="phone"
+                    placeholder="Telephone"
+                  />
+                  <input
+                    className="rounded-2xl border border-black/10 bg-white px-4 py-3"
+                    name="eventType"
+                    placeholder="Type d'evenement"
+                  />
+                  <input
+                    className="rounded-2xl border border-black/10 bg-white px-4 py-3"
+                    name="eventLocation"
+                    placeholder="Lieu de l'evenement"
+                  />
+                  <input
+                    className="rounded-2xl border border-black/10 bg-white px-4 py-3"
+                    name="guestCount"
+                    type="number"
+                    min="1"
+                    placeholder="Nombre d'invites"
+                  />
+                  <input
+                    className="rounded-2xl border border-black/10 bg-white px-4 py-3"
+                    name="budget"
+                    placeholder="Budget estime (EUR)"
+                  />
+                  <DateRangePicker startName="startDate" endName="endDate" />
+                </div>
+                <textarea
+                  className="min-h-[140px] rounded-2xl border border-black/10 bg-white px-4 py-3"
+                  name="message"
+                  placeholder="Expliquez votre demande, les quantites et le style souhaite."
+                  required
+                />
+                <button
+                  className="rounded-full bg-[color:var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)]"
+                  type="submit"
+                >
+                  Envoyer la demande
+                </button>
+              </form>
+
+              <div className="mt-6 space-y-3 text-sm text-[color:var(--muted)]">
+                <p>
+                  <strong className="text-[color:var(--ink)]">Telephone</strong> : {siteConfig.phone}
+                </p>
+                <p>
+                  <strong className="text-[color:var(--ink)]">Email</strong> : {siteConfig.email}
+                </p>
+                <p>
+                  <strong className="text-[color:var(--ink)]">Adresse</strong> : {siteConfig.address}
+                </p>
+              </div>
+            </div>
+
+            <div className="h-full space-y-6 rounded-[32px] border border-black/5 bg-[color:var(--surface-2)] p-8">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
+                  Comment ca marche
+                </p>
+                <ol className="mt-3 space-y-2 text-sm text-[color:var(--muted)]">
+                  {steps.map((step, index) => (
+                    <li key={step.title}>
+                      {index + 1}. {step.title}: {step.text}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div className="h-0.5 w-full bg-black/15" />
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
+                  Horaires
+                </p>
+                <div className="mt-2 space-y-1 text-sm text-[color:var(--muted)]">
+                  <div className="flex items-center justify-between">
+                    <span>Lundi</span>
+                    <span>09:00 - 18:30</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Mardi</span>
+                    <span>09:00 - 18:30</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Mercredi</span>
+                    <span>09:00 - 18:30</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Jeudi</span>
+                    <span>09:00 - 18:30</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Vendredi</span>
+                    <span>09:00 - 18:00</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Samedi</span>
+                    <span>Ferme</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Dimanche</span>
+                    <span>Ferme</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
+                  Services
+                </p>
+                <p className="mt-2 text-sm font-medium">
+                  Retrait sur place ou livraison possible a partir de 1 EUR / km, voir avec l&apos;entreprise.
+                </p>
+              </div>
+              <div className="rounded-3xl bg-white/80 p-4 text-sm text-[color:var(--muted)]">
+                <div className="flex flex-wrap gap-3">
+                  <a
+                    className="rounded-full border border-black/10 px-3 py-1 text-xs font-semibold"
+                    href={`https://www.instagram.com/${instagramHandle}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Instagram {siteConfig.instagram}
+                  </a>
+                  <a
+                    className="rounded-full border border-black/10 px-3 py-1 text-xs font-semibold"
+                    href={`https://www.facebook.com/${facebookSlug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Facebook {siteConfig.facebook}
+                  </a>
+                  <a
+                    className="rounded-full border border-black/10 px-3 py-1 text-xs font-semibold"
+                    href={`https://wa.me/${whatsappNumber}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    WhatsApp {siteConfig.whatsapp}
+                  </a>
+                </div>
+              </div>
+            </div>
+            </div>
+          </div>
+        </section>
+
+        <ReviewsSection
+          reviews={reviews}
+          reviewStatus={reviewStatus}
+          onSubmit={submitReviewPublic}
+        />
+
+        <section className="sr-only">
+          <div className="rounded-[32px] border border-black/5 bg-white/80 p-8">
+            <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
+              Location evenementielle a Galgon
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold">
+              Vaisselle, decoration, mobilier et sonorisation pour vos evenements.
+            </h2>
+            <div className="mt-4 space-y-3 text-sm text-[color:var(--muted)]">
+              <p>
+                Alternative Location accompagne mariages, anniversaires, fetes
+                de famille et evenements professionnels a Galgon (33133) et dans
+                un rayon de 150 km.
+              </p>
+              <p>
+                Nous proposons la location de vaisselle, decoration, mobilier,
+                ambiance et sonorisation avec un service simple et fiable.
+              </p>
+              <p>
+                Retrait sur place a Galgon ou livraison possible a partir de 1
+                EUR / km (selon disponibilites).
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}

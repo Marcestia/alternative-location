@@ -1,0 +1,32 @@
+node_modules
+.next
+.env
+*.db
+*.sqlite
+*.sqlite3
+public/items
+public/reviews
+public/spotlight
+# Prisma / generated
+src/generated/prisma/
+prisma/export.json
+
+# Local databases
+prisma/*.db
+prisma/*.db-journal
+dev.db*
+
+# Local PDFs / uploads
+public/pdfs/
+public/signatures/
+public/IBAN.pdf
+
+# Build / cache
+.next/
+node_modules/
+tsconfig.tsbuildinfo
+
+# Temp / misc
+*.tmp
+tmp_patch.txt
+test_write.txt

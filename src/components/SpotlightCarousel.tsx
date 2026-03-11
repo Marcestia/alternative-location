@@ -1,0 +1,122 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+
+type SpotlightItem = {
+  id: string;
+  title: string;
+  description: string | null;
+  imageUrl: string | null;
+};
+
+type SpotlightCarouselProps = {
+  items: SpotlightItem[];
+};
+
+export default function SpotlightCarousel({ items }: SpotlightCarouselProps) {
+  const activeItems = useMemo(
+    () => items.filter((item) => item.title),
+    [items]
+  );
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  if (activeItems.length === 0) return null;
+
+  const current = activeItems[index % activeItems.length];
+
+  const goPrev = () =>
+    setIndex((prev) => (prev - 1 + activeItems.length) % activeItems.length);
+  const goNext = () => setIndex((prev) => (prev + 1) % activeItems.length);
+
+  useEffect(() => {
+    if (activeItems.length <= 1) return;
+    const id = setInterval(() => {
+      setIndex((prev) => (prev + 1) % activeItems.length);
+    }, 5000);
+    return () => clearInterval(id);
+  }, [activeItems.length]);
+
+  useEffect(() => {
+    setVisible(false);
+    const t = setTimeout(() => setVisible(true), 30);
+    return () => clearTimeout(t);
+  }, [index]);
+
+  return (
+    <div className="h-full">
+      <div className="group relative flex h-full items-center justify-center p-0 [perspective:1600px]">
+        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[color:var(--accent)]/20 blur-3xl" />
+        <div className="absolute -bottom-10 left-6 h-40 w-40 rounded-full bg-[color:var(--accent-2)]/30 blur-3xl" />
+        <a
+          href={current.imageUrl || "/vitrine/hero.jpg"}
+          target="_blank"
+          rel="noreferrer"
+          className={`relative block h-full w-full overflow-hidden rounded-[36px] bg-white/65 shadow-[0_40px_90px_rgba(12,10,8,0.22)] transition-transform duration-700 ease-out ${
+            visible ? "scale-[1.01]" : "scale-[0.995]"
+          }`}
+        >
+          <div className="relative h-full w-full overflow-hidden rounded-[36px] bg-white">
+            <img
+              key={current.id}
+              src={current.imageUrl || "/vitrine/hero.jpg"}
+              alt={current.title}
+              className={`h-full w-full object-cover object-center transition-all duration-700 ease-out ${
+                visible ? "opacity-100 scale-[1.01]" : "opacity-0 scale-[0.995]"
+              }`}
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent" />
+            <div className="absolute bottom-6 left-6 right-6 rounded-3xl bg-white/85 px-5 py-4 text-[13px] text-[color:var(--muted)] backdrop-blur">
+              <p className="text-base font-semibold text-[color:var(--ink)]">
+                {current.title}
+              </p>
+              {current.description && (
+                <p className="mt-1 line-clamp-2">{current.description}</p>
+              )}
+            </div>
+          </div>
+        </a>
+        {activeItems.length > 1 && (
+          <>
+            <button
+              className="absolute left-6 top-1/2 -translate-y-1/2 rounded-full border border-white/70 bg-white/90 px-3 py-2 text-xs font-semibold text-[color:var(--ink)] shadow-sm opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+              type="button"
+              onClick={goPrev}
+              aria-label="Precedent"
+            >
+              &lt;
+            </button>
+            <button
+              className="absolute right-6 top-1/2 -translate-y-1/2 rounded-full border border-white/70 bg-white/90 px-3 py-2 text-xs font-semibold text-[color:var(--ink)] shadow-sm opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+              type="button"
+              onClick={goNext}
+              aria-label="Suivant"
+            >
+              &gt;
+            </button>
+          </>
+        )}
+      </div>
+      {activeItems.length > 1 && (
+        <div className="mt-4 flex items-center justify-center gap-3 text-xs text-[color:var(--muted)]">
+          <span className="rounded-full bg-white/80 px-2 py-1 font-semibold">
+            {index + 1} / {activeItems.length}
+          </span>
+          <div className="flex items-center gap-2">
+            {activeItems.map((item, idx) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setIndex(idx)}
+                className={`h-1.5 w-8 rounded-full transition ${
+                  idx === index ? "bg-[color:var(--accent)]" : "bg-black/15"
+                }`}
+                aria-label={`Voir ${item.title}`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
