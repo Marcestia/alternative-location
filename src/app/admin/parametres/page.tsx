@@ -15,7 +15,7 @@ export const revalidate = 0;
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: Promise<{ saved?: string }>;
+  searchParams?: Promise<{ saved?: string; reset?: string }>;
 }) {
   const resolvedParams = searchParams ? await searchParams : undefined;
   const [settings, categories, spotlights] = await Promise.all([
