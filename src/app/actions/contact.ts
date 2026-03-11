@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import nodemailer from "nodemailer";
+import { sendMail } from "@/lib/mailer";
 
 function toDate(value: string) {
   const date = new Date(value);
@@ -28,19 +28,7 @@ async function sendAcknowledgementEmail({
     return;
   }
 
-  const port = Number(process.env.SMTP_PORT || 587);
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-
-  const transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: user && pass ? { user, pass } : undefined,
-  });
-
-  await transporter.sendMail({
-    from,
+  await sendMail({
     to,
     subject: "Demande reçue - Alternative Location",
     text: `Bonjour ${name},\n\nMerci pour votre demande. Nous l'avons bien reçue et revenons vers vous rapidement pour préciser les détails.\n\nÀ bientôt,\nAlternative Location`,
