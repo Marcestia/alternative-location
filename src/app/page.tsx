@@ -5,6 +5,7 @@ import DateRangePicker from "@/components/DateRangePicker";
 import ReviewsSection from "@/components/ReviewsSection";
 import { createContactRequest } from "@/app/actions/contact";
 import { submitReviewPublic } from "@/app/actions/reviews";
+import Script from "next/script";
 
 const slugify = (value: string) =>
   value
@@ -484,12 +485,17 @@ export default async function Home({
               </p>
               {sentStatus === "1" && (
                 <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                  Merci ! Votre demande a bien été envoyée. Nous revenons vers vous rapidement.
+                  Merci ! Votre demande a bien ete envoyee. Nous revenons vers vous rapidement.
                 </div>
               )}
               {sentStatus === "0" && (
                 <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                   Merci de remplir le nom, l'email, les dates et le message.
+                </div>
+              )}
+              {sentStatus === "2" && (
+                <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  Merci de valider le captcha avant d'envoyer.
                 </div>
               )}
               <form action={createContactRequest} className="mt-6 grid gap-4 text-sm">
@@ -542,6 +548,14 @@ export default async function Home({
                   placeholder="Expliquez votre demande, les quantites et le style souhaite."
                   required
                 />
+                {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+                  <div className="flex items-center justify-start">
+                    <div
+                      className="cf-turnstile"
+                      data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                    />
+                  </div>
+                )}
                 <button
                   className="rounded-full bg-[color:var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)]"
                   type="submit"
@@ -549,6 +563,12 @@ export default async function Home({
                   Envoyer la demande
                 </button>
               </form>
+              {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+                <Script
+                  src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+                  strategy="afterInteractive"
+                />
+              )}
 
               <div className="mt-6 space-y-3 text-sm text-[color:var(--muted)]">
                 <p>

@@ -36,6 +36,8 @@ async function sendAcknowledgementEmail({
 }
 
 export async function createContactRequest(formData: FormData) {
+  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+  const turnstileToken = String(formData.get("cf-turnstile-response") || "").trim();
   const name = String(formData.get("name") || "").trim();
   const email = String(formData.get("email") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
@@ -50,6 +52,28 @@ export async function createContactRequest(formData: FormData) {
 
   if (!name || !email || !message || !startDateValue || !endDateValue) {
     redirect("/?sent=0");
+  }
+
+  if (turnstileSecret) {
+    if (!turnstileToken) {
+      redirect("/?sent=2");
+    }
+    try {
+      const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          secret: turnstileSecret,
+          response: turnstileToken,
+        }),
+      });
+      const result = (await verifyRes.json()) as { success?: boolean };
+      if (!result?.success) {
+        redirect("/?sent=2");
+      }
+    } catch {
+      redirect("/?sent=2");
+    }
   }
 
   const startDate = startDateValue ? toDate(startDateValue) : null;
