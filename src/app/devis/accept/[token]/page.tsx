@@ -77,7 +77,7 @@ export default async function AcceptQuotePage({
             {quote.pdfUrl && (
               <a
                 className="rounded-full border border-black/10 px-3 py-1"
-                href={quote.pdfUrl}
+                href={`/api/pdfs?key=${encodeURIComponent(quote.pdfUrl)}`}
                 target="_blank"
                 rel="noreferrer"
               >

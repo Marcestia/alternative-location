@@ -4,10 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { ReservationStatus } from "@/generated/prisma";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import path from "path";
-import fs from "fs/promises";
 import { sendMail } from "@/lib/mailer";
 import { QuoteStatus } from "@/generated/prisma";
+import { downloadBufferFromR2, getSignedUrlForKey } from "@/lib/r2";
+
+const SIGNED_URL_TTL = 60 * 60 * 24 * 7;
 
 function toDate(value: string) {
   const date = new Date(value);
@@ -117,14 +118,17 @@ export async function markConfirmationSent(formData: FormData) {
     : `${baseUrl}/rib-placeholder.pdf`;
 
   const attachments = [];
-  const pdfPath = path.join(process.cwd(), "public", signedQuote.pdfUrl);
   try {
-    const pdfBuffer = await fs.readFile(pdfPath);
-    attachments.push({
-      filename: "devis-signe.pdf",
-      content: pdfBuffer,
-      contentType: "application/pdf",
-    });
+    if (!signedQuote.pdfUrl.startsWith("/pdfs/")) {
+      const pdfBuffer = await downloadBufferFromR2({ key: signedQuote.pdfUrl });
+      if (pdfBuffer.length) {
+        attachments.push({
+          filename: "devis-signe.pdf",
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        });
+      }
+    }
   } catch {
     // If file missing, keep link in email.
   }
@@ -144,11 +148,15 @@ export async function markConfirmationSent(formData: FormData) {
   }
 
   const subject = "Confirmation de reservation - Alternative Location";
-  const text = `Bonjour ${reservation.client.name || "madame/monsieur"},\n\nVotre reservation est confirmee.\n\nDevis signe (PDF) :\n${baseUrl}${signedQuote.pdfUrl}\n\nRIB / IBAN (pour l'acompte) :\n${ribUrl}\n\nNous vous recontacterons pour organiser la livraison ou la recuperation du materiel.\n\nMerci,\nAlternative Location`;
+  const signedLink =
+    signedQuote.pdfUrl && !signedQuote.pdfUrl.startsWith("/pdfs/")
+      ? await getSignedUrlForKey({ key: signedQuote.pdfUrl, expiresInSeconds: SIGNED_URL_TTL })
+      : `${baseUrl}${signedQuote.pdfUrl}`;
+  const text = `Bonjour ${reservation.client.name || "madame/monsieur"},\n\nVotre reservation est confirmee.\n\nDevis signe (PDF) :\n${signedLink}\n\nRIB / IBAN (pour l'acompte) :\n${ribUrl}\n\nNous vous recontacterons pour organiser la livraison ou la recuperation du materiel.\n\nMerci,\nAlternative Location`;
   const html = `
     <p>Bonjour ${reservation.client.name || "madame/monsieur"},</p>
     <p>Votre reservation est confirmee.</p>
-    <p><strong>Devis signe (PDF)</strong> : <a href="${baseUrl}${signedQuote.pdfUrl}">Devis signe</a></p>
+    <p><strong>Devis signe (PDF)</strong> : <a href="${signedLink}">Devis signe</a></p>
     <p><strong>RIB / IBAN (pour l'acompte)</strong> : <a href="${ribUrl}">RIB / IBAN</a></p>
     <p>Nous vous recontacterons pour organiser la livraison ou la recuperation du materiel.</p>
     <p>Merci,<br/>Alternative Location</p>

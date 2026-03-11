@@ -4,15 +4,15 @@ import { prisma } from "@/lib/prisma";
 import { ContactStatus, QuoteStatus, ReservationStatus } from "@/generated/prisma";
 import { redirect } from "next/navigation";
 import { siteConfig } from "@/lib/site";
-import fs from "node:fs";
 import path from "node:path";
 import PDFDocument from "pdfkit/js/pdfkit.standalone";
 import { createInvoiceForQuoteId } from "@/app/actions/invoices";
 import { headers } from "next/headers";
 import { sendMail } from "@/lib/mailer";
 import { CG_VERSION } from "@/lib/conditions";
+import { getSignedUrlForKey, uploadBufferToR2 } from "@/lib/r2";
 
-const PDF_DIR = path.join(process.cwd(), "public", "pdfs");
+const SIGNED_URL_TTL = 60 * 60 * 24 * 7;
 
 const formatPrice = (cents: number) =>
   (cents / 100).toLocaleString("fr-FR", {
@@ -577,13 +577,16 @@ export async function acceptQuoteByToken(formData: FormData) {
     signatureImagePath: null,
   });
 
-  await fs.promises.mkdir(PDF_DIR, { recursive: true });
-  const signedFileName = `devis-${quote.id}-signed.pdf`;
-  await fs.promises.writeFile(path.join(PDF_DIR, signedFileName), pdfBuffer);
+  const signedFileName = `documents/devis-${quote.id}-signed.pdf`;
+  await uploadBufferToR2({
+    key: signedFileName,
+    body: pdfBuffer,
+    contentType: "application/pdf",
+  });
 
   await prisma.quote.update({
     where: { id: quote.id },
-    data: { pdfUrl: `/pdfs/${signedFileName}`, quoteNumber },
+    data: { pdfUrl: signedFileName, quoteNumber },
   });
 
   try {
@@ -591,18 +594,13 @@ export async function acceptQuoteByToken(formData: FormData) {
       ? `${process.env.R2_PUBLIC_BASE_URL.replace(/\/$/, "")}/documents/IBAN.pdf`
       : `${baseUrl}/rib-placeholder.pdf`;
 
-    const attachments = [];
-    const signedPdfPath = path.join(PDF_DIR, signedFileName);
-    try {
-      const pdfBuffer = await fs.promises.readFile(signedPdfPath);
-      attachments.push({
+    const attachments = [
+      {
         filename: "devis-signe.pdf",
         content: pdfBuffer,
         contentType: "application/pdf",
-      });
-    } catch {
-      // Fallback to link in email if file missing
-    }
+      },
+    ];
 
     try {
       const ribResponse = await fetch(ribUrl);
@@ -621,7 +619,10 @@ export async function acceptQuoteByToken(formData: FormData) {
     const recipient = quote.client?.email || quote.contactRequest?.email;
     if (recipient) {
       const subject = "Confirmation de reservation - Alternative Location";
-      const signedLink = `${baseUrl}/pdfs/${signedFileName}`;
+      const signedLink = await getSignedUrlForKey({
+        key: signedFileName,
+        expiresInSeconds: SIGNED_URL_TTL,
+      });
       const text = `Bonjour ${signatureName},\n\nVotre reservation est confirmee.\n\nDevis signe (PDF) :\n${signedLink}\n\nRIB / IBAN (pour l'acompte) :\n${ribUrl}\n\nNous vous recontacterons pour organiser la livraison ou la recuperation du materiel.\n\nMerci,\nAlternative Location`;
       const html = `
         <p>Bonjour ${signatureName},</p>
@@ -947,12 +948,14 @@ export async function generateQuotePdf(formData: FormData) {
     signatureData: quote.signatureData,
   });
 
-  await fs.promises.mkdir(PDF_DIR, { recursive: true });
-  const fileName = `devis-${quote.id}.pdf`;
-  const filePath = path.join(PDF_DIR, fileName);
-  await fs.promises.writeFile(filePath, pdfBuffer);
+  const fileName = `documents/devis-${quote.id}.pdf`;
+  await uploadBufferToR2({
+    key: fileName,
+    body: pdfBuffer,
+    contentType: "application/pdf",
+  });
 
-  const pdfUrl = `/pdfs/${fileName}`;
+  const pdfUrl = fileName;
   await prisma.quote.update({
     where: { id: quote.id },
     data: { pdfUrl, totalAmountCents: total, quoteNumber, status: QuoteStatus.SUBMITTED },

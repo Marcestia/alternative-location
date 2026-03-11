@@ -5,6 +5,7 @@ import { ContactStatus, QuoteStatus } from "@/generated/prisma";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { sendMail } from "@/lib/mailer";
+import { downloadBufferFromR2, getSignedUrlForKey } from "@/lib/r2";
 import path from "path";
 import fs from "fs/promises";
 import crypto from "crypto";
@@ -234,25 +235,43 @@ export async function markQuoteSent(formData: FormData) {
 
   const attachments = [];
   if (request.quote.pdfUrl) {
-    const pdfPath = path.join(process.cwd(), "public", request.quote.pdfUrl);
     try {
-      const pdfBuffer = await fs.readFile(pdfPath);
-      attachments.push({
-        filename: "devis.pdf",
-        content: pdfBuffer,
-        contentType: "application/pdf",
-      });
+      if (request.quote.pdfUrl.startsWith("/pdfs/")) {
+        const pdfPath = path.join(process.cwd(), "public", request.quote.pdfUrl);
+        const pdfBuffer = await fs.readFile(pdfPath);
+        attachments.push({
+          filename: "devis.pdf",
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        });
+      } else {
+        const pdfBuffer = await downloadBufferFromR2({ key: request.quote.pdfUrl });
+        if (pdfBuffer.length) {
+          attachments.push({
+            filename: "devis.pdf",
+            content: pdfBuffer,
+            contentType: "application/pdf",
+          });
+        }
+      }
     } catch {
       // ignore
     }
   }
 
   const subject = "Votre devis - Alternative Location";
-  const text = `Bonjour ${request.name},\n\nAlternative Location vous contacte pour votre devis.\nPour valider votre devis, merci de cliquer ici :\n${acceptLink}\n\nMerci de bien vouloir prendre connaissance des conditions generales. La signature du devis vaut acceptation des conditions generales.\n\nEn signant, vous vous engagez a verser l'acompte de 30% sous 7 jours.\n\nBien a vous,\nAlternative Location`;
+  const pdfLink =
+    request.quote.pdfUrl && !request.quote.pdfUrl.startsWith("/pdfs/")
+      ? await getSignedUrlForKey({ key: request.quote.pdfUrl, expiresInSeconds: 60 * 60 * 24 * 7 })
+      : request.quote.pdfUrl
+        ? `${baseUrl}${request.quote.pdfUrl}`
+        : "";
+  const text = `Bonjour ${request.name},\n\nAlternative Location vous contacte pour votre devis.\nPour valider votre devis, merci de cliquer ici :\n${acceptLink}\n${pdfLink ? `\nDevis (PDF) :\n${pdfLink}\n` : ""}\nMerci de bien vouloir prendre connaissance des conditions generales. La signature du devis vaut acceptation des conditions generales.\n\nEn signant, vous vous engagez a verser l'acompte de 30% sous 7 jours.\n\nBien a vous,\nAlternative Location`;
   const html = `
     <p>Bonjour ${request.name},</p>
     <p>Alternative Location vous contacte pour votre devis.</p>
     <p><strong>Acceder au devis</strong> : <a href="${acceptLink}">Voir et signer le devis</a></p>
+    ${pdfLink ? `<p><strong>Devis (PDF)</strong> : <a href="${pdfLink}">Télécharger le devis</a></p>` : ""}
     <p>Merci de bien vouloir prendre connaissance des conditions generales. La signature du devis vaut acceptation des conditions generales.</p>
     <p>En signant, vous vous engagez a verser l'acompte de 30% sous 7 jours.</p>
     <p>Bien a vous,<br/>Alternative Location</p>

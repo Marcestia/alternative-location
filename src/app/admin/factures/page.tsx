@@ -157,7 +157,7 @@ export default async function FacturesPage({
                   {invoice.pdfUrl && (
                     <a
                       className="mt-2 inline-flex rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-700"
-                      href={invoice.pdfUrl}
+                      href={`/api/pdfs?key=${encodeURIComponent(invoice.pdfUrl)}`}
                       target="_blank"
                       rel="noreferrer"
                     >

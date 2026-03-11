@@ -198,7 +198,7 @@ export default async function ReservationsPage({
                           <>
                             <a
                               className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-700"
-                              href={signedQuote.pdfUrl}
+                              href={`/api/pdfs?key=${encodeURIComponent(signedQuote.pdfUrl)}`}
                               target="_blank"
                               rel="noreferrer"
                             >

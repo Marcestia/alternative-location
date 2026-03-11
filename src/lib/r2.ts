@@ -1,7 +1,9 @@
 "use server";
 
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import crypto from "node:crypto";
+import { Readable } from "node:stream";
 
 const slugify = (value: string) =>
   value
@@ -34,6 +36,29 @@ const getR2Client = () => {
   });
 };
 
+const getBucketName = (override?: string) => {
+  if (override) return override;
+  return getRequiredEnv("R2_BUCKET");
+};
+
+async function streamToBuffer(body: unknown) {
+  if (!body) return Buffer.alloc(0);
+  if (body instanceof Uint8Array) return Buffer.from(body);
+  if (typeof body === "string") return Buffer.from(body);
+  if (body instanceof Readable) {
+    const chunks: Buffer[] = [];
+    for await (const chunk of body) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    return Buffer.concat(chunks);
+  }
+  if (typeof (body as { arrayBuffer?: () => Promise<ArrayBuffer> }).arrayBuffer === "function") {
+    const buffer = await (body as { arrayBuffer: () => Promise<ArrayBuffer> }).arrayBuffer();
+    return Buffer.from(buffer);
+  }
+  return Buffer.alloc(0);
+}
+
 const parseDataUrl = (imageData: string) => {
   if (!imageData.startsWith("data:image")) return null;
   const [header, base64] = imageData.split(",", 2);
@@ -50,7 +75,7 @@ export async function uploadImageDataToR2(
   const parsed = parseDataUrl(imageData);
   if (!parsed) return null;
 
-  const bucket = getRequiredEnv("R2_BUCKET");
+  const bucket = getBucketName();
   const publicBaseUrl = getRequiredEnv("R2_PUBLIC_BASE_URL").replace(/\/+$/, "");
 
   const extension = parsed.contentType.split("/")[1] || "png";
@@ -69,4 +94,51 @@ export async function uploadImageDataToR2(
   );
 
   return `${publicBaseUrl}/${key}`;
+}
+
+export async function uploadBufferToR2(opts: {
+  key: string;
+  body: Buffer;
+  contentType: string;
+  bucket?: string;
+}) {
+  const client = getR2Client();
+  const bucket = getBucketName(opts.bucket);
+  await client.send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: opts.key,
+      Body: opts.body,
+      ContentType: opts.contentType,
+    })
+  );
+  return opts.key;
+}
+
+export async function downloadBufferFromR2(opts: { key: string; bucket?: string }) {
+  const client = getR2Client();
+  const bucket = getBucketName(opts.bucket);
+  const result = await client.send(
+    new GetObjectCommand({
+      Bucket: bucket,
+      Key: opts.key,
+    })
+  );
+  return streamToBuffer(result.Body);
+}
+
+export async function getSignedUrlForKey(opts: {
+  key: string;
+  expiresInSeconds?: number;
+  bucket?: string;
+}) {
+  const client = getR2Client();
+  const bucket = getBucketName(opts.bucket);
+  const command = new GetObjectCommand({
+    Bucket: bucket,
+    Key: opts.key,
+  });
+  return getSignedUrl(client, command, {
+    expiresIn: opts.expiresInSeconds ?? 3600,
+  });
 }

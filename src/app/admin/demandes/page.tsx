@@ -463,7 +463,7 @@ export default async function DemandesPage() {
               {quote.pdfUrl && (
                 <a
                   className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]"
-                  href={quote.pdfUrl}
+                  href={`/api/pdfs?key=${encodeURIComponent(quote.pdfUrl)}`}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -528,7 +528,7 @@ export default async function DemandesPage() {
               {quote.pdfUrl && (
                 <a
                   className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-700"
-                  href={quote.pdfUrl}
+                  href={`/api/pdfs?key=${encodeURIComponent(quote.pdfUrl)}`}
                   target="_blank"
                   rel="noreferrer"
                 >

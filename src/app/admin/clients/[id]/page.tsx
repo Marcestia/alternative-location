@@ -73,7 +73,7 @@ export default async function ClientDetailPage({
                   {quote.pdfUrl && (
                     <a
                       className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]"
-                      href={quote.pdfUrl}
+                      href={`/api/pdfs?key=${encodeURIComponent(quote.pdfUrl)}`}
                       target="_blank"
                       rel="noreferrer"
                     >

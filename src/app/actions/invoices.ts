@@ -5,13 +5,11 @@ import { InvoiceStatus, QuoteStatus } from "@/generated/prisma";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { sendMail } from "@/lib/mailer";
-import path from "node:path";
-import fs from "node:fs";
-import fsPromises from "node:fs/promises";
 import { siteConfig } from "@/lib/site";
 import PDFDocument from "pdfkit/js/pdfkit.standalone";
+import { downloadBufferFromR2, getSignedUrlForKey, uploadBufferToR2 } from "@/lib/r2";
 
-const PDF_DIR = path.join(process.cwd(), "public", "pdfs");
+const SIGNED_URL_TTL = 60 * 60 * 24 * 7;
 
 const formatPrice = (cents: number) =>
   (cents / 100).toLocaleString("fr-FR", {
@@ -441,13 +439,16 @@ export async function createInvoiceForQuoteId(quoteId: string) {
     vatApplicable,
   });
 
-  await fsPromises.mkdir(PDF_DIR, { recursive: true });
-  const fileName = `facture-${invoice.id}.pdf`;
-  await fsPromises.writeFile(path.join(PDF_DIR, fileName), pdfBuffer);
+  const fileName = `documents/facture-${invoice.id}.pdf`;
+  await uploadBufferToR2({
+    key: fileName,
+    body: pdfBuffer,
+    contentType: "application/pdf",
+  });
 
   await prisma.invoice.update({
     where: { id: invoice.id },
-    data: { pdfUrl: `/pdfs/${fileName}` },
+    data: { pdfUrl: fileName },
   });
 
   return invoice;
@@ -504,14 +505,19 @@ export async function markInvoiceSentAndEmail(formData: FormData) {
     : `${baseUrl}/rib-placeholder.pdf`;
 
   const attachments = [];
-  const pdfPath = path.join(process.cwd(), "public", invoice.pdfUrl);
   try {
-    const pdfBuffer = await fsPromises.readFile(pdfPath);
-    attachments.push({
-      filename: "facture.pdf",
-      content: pdfBuffer,
-      contentType: "application/pdf",
-    });
+    if (invoice.pdfUrl.startsWith("/pdfs/")) {
+      // legacy local PDF
+    } else {
+      const pdfBuffer = await downloadBufferFromR2({ key: invoice.pdfUrl });
+      if (pdfBuffer.length) {
+        attachments.push({
+          filename: "facture.pdf",
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        });
+      }
+    }
   } catch {
     // ignore
   }
@@ -531,11 +537,15 @@ export async function markInvoiceSentAndEmail(formData: FormData) {
   }
 
   const subject = "Votre facture - Alternative Location";
-  const text = `Bonjour ${invoice.client.name},\n\nAlternative Location vous contacte pour votre facture.\n\nFacture (PDF) :\n${baseUrl}${invoice.pdfUrl}\n\nRIB / IBAN :\n${ribUrl}\n\nPaiement possible par cheque, espece ou virement, et en plusieurs fois si necessaire, avant la remise du materiel.\n\nBien a vous,\nAlternative Location`;
+  const pdfLink =
+    invoice.pdfUrl && !invoice.pdfUrl.startsWith("/pdfs/")
+      ? await getSignedUrlForKey({ key: invoice.pdfUrl, expiresInSeconds: SIGNED_URL_TTL })
+      : `${baseUrl}${invoice.pdfUrl}`;
+  const text = `Bonjour ${invoice.client.name},\n\nAlternative Location vous contacte pour votre facture.\n\nFacture (PDF) :\n${pdfLink}\n\nRIB / IBAN :\n${ribUrl}\n\nPaiement possible par cheque, espece ou virement, et en plusieurs fois si necessaire, avant la remise du materiel.\n\nBien a vous,\nAlternative Location`;
   const html = `
     <p>Bonjour ${invoice.client.name},</p>
     <p>Alternative Location vous contacte pour votre facture.</p>
-    <p><strong>Facture (PDF)</strong> : <a href="${baseUrl}${invoice.pdfUrl}">Facture</a></p>
+    <p><strong>Facture (PDF)</strong> : <a href="${pdfLink}">Facture</a></p>
     <p><strong>RIB / IBAN</strong> : <a href="${ribUrl}">RIB / IBAN</a></p>
     <p>Paiement possible par cheque, espece ou virement, et en plusieurs fois si necessaire, avant la remise du materiel.</p>
     <p>Bien a vous,<br/>Alternative Location</p>
@@ -624,13 +634,16 @@ export async function regenerateInvoicePdf(formData: FormData) {
     vatApplicable: (company?.vatApplicable ?? false) && invoice.taxRateBps > 0,
   });
 
-  await fsPromises.mkdir(PDF_DIR, { recursive: true });
-  const fileName = `facture-${invoice.id}.pdf`;
-  await fsPromises.writeFile(path.join(PDF_DIR, fileName), pdfBuffer);
+  const fileName = `documents/facture-${invoice.id}.pdf`;
+  await uploadBufferToR2({
+    key: fileName,
+    body: pdfBuffer,
+    contentType: "application/pdf",
+  });
 
   await prisma.invoice.update({
     where: { id },
-    data: { pdfUrl: `/pdfs/${fileName}` },
+    data: { pdfUrl: fileName },
   });
 
   redirect("/admin/factures");
