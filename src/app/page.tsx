@@ -30,25 +30,6 @@ const steps = [
   },
 ];
 
-const highlights = [
-  {
-    title: "Devis clair et rapide",
-    text: "Une proposition lisible, ajustable jusqu'au dernier moment.",
-  },
-  {
-    title: "Retrait ou livraison",
-    text: "On s'adapte a votre organisation et a vos horaires.",
-  },
-  {
-    title: "Housses nettoyees",
-    text: "Proprete garantie, vous rendez la vaisselle sale.",
-  },
-  {
-    title: "Accompagnement pro",
-    text: "Conseil deco, quantites, logistique et timing.",
-  },
-];
-
 const trustPoints = [
   "Recommande par 100% (10 avis)",
   "Entreprise locale a Galgon (33)",
@@ -205,27 +186,42 @@ export default async function Home({
                 <p className="text-lg font-semibold">{siteConfig.name}</p>
               </div>
             </a>
-            <nav className="hidden items-center gap-6 text-sm font-medium text-[color:var(--muted)] md:flex">
-              <a className="hover:text-[color:var(--ink)]" href="#univers">
+            <nav className="hidden items-center gap-3 text-sm font-medium text-[color:var(--muted)] md:flex">
+              <a
+                className="rounded-full border border-black/10 bg-white/70 px-4 py-2 transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white hover:text-[color:var(--ink)] hover:shadow-[0_10px_24px_rgba(30,25,20,0.08)]"
+                href="#univers"
+              >
                 Univers
               </a>
-              <a className="hover:text-[color:var(--ink)]" href="/catalogue">
+              <a
+                className="rounded-full border border-black/10 bg-white/70 px-4 py-2 transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white hover:text-[color:var(--ink)] hover:shadow-[0_10px_24px_rgba(30,25,20,0.08)]"
+                href="/catalogue"
+              >
                 Catalogue
               </a>
-              <a className="hover:text-[color:var(--ink)]" href="#contact">
+              <a
+                className="rounded-full border border-black/10 bg-white/70 px-4 py-2 transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white hover:text-[color:var(--ink)] hover:shadow-[0_10px_24px_rgba(30,25,20,0.08)]"
+                href="#contact"
+              >
                 Contact
               </a>
             </nav>
           </div>
           <div className="mt-4 flex gap-3 text-sm font-medium text-[color:var(--muted)] md:hidden">
-            <a className="rounded-full bg-white px-4 py-2" href="#univers">
+            <a
+              className="rounded-full border border-black/10 bg-white px-4 py-2 transition active:scale-[0.98]"
+              href="#univers"
+            >
               Univers
             </a>
-            <a className="rounded-full bg-white px-4 py-2" href="/catalogue">
+            <a
+              className="rounded-full border border-black/10 bg-white px-4 py-2 transition active:scale-[0.98]"
+              href="/catalogue"
+            >
               Catalogue
             </a>
             <a
-              className="rounded-full bg-[color:var(--ink)] px-4 py-2 text-white"
+              className="rounded-full bg-[color:var(--ink)] px-4 py-2 text-white transition active:scale-[0.98]"
               href="#contact"
             >
               Contact
@@ -234,7 +230,7 @@ export default async function Home({
         </div>
       </header>
 
-      <main className="pb-20 pt-12 lg:pt-0">
+      <main className="pb-16 pt-10 lg:pt-0">
         <section className="mx-auto w-full max-w-6xl px-5 sm:px-6 lg:max-w-none lg:px-0">
           <div className="lg:hidden">
             <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
@@ -353,79 +349,9 @@ export default async function Home({
           </div>
         </section>
 
-        <section className="hidden lg:block">
-          <div className="mx-auto mt-12 w-full max-w-6xl px-5 sm:px-6 lg:px-12">
-            <div className="relative overflow-hidden rounded-[44px] border border-white/60 bg-[radial-gradient(circle_at_top_left,rgba(216,111,63,0.35),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(245,208,173,0.55),transparent_40%),linear-gradient(120deg,rgba(255,255,255,0.95),rgba(248,241,234,0.95))] p-10 shadow-[0_40px_80px_rgba(30,25,20,0.16)]">
-              <div className="pointer-events-none absolute -left-20 -top-20 h-56 w-56 rounded-full bg-[color:var(--accent)]/20 blur-3xl" />
-              <div className="pointer-events-none absolute -bottom-24 right-10 h-72 w-72 rounded-full bg-[color:var(--accent-2)]/30 blur-3xl" />
-              <div className="pointer-events-none absolute left-1/2 top-10 h-24 w-24 -translate-x-1/2 rounded-full border border-white/70 bg-white/40" />
-              <div className="pointer-events-none absolute right-16 top-28 h-14 w-14 rounded-full border border-white/70 bg-white/30" />
-              <div className="relative grid gap-8 lg:grid-cols-[1.5fr_1fr]">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
-                    Selection du moment
-                  </p>
-                  <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                    {highlights.map((item) => (
-                      <div
-                        key={item.title}
-                        className="rounded-3xl border border-white/70 bg-white/90 p-5 shadow-[0_18px_36px_rgba(30,25,20,0.12)] transition hover:-translate-y-1 hover:shadow-[0_26px_40px_rgba(30,25,20,0.16)]"
-                      >
-                        <p className="text-sm font-semibold text-[color:var(--ink)]">
-                          {item.title}
-                        </p>
-                        <p className="mt-2 text-xs text-[color:var(--muted)]">
-                          {item.text}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="rounded-3xl border border-white/70 bg-white/90 p-6 shadow-[0_20px_40px_rgba(30,25,20,0.12)]">
-                  <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
-                    Comment ca marche
-                  </p>
-                  <ol className="mt-4 space-y-3 text-sm text-[color:var(--muted)]">
-                    {steps.map((step, index) => (
-                      <li key={step.title}>
-                        {index + 1}. {step.title}: {step.text}
-                      </li>
-                    ))}
-                  </ol>
-                  <div className="mt-5 flex flex-wrap gap-2 text-xs text-[color:var(--muted)]">
-                    {trustPoints.map((point) => (
-                      <span
-                        key={point}
-                        className="rounded-full bg-[color:var(--surface)] px-3 py-1"
-                      >
-                        {point}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="mt-6 flex flex-wrap gap-3">
-                    <a
-                      className="rounded-full bg-[color:var(--accent)] px-6 py-3 text-xs font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_36px_rgba(216,111,63,0.25)]"
-                      href="/catalogue"
-                    >
-                      Voir le catalogue
-                    </a>
-                    <a
-                      className="rounded-full border border-black/10 bg-white px-6 py-3 text-xs font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/30"
-                      href="#contact"
-                    >
-                      Parler du projet
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section
           id="univers"
-          className="mx-auto mt-16 w-full max-w-6xl px-5 sm:px-6 lg:px-12"
+          className="mx-auto mt-10 w-full max-w-6xl px-5 sm:px-6 lg:mt-12 lg:px-12"
         >
           <div className="relative overflow-hidden rounded-[40px] border border-black/5 bg-white/90 p-8 shadow-[0_30px_60px_rgba(30,25,20,0.12)]">
             <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[color:var(--accent-2)]/20 blur-3xl" />
@@ -472,7 +398,7 @@ export default async function Home({
           </div>
         </section>
 
-        <section id="contact" className="mx-auto mt-16 w-full max-w-6xl px-5 sm:px-6 lg:px-12">
+        <section id="contact" className="mx-auto mt-10 w-full max-w-6xl px-5 sm:px-6 lg:mt-12 lg:px-12">
           <div className="rounded-[40px] border border-black/5 bg-white/90 p-8 shadow-[0_30px_60px_rgba(30,25,20,0.12)]">
             <div className="grid gap-8 lg:grid-cols-2 lg:items-stretch">
             <div className="h-full rounded-[32px] border border-black/5 bg-white/80 p-8">

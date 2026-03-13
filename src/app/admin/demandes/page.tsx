@@ -474,10 +474,16 @@ export default async function DemandesPage() {
                 <form action={markQuoteSent}>
                   <input type="hidden" name="id" value={demande.id} />
                   <button
-                    className="rounded-full bg-sky-600 px-4 py-2 text-xs font-semibold text-white shadow-[0_12px_24px_rgba(2,132,199,0.25)]"
+                    className={`rounded-full px-4 py-2 text-xs font-semibold text-white shadow-[0_12px_24px_rgba(30,25,20,0.16)] transition hover:-translate-y-0.5 ${
+                      demande.status === ContactStatus.PENDING
+                        ? "bg-emerald-600 shadow-[0_12px_24px_rgba(5,150,105,0.25)]"
+                        : "bg-sky-600 shadow-[0_12px_24px_rgba(2,132,199,0.25)]"
+                    }`}
                     type="submit"
                   >
-                    Envoyer le devis
+                    {demande.status === ContactStatus.PENDING
+                      ? "Devis envoye"
+                      : "Envoyer le devis"}
                   </button>
                 </form>
               )}
