@@ -346,6 +346,56 @@ export default function CataloguePageClient({
                 <p className="mt-2 text-xs text-[color:var(--muted)]">
                   Estimation location hors livraison et caution.
                 </p>
+                {selectedItems.length > 0 ? (
+                  <div className="mt-4 space-y-3">
+                    {selectedItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="rounded-2xl border border-black/10 bg-white/90 p-3 shadow-[0_10px_24px_rgba(20,18,14,0.06)]"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-[color:var(--ink)]">
+                              {item.name}
+                            </p>
+                            <p className="mt-1 text-xs text-[color:var(--muted)]">
+                              {formatEuro(item.rentalPriceCents)} / unite
+                            </p>
+                          </div>
+                          <p className="whitespace-nowrap text-sm font-semibold text-[color:var(--ink)]">
+                            {formatEuro(item.rentalPriceCents * item.quantity)}
+                          </p>
+                        </div>
+                        <div className="mt-3 flex items-center justify-between rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1">
+                          <button
+                            type="button"
+                            onClick={() => removeItem(item)}
+                            className="h-8 w-8 rounded-full bg-white text-sm font-semibold text-emerald-700 shadow-sm"
+                            aria-label={`Retirer ${item.name}`}
+                          >
+                            -
+                          </button>
+                          <span className="text-xs font-semibold text-emerald-800">
+                            Quantite: {item.quantity}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => addItem(item)}
+                            disabled={item.quantity >= Math.max(item.totalQty, 1)}
+                            className="h-8 w-8 rounded-full bg-white text-sm font-semibold text-emerald-700 shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+                            aria-label={`Ajouter ${item.name}`}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-4 rounded-2xl border border-dashed border-black/10 bg-white/70 p-4 text-xs text-[color:var(--muted)]">
+                    Selectionnez des articles pour afficher le detail ici.
+                  </div>
+                )}
               </div>
             </div>
           </div>

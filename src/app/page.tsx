@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import SpotlightCarousel from "@/components/SpotlightCarousel";
 import DateRangePicker from "@/components/DateRangePicker";
 import ReviewsSection from "@/components/ReviewsSection";
+import ContactSubmitButton from "@/components/ContactSubmitButton";
 import { createContactRequest } from "@/app/actions/contact";
 import { submitReviewPublic } from "@/app/actions/reviews";
 import Script from "next/script";
@@ -482,12 +483,7 @@ export default async function Home({
                     />
                   </div>
                 )}
-                <button
-                  className="rounded-full bg-[color:var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)]"
-                  type="submit"
-                >
-                  Envoyer la demande
-                </button>
+                <ContactSubmitButton />
               </form>
               {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
                 <Script

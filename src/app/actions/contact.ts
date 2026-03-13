@@ -51,12 +51,12 @@ export async function createContactRequest(formData: FormData) {
   const message = String(formData.get("message") || "").trim();
 
   if (!name || !email || !message || !startDateValue || !endDateValue) {
-    redirect("/?sent=0");
+    redirect("/?sent=0#contact");
   }
 
   if (turnstileSecret) {
     if (!turnstileToken) {
-      redirect("/?sent=2");
+      redirect("/?sent=2#contact");
     }
     try {
       const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
@@ -69,10 +69,10 @@ export async function createContactRequest(formData: FormData) {
       });
       const result = (await verifyRes.json()) as { success?: boolean };
       if (!result?.success) {
-        redirect("/?sent=2");
+        redirect("/?sent=2#contact");
       }
     } catch {
-      redirect("/?sent=2");
+      redirect("/?sent=2#contact");
     }
   }
 
@@ -128,5 +128,5 @@ export async function createContactRequest(formData: FormData) {
     console.error("Contact acknowledgement failed", error);
   }
 
-  redirect("/?sent=1");
+  redirect("/?sent=1#contact");
 }
