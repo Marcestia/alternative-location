@@ -52,7 +52,7 @@ export default function SpotlightCarousel({ items }: SpotlightCarouselProps) {
           href={current.imageUrl || "/vitrine/hero.jpg"}
           target="_blank"
           rel="noreferrer"
-          className={`relative block h-full w-full overflow-hidden rounded-[36px] bg-white/65 shadow-[0_40px_90px_rgba(12,10,8,0.22)] transition-transform duration-700 ease-out ${
+          className={`relative z-0 block h-full w-full overflow-hidden rounded-[36px] bg-white/65 shadow-[0_40px_90px_rgba(12,10,8,0.22)] transition-transform duration-700 ease-out ${
             visible ? "scale-[1.01]" : "scale-[0.995]"
           }`}
         >
@@ -77,9 +77,9 @@ export default function SpotlightCarousel({ items }: SpotlightCarouselProps) {
           </div>
         </a>
         {activeItems.length > 1 && (
-          <>
+          <div className="pointer-events-none absolute inset-0 z-20">
             <button
-              className="absolute left-5 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/70 bg-white/95 px-3 py-2 text-sm font-semibold text-[color:var(--ink)] shadow-[0_12px_28px_rgba(12,10,8,0.16)] transition hover:-translate-x-0.5 hover:bg-white focus:outline-none focus:ring-2 focus:ring-white/80"
+              className="pointer-events-auto absolute left-5 top-1/2 -translate-y-1/2 rounded-full border border-white/70 bg-white/95 px-3 py-2 text-sm font-semibold text-[color:var(--ink)] shadow-[0_12px_28px_rgba(12,10,8,0.16)] transition hover:-translate-x-0.5 hover:bg-white focus:outline-none focus:ring-2 focus:ring-white/80"
               type="button"
               onClick={(event) => {
                 event.preventDefault();
@@ -91,7 +91,7 @@ export default function SpotlightCarousel({ items }: SpotlightCarouselProps) {
               {"<"}
             </button>
             <button
-              className="absolute right-5 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/70 bg-white/95 px-3 py-2 text-sm font-semibold text-[color:var(--ink)] shadow-[0_12px_28px_rgba(12,10,8,0.16)] transition hover:translate-x-0.5 hover:bg-white focus:outline-none focus:ring-2 focus:ring-white/80"
+              className="pointer-events-auto absolute right-5 top-1/2 -translate-y-1/2 rounded-full border border-white/70 bg-white/95 px-3 py-2 text-sm font-semibold text-[color:var(--ink)] shadow-[0_12px_28px_rgba(12,10,8,0.16)] transition hover:translate-x-0.5 hover:bg-white focus:outline-none focus:ring-2 focus:ring-white/80"
               type="button"
               onClick={(event) => {
                 event.preventDefault();
@@ -102,7 +102,7 @@ export default function SpotlightCarousel({ items }: SpotlightCarouselProps) {
             >
               {">"}
             </button>
-          </>
+          </div>
         )}
       </div>
       {activeItems.length > 1 && (
