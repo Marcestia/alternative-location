@@ -45,7 +45,7 @@ export default async function StockPage({
         </p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+      <div className="grid gap-6">
         <div className="rounded-3xl border border-black/5 bg-white/80 p-6">
           <h2 className="text-xl font-semibold">Ajouter un article</h2>
           <p className="mt-2 text-sm text-[color:var(--muted)]">
@@ -67,56 +67,67 @@ export default async function StockPage({
             </div>
           )}
           <form action={addItem} className="mt-4 grid gap-4">
-            <input
-              className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-              placeholder="Nom de l'article"
-              name="name"
-              required
-            />
-            <select
-              className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-              name="categoryId"
-              defaultValue=""
-            >
-              <option value="">Choisir une cat&eacute;gorie</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
+            <label className="grid gap-2 text-xs font-semibold text-[color:var(--muted)]">
+              Nom de l&apos;article
+              <input
+                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                name="name"
+                required
+              />
+            </label>
+            <label className="grid gap-2 text-xs font-semibold text-[color:var(--muted)]">
+              Cat&eacute;gorie
+              <select
+                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                name="categoryId"
+                defaultValue=""
+              >
+                <option value="">Choisir une cat&eacute;gorie</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </label>
             <div className="grid gap-3 sm:grid-cols-3">
               <AdminImageInput label="Image 1" name="imageData" />
               <AdminImageInput label="Image 2" name="imageData" />
               <AdminImageInput label="Image 3" name="imageData" />
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
-              <input
-                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                placeholder="Quantit&eacute;"
-                name="totalQty"
-                type="number"
-                min="0"
-                defaultValue="0"
-              />
-              <input
-                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                placeholder="Prix location"
-                name="rentalPriceCents"
-                type="number"
-                min="0"
-                step="0.01"
-                defaultValue="0"
-              />
-              <input
-                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                placeholder="Caution"
-                name="depositPriceCents"
-                type="number"
-                min="0"
-                step="0.01"
-                defaultValue="0"
-              />
+              <label className="grid gap-2 text-xs font-semibold text-[color:var(--muted)]">
+                Quantit&eacute;
+                <input
+                  className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                  name="totalQty"
+                  type="number"
+                  min="0"
+                  defaultValue="0"
+                />
+              </label>
+              <label className="grid gap-2 text-xs font-semibold text-[color:var(--muted)]">
+                Prix location
+                <input
+                  className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                  name="rentalPriceCents"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  defaultValue="0"
+                />
+              </label>
+              <label className="grid gap-2 text-xs font-semibold text-[color:var(--muted)]">
+                Caution
+                <input
+                  className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                  name="depositPriceCents"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  defaultValue="0"
+                />
+              </label>
             </div>
             <button
               className="rounded-full bg-[color:var(--ink)] px-6 py-3 text-sm font-semibold text-white"
@@ -125,24 +136,6 @@ export default async function StockPage({
               Enregistrer
             </button>
           </form>
-        </div>
-
-        <div className="rounded-3xl border border-black/5 bg-[color:var(--surface-2)] p-6">
-          <h2 className="text-xl font-semibold">Conseil gestion</h2>
-          <p className="mt-2 text-sm text-[color:var(--muted)]">
-            Pense &agrave; garder une marge de s&eacute;curit&eacute; pour les articles fragiles.
-          </p>
-          <ul className="mt-4 space-y-3 text-sm">
-            {[
-              "Mettre &agrave; jour les stocks apr&egrave;s chaque retour",
-              "Noter les &eacute;l&eacute;ments endommag&eacute;s",
-              "Regrouper les articles par th&egrave;me",
-            ].map((tip) => (
-              <li key={tip} className="rounded-2xl bg-white/80 px-4 py-3">
-                {tip}
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
 
@@ -253,25 +246,30 @@ export default async function StockPage({
                   <div className="grid gap-4">
                     <form action={updateItem} className="grid gap-3">
                       <input type="hidden" name="id" value={item.id} />
-                      <input
-                        className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                        placeholder="Nom de l'article"
-                        name="name"
-                        defaultValue={item.name}
-                        required
-                      />
-                      <select
-                        className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                        name="categoryId"
-                        defaultValue={item.categoryId ?? ""}
-                      >
-                        <option value="">Choisir une cat&eacute;gorie</option>
-                        {categories.map((category) => (
-                          <option key={category.id} value={category.id}>
-                            {category.name}
-                          </option>
-                        ))}
-                      </select>
+                      <label className="grid gap-2 text-xs font-semibold text-[color:var(--muted)]">
+                        Nom de l&apos;article
+                        <input
+                          className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                          name="name"
+                          defaultValue={item.name}
+                          required
+                        />
+                      </label>
+                      <label className="grid gap-2 text-xs font-semibold text-[color:var(--muted)]">
+                        Cat&eacute;gorie
+                        <select
+                          className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                          name="categoryId"
+                          defaultValue={item.categoryId ?? ""}
+                        >
+                          <option value="">Choisir une cat&eacute;gorie</option>
+                          {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                              {category.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
                       <div className="grid gap-3">
                         {item.images.length > 0 && (
                           <div className="flex flex-wrap gap-2">
@@ -292,32 +290,38 @@ export default async function StockPage({
                         </div>
                       </div>
                       <div className="grid gap-3 sm:grid-cols-3">
-                        <input
-                          className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                          placeholder="Quantit&eacute;"
-                          name="totalQty"
-                          type="number"
-                          min="0"
-                          defaultValue={item.totalQty}
-                        />
-                        <input
-                          className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                          placeholder="Prix location"
-                          name="rentalPriceCents"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          defaultValue={(item.rentalPriceCents / 100).toFixed(2)}
-                        />
-                        <input
-                          className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                          placeholder="Caution"
-                          name="depositPriceCents"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          defaultValue={(item.depositPriceCents / 100).toFixed(2)}
-                        />
+                        <label className="grid gap-2 text-xs font-semibold text-[color:var(--muted)]">
+                          Quantit&eacute;
+                          <input
+                            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                            name="totalQty"
+                            type="number"
+                            min="0"
+                            defaultValue={item.totalQty}
+                          />
+                        </label>
+                        <label className="grid gap-2 text-xs font-semibold text-[color:var(--muted)]">
+                          Prix location
+                          <input
+                            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                            name="rentalPriceCents"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            defaultValue={(item.rentalPriceCents / 100).toFixed(2)}
+                          />
+                        </label>
+                        <label className="grid gap-2 text-xs font-semibold text-[color:var(--muted)]">
+                          Caution
+                          <input
+                            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                            name="depositPriceCents"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            defaultValue={(item.depositPriceCents / 100).toFixed(2)}
+                          />
+                        </label>
                       </div>
                       <button
                         className="rounded-full bg-[color:var(--ink)] px-6 py-3 text-sm font-semibold text-white"
