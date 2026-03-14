@@ -471,7 +471,8 @@ export default async function DemandesPage() {
               </button>
             </form>
 
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-2">
               <form action={generateQuotePdf}>
                 <input type="hidden" name="quoteId" value={quote.id} />
                 <button
@@ -519,16 +520,57 @@ export default async function DemandesPage() {
                   </button>
                 </form>
               )}
-              <form action={approveQuote}>
-                <input type="hidden" name="id" value={quote.id} />
+              </div>
+              <div className="flex flex-wrap justify-end gap-2">
                 <button
                   className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-[0_12px_24px_rgba(5,150,105,0.25)] transition hover:-translate-y-0.5"
-                  type="submit"
+                  type="button"
+                  data-action="open-approve-quote-dialog"
+                  data-dialog-id={`approve-quote-${quote.id}`}
                 >
                   Confirmer manuellement
                 </button>
-              </form>
+              </div>
             </div>
+
+            <dialog
+              id={`approve-quote-${quote.id}`}
+              className="w-full max-w-lg rounded-3xl border border-black/10 bg-white p-0 text-left shadow-[0_30px_80px_rgba(20,18,14,0.18)] backdrop:bg-black/30"
+            >
+              <div className="p-6">
+                <p className="text-lg font-semibold text-[color:var(--ink)]">
+                  Confirmer manuellement la reservation
+                </p>
+                <p className="mt-3 text-sm text-[color:var(--muted)]">
+                  Cette action valide le devis sans signature en ligne.
+                </p>
+                <p className="mt-2 text-sm text-[color:var(--muted)]">
+                  Une reservation sera creee, la demande passera en reservee et la facture sera generee automatiquement.
+                </p>
+                <p className="mt-2 text-sm text-[color:var(--muted)]">
+                  A utiliser uniquement si le client a confirme le devis par un autre moyen.
+                </p>
+                <div className="mt-6 flex flex-wrap justify-end gap-3">
+                  <form method="dialog">
+                    <button
+                      className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]"
+                      type="submit"
+                    >
+                      Annuler
+                    </button>
+                  </form>
+                  <form action={approveQuote}>
+                    <input type="hidden" name="id" value={quote.id} />
+                    <button
+                      className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-[0_12px_24px_rgba(5,150,105,0.25)] transition hover:-translate-y-0.5"
+                      type="submit"
+                    >
+                      Confirmer
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </dialog>
 
             <p className="mt-3 text-sm font-semibold">
               Total: {(quote.totalAmountCents / 100).toFixed(2)} €
@@ -747,6 +789,18 @@ export default async function DemandesPage() {
             const qtyInput = row.querySelector('input[name="itemQty"]');
             if (qtyInput) qtyInput.value = '0';
             row.style.opacity = '0.6';
+          });
+
+          document.addEventListener('click', (event) => {
+            const target = event.target;
+            if (!(target instanceof HTMLElement)) return;
+            const trigger = target.closest('[data-action="open-approve-quote-dialog"]');
+            if (!(trigger instanceof HTMLElement)) return;
+            const dialogId = trigger.getAttribute('data-dialog-id');
+            if (!dialogId) return;
+            const dialog = document.getElementById(dialogId);
+            if (!(dialog instanceof HTMLDialogElement)) return;
+            dialog.showModal();
           });
         `}
       </Script>
