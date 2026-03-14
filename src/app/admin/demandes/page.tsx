@@ -1,5 +1,5 @@
 ﻿import { createQuoteLink, markQuoteSent, refuseContact, markContacted, reopenQuote } from "@/app/actions/demandes";
-import { rejectQuote, updateQuoteAdmin, generateQuotePdf } from "@/app/actions/quotes";
+import { approveQuote, rejectQuote, updateQuoteAdmin, generateQuotePdf } from "@/app/actions/quotes";
 import { prisma } from "@/lib/prisma";
 import { ContactStatus, QuoteStatus } from "@/generated/prisma";
 import { headers } from "next/headers";
@@ -272,22 +272,28 @@ export default async function DemandesPage() {
                       </p>
                       <input type="hidden" name="itemId" value={item.itemId} />
                     </div>
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
-                      name="itemQty"
-                      type="number"
-                      min="0"
-                      max={availableByItem[item.itemId] ?? item.item.totalQty}
-                      defaultValue={item.quantity}
-                    />
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
-                      name="itemPrice"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      defaultValue={(item.unitPriceCents / 100).toFixed(2)}
-                    />
+                    <label className="grid gap-1 text-xs font-semibold text-[color:var(--muted)]">
+                      Quantite
+                      <input
+                        className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
+                        name="itemQty"
+                        type="number"
+                        min="0"
+                        max={availableByItem[item.itemId] ?? item.item.totalQty}
+                        defaultValue={item.quantity}
+                      />
+                    </label>
+                    <label className="grid gap-1 text-xs font-semibold text-[color:var(--muted)]">
+                      Prix
+                      <input
+                        className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
+                        name="itemPrice"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        defaultValue={(item.unitPriceCents / 100).toFixed(2)}
+                      />
+                    </label>
                     <button
                       className="rounded-full border border-black/10 px-3 py-2 text-xs font-semibold text-[color:var(--muted)]"
                       type="button"
@@ -321,24 +327,30 @@ export default async function DemandesPage() {
                       />
                       <input type="hidden" name="newItemId" data-role="quote-item-id" />
                     </div>
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
-                      name="newItemQty"
-                      type="number"
-                      min="0"
-                      max="0"
-                      defaultValue="0"
-                      data-role="quote-item-qty"
-                    />
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
-                      name="newItemPrice"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      defaultValue="0"
-                      data-role="quote-item-price"
-                    />
+                    <label className="grid gap-1 text-xs font-semibold text-[color:var(--muted)]">
+                      Quantite
+                      <input
+                        className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
+                        name="newItemQty"
+                        type="number"
+                        min="0"
+                        max="0"
+                        defaultValue="0"
+                        data-role="quote-item-qty"
+                      />
+                    </label>
+                    <label className="grid gap-1 text-xs font-semibold text-[color:var(--muted)]">
+                      Prix
+                      <input
+                        className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
+                        name="newItemPrice"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        defaultValue="0"
+                        data-role="quote-item-price"
+                      />
+                    </label>
                     <button
                       className="rounded-full border border-black/10 px-3 py-2 text-xs font-semibold text-[color:var(--muted)]"
                       type="button"
@@ -383,31 +395,40 @@ export default async function DemandesPage() {
                 </p>
                 {[...otherLines, { id: "new-1" }, { id: "new-2" }, { id: "new-3" }].map((line) => (
                   <div key={line.id} className="grid gap-2 md:grid-cols-[2fr_1fr_1fr]">
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
-                      name="lineLabel"
-                      placeholder="Libellé"
-                      defaultValue={"label" in line ? line.label : ""}
-                    />
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
-                      name="lineQty"
-                      type="number"
-                      min="0"
-                      defaultValue={"quantity" in line ? line.quantity : 0}
-                    />
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
-                      name="linePrice"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      defaultValue={
-                        "unitPriceCents" in line
-                          ? (line.unitPriceCents / 100).toFixed(2)
-                          : "0"
-                      }
-                    />
+                    <label className="grid gap-1 text-xs font-semibold text-[color:var(--muted)]">
+                      Libelle
+                      <input
+                        className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
+                        name="lineLabel"
+                        placeholder="Libelle"
+                        defaultValue={"label" in line ? line.label : ""}
+                      />
+                    </label>
+                    <label className="grid gap-1 text-xs font-semibold text-[color:var(--muted)]">
+                      Quantite
+                      <input
+                        className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
+                        name="lineQty"
+                        type="number"
+                        min="0"
+                        defaultValue={"quantity" in line ? line.quantity : 0}
+                      />
+                    </label>
+                    <label className="grid gap-1 text-xs font-semibold text-[color:var(--muted)]">
+                      Prix
+                      <input
+                        className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
+                        name="linePrice"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        defaultValue={
+                          "unitPriceCents" in line
+                            ? (line.unitPriceCents / 100).toFixed(2)
+                            : "0"
+                        }
+                      />
+                    </label>
                   </div>
                 ))}
               </div>
@@ -498,6 +519,15 @@ export default async function DemandesPage() {
                   </button>
                 </form>
               )}
+              <form action={approveQuote}>
+                <input type="hidden" name="id" value={quote.id} />
+                <button
+                  className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-[0_12px_24px_rgba(5,150,105,0.25)] transition hover:-translate-y-0.5"
+                  type="submit"
+                >
+                  Confirmer manuellement
+                </button>
+              </form>
             </div>
 
             <p className="mt-3 text-sm font-semibold">

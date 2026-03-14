@@ -395,6 +395,14 @@ export async function approveQuote(formData: FormData) {
     redirect("/admin/demandes");
   }
 
+  if (quote.status === QuoteStatus.ACCEPTED) {
+    redirect("/admin/reservations");
+  }
+
+  if (quote.status === QuoteStatus.REJECTED) {
+    redirect("/admin/demandes");
+  }
+
   const reservation = await prisma.reservation.create({
     data: {
       code: `RES-${Date.now()}`,
@@ -418,10 +426,28 @@ export async function approveQuote(formData: FormData) {
     });
   }
 
+  const signedAt = new Date();
   await prisma.quote.update({
     where: { id: quote.id },
-    data: { status: QuoteStatus.ACCEPTED },
+    data: {
+      status: QuoteStatus.ACCEPTED,
+      signedAt,
+      signedName: "Validation manuelle",
+      signatureData: null,
+    },
   });
+  try {
+    await prisma.$executeRaw`
+      UPDATE Quote
+      SET cgAcceptedAt = ${signedAt},
+          cgAcceptedIp = ${null},
+          cgAcceptedUserAgent = ${"Validation manuelle admin"},
+          cgAcceptedVersion = ${CG_VERSION}
+      WHERE id = ${quote.id}
+    `;
+  } catch (error) {
+    console.warn("Manual CG acceptance proof update failed.", error);
+  }
 
   await prisma.contactRequest.update({
     where: { id: quote.contactRequestId },
