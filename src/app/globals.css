@@ -24,6 +24,16 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: 16px;
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 17px;
+  }
+}
+
 body {
   background: radial-gradient(
       circle at top left,
@@ -39,6 +49,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
+  line-height: 1.5;
 }
 
 h1,
