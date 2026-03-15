@@ -27,7 +27,12 @@ function statusLabel(status: ContactStatus) {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function DemandesPage() {
+export default async function DemandesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ error?: string }>;
+}) {
+  const resolvedParams = searchParams ? await searchParams : undefined;
   const [demandes, items, reservations, heldQuotes] = await Promise.all([
     prisma.contactRequest.findMany({
       orderBy: { createdAt: "desc" },
@@ -893,6 +898,18 @@ export default async function DemandesPage() {
           Suivi des demandes, propositions de devis et réservations.
         </p>
       </header>
+
+      {resolvedParams?.error === "smtp" && (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          Envoi du devis impossible. Verifiez la configuration SMTP dans Vercel.
+        </div>
+      )}
+
+      {resolvedParams?.error === "mail" && (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          Cette demande ne contient pas d&apos;email client ou de devis exploitable.
+        </div>
+      )}
 
       <div className="space-y-6">
         <div className="rounded-3xl border border-black/5 bg-white/80 p-6">

@@ -277,13 +277,18 @@ export async function markQuoteSent(formData: FormData) {
     <p>Bien a vous,<br/>Alternative Location</p>
   `;
 
-  await sendMail({
-    to: request.email,
-    subject,
-    text,
-    html,
-    attachments,
-  });
+  try {
+    await sendMail({
+      to: request.email,
+      subject,
+      text,
+      html,
+      attachments,
+    });
+  } catch (error) {
+    console.error("markQuoteSent mail error", error);
+    redirect("/admin/demandes?error=smtp");
+  }
 
   await prisma.contactRequest.update({
     where: { id },
