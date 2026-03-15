@@ -159,8 +159,6 @@ export default async function Home({
         ...otherCategories.slice(decorInsertIndex),
       ]
     : otherCategories;
-  const instagramHandle = siteConfig.instagram.replace("@", "");
-  const facebookSlug = siteConfig.facebook.replace(/ /g, "").toLowerCase();
   const whatsappNumber = siteConfig.whatsapp.replace(/\D/g, "");
 
   return (
@@ -563,32 +561,52 @@ export default async function Home({
                 </p>
               </div>
               <div className="rounded-3xl bg-white/80 p-4 text-sm text-[color:var(--muted)]">
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3 sm:flex-nowrap">
                   <a
-                    className="rounded-full border border-black/10 px-3 py-1 text-xs font-semibold"
-                    href={`https://www.instagram.com/${instagramHandle}`}
+                    className="inline-flex items-center gap-2 rounded-full border border-black/10 px-3 py-2 text-xs font-semibold transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white"
+                    href="https://l.facebook.com/l.php?u=https%3A%2F%2Fwww.instagram.com%2Falternative%2520%3Ffbclid%3DIwZXh0bgNhZW0CMTAAYnJpZBEwY005T2VENks2YjR5TmptTnNydGMGYXBwX2lkEDIyMjAzOTE3ODgyMDA4OTIAAR6t076-DYHhbWs92dQB7agKyareNSPQc5ia-0sncmvPY1A3Los8h4NKePLpwQ_aem_-TLiA3VKREGZEGAp_7bupw&h=AT6lRnscVWMiPrpxBjo8_L1CM0UuiHxpJazpV9oXtaCAX9qZN74UH-Zk4FD4_vaRXcYMZlZV-jSisNxe0RtXJngK5Jmus7f0doMhFmyWL4W4uKcckEBkt_BlypvdfJpnvnS3egOgaQ7i2fwY4iQR"
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Instagram {siteConfig.instagram}
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[linear-gradient(135deg,#fdc468,#df4996,#5f58d3)] text-[11px] font-bold text-white">
+                      IG
+                    </span>
+                    <span>Instagram</span>
                   </a>
                   <a
-                    className="rounded-full border border-black/10 px-3 py-1 text-xs font-semibold"
-                    href={`https://www.facebook.com/${facebookSlug}`}
+                    className="inline-flex items-center gap-2 rounded-full border border-black/10 px-3 py-2 text-xs font-semibold transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white"
+                    href="https://www.facebook.com/p/Alternative-location-100063656164530/"
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Facebook {siteConfig.facebook}
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#1877F2] text-sm font-bold text-white">
+                      f
+                    </span>
+                    <span>Facebook</span>
                   </a>
                   <a
-                    className="rounded-full border border-black/10 px-3 py-1 text-xs font-semibold"
+                    className="inline-flex items-center gap-2 rounded-full border border-black/10 px-3 py-2 text-xs font-semibold transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white"
                     href={`https://wa.me/${whatsappNumber}`}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    WhatsApp {siteConfig.whatsapp}
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#25D366] text-[11px] font-bold text-white">
+                      WA
+                    </span>
+                    <span>WhatsApp</span>
                   </a>
                 </div>
+                <a
+                  className="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-[color:var(--accent)] underline-offset-4 transition hover:underline"
+                  href="https://www.google.com/maps/search/?api=1&query=14+impasse+Moustron,+33133+Galgon,+France"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[color:var(--surface)] text-[11px] font-bold text-[color:var(--accent)]">
+                    M
+                  </span>
+                  <span>Voir l&apos;adresse sur Google Maps</span>
+                </a>
               </div>
             </div>
             </div>
