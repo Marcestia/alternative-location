@@ -31,12 +31,6 @@ const steps = [
   },
 ];
 
-const trustPoints = [
-  "Recommande par 100% (10 avis)",
-  "Entreprise locale a Galgon (33)",
-  "Reponse rapide et suivi personnalise",
-];
-
 export default async function Home({
   searchParams,
 }: {
@@ -299,10 +293,10 @@ export default async function Home({
               <div className="relative z-10 flex h-full items-end px-12 pb-16">
                 <div className="max-w-3xl space-y-6">
                   <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-xs uppercase tracking-[0.3em] text-[color:var(--accent)] shadow-[0_12px_30px_rgba(30,25,20,0.08)]">
-                    Location evenementielle
+                    Location événementielle
                   </div>
                   <h1 className="text-5xl font-semibold leading-tight">
-                    Une scenographie complete pour vos evenements a Galgon et autour.
+                    Une scénographie complète pour vos événements.
                   </h1>
                   <p className="max-w-2xl text-lg text-[color:var(--muted)]">
                     {siteConfig.description}
@@ -320,16 +314,6 @@ export default async function Home({
                     >
                       Parler du projet
                     </a>
-                  </div>
-                  <div className="flex flex-wrap gap-3 text-xs text-[color:var(--muted)]">
-                    {trustPoints.map((point) => (
-                      <span
-                        key={point}
-                        className="rounded-full bg-white/70 px-3 py-1"
-                      >
-                        {point}
-                      </span>
-                    ))}
                   </div>
                 </div>
               </div>
@@ -362,7 +346,7 @@ export default async function Home({
                     Univers
                   </p>
                   <h2 className="text-3xl font-semibold md:text-4xl">
-                    Tout pour une fete harmonieuse.
+                    Tout pour une fête à votre image.
                   </h2>
                 </div>
               </div>
