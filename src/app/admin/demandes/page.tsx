@@ -257,7 +257,12 @@ export default async function DemandesPage() {
               )}
             </div>
 
-            <form action={updateQuoteAdmin} className="mt-4 grid gap-6">
+            <form
+              action={updateQuoteAdmin}
+              className="mt-4 grid gap-6"
+              data-role="quote-update-form"
+              data-quote-id={quote.id}
+            >
               <input type="hidden" name="quoteId" value={quote.id} />
               <div className="space-y-3">
                 <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
@@ -460,6 +465,7 @@ export default async function DemandesPage() {
                   step="0.01"
                   placeholder="Montant de la caution en €"
                   defaultValue={(quote.depositAmountCents / 100).toFixed(2)}
+                  data-role="quote-deposit-input"
                 />
               </div>
 
@@ -470,6 +476,41 @@ export default async function DemandesPage() {
                 Mettre à jour le devis
               </button>
             </form>
+
+            <dialog
+              id={`deposit-warning-${quote.id}`}
+              className="w-full max-w-md rounded-3xl border border-black/10 bg-white p-0 text-left shadow-[0_30px_80px_rgba(20,18,14,0.18)] backdrop:bg-black/30"
+            >
+              <div className="p-6">
+                <p className="text-lg font-semibold text-[color:var(--ink)]">
+                  Caution non remplie
+                </p>
+                <p className="mt-3 text-sm text-[color:var(--muted)]">
+                  La caution est vide ou egale a 0 €.
+                </p>
+                <p className="mt-2 text-sm text-[color:var(--muted)]">
+                  Vous pouvez continuer sans caution ou revenir au devis pour la renseigner avant l&apos;enregistrement.
+                </p>
+                <div className="mt-6 flex flex-wrap justify-end gap-3">
+                  <form method="dialog">
+                    <button
+                      className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]"
+                      type="submit"
+                    >
+                      Remplir
+                    </button>
+                  </form>
+                  <button
+                    className="rounded-full bg-[color:var(--ink)] px-4 py-2 text-xs font-semibold text-white shadow-[0_12px_24px_rgba(30,25,20,0.16)] transition hover:-translate-y-0.5"
+                    type="button"
+                    data-action="confirm-empty-deposit"
+                    data-form-quote-id={quote.id}
+                  >
+                    Continuer
+                  </button>
+                </div>
+              </div>
+            </dialog>
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap gap-2">
@@ -801,6 +842,45 @@ export default async function DemandesPage() {
             const dialog = document.getElementById(dialogId);
             if (!(dialog instanceof HTMLDialogElement)) return;
             dialog.showModal();
+          });
+
+          document.addEventListener('submit', (event) => {
+            const form = event.target;
+            if (!(form instanceof HTMLFormElement)) return;
+            if (form.getAttribute('data-role') !== 'quote-update-form') return;
+            if (form.dataset.skipDepositWarning === 'true') {
+              delete form.dataset.skipDepositWarning;
+              return;
+            }
+            const depositInput = form.querySelector('input[data-role="quote-deposit-input"]');
+            if (!(depositInput instanceof HTMLInputElement)) return;
+            const normalizedValue = depositInput.value.replace(',', '.').trim();
+            const depositAmount = normalizedValue === '' ? 0 : Number.parseFloat(normalizedValue);
+            if (!Number.isFinite(depositAmount) || depositAmount > 0) return;
+            event.preventDefault();
+            const quoteId = form.getAttribute('data-quote-id');
+            if (!quoteId) return;
+            const dialog = document.getElementById('deposit-warning-' + quoteId);
+            if (!(dialog instanceof HTMLDialogElement)) return;
+            dialog.dataset.formQuoteId = quoteId;
+            dialog.showModal();
+          });
+
+          document.addEventListener('click', (event) => {
+            const target = event.target;
+            if (!(target instanceof HTMLElement)) return;
+            const trigger = target.closest('[data-action="confirm-empty-deposit"]');
+            if (!(trigger instanceof HTMLElement)) return;
+            const quoteId = trigger.getAttribute('data-form-quote-id');
+            if (!quoteId) return;
+            const form = document.querySelector('form[data-role="quote-update-form"][data-quote-id="' + quoteId + '"]');
+            if (!(form instanceof HTMLFormElement)) return;
+            form.dataset.skipDepositWarning = 'true';
+            const dialog = document.getElementById('deposit-warning-' + quoteId);
+            if (dialog instanceof HTMLDialogElement) {
+              dialog.close();
+            }
+            form.requestSubmit();
           });
         `}
       </Script>
