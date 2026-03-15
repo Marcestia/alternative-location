@@ -270,7 +270,7 @@ export async function markQuoteSent(formData: FormData) {
   const html = `
     <p>Bonjour ${request.name},</p>
     <p>Alternative Location vous contacte pour votre devis.</p>
-    <p><strong>Acceder au devis</strong> : <a href="${acceptLink}">Voir et signer le devis</a></p>
+    <p><strong>Valider votre devis</strong> : <a href="${acceptLink}">Voir et signer le devis</a></p>
     ${pdfLink ? `<p><strong>Devis (PDF)</strong> : <a href="${pdfLink}">Télécharger le devis</a></p>` : ""}
     <p>Merci de bien vouloir prendre connaissance des conditions generales. La signature du devis vaut acceptation des conditions generales.</p>
     <p>En signant, vous vous engagez a verser l'acompte de 30% sous 7 jours.</p>
