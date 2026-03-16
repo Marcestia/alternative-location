@@ -91,7 +91,10 @@ export default function SpotlightCarousel({ items }: SpotlightCarouselProps) {
               <button
                 className="absolute left-5 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/70 bg-white/95 px-3 py-2 text-sm font-semibold text-[color:var(--ink)] shadow-[0_12px_28px_rgba(12,10,8,0.16)] transition hover:-translate-x-0.5 hover:bg-white focus:outline-none focus:ring-2 focus:ring-white/80"
                 type="button"
-                onClick={goPrev}
+                onPointerDown={(event) => {
+                  event.preventDefault();
+                  goPrev();
+                }}
                 aria-label="Precedent"
               >
                 {"<"}
@@ -99,7 +102,10 @@ export default function SpotlightCarousel({ items }: SpotlightCarouselProps) {
               <button
                 className="absolute right-5 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/70 bg-white/95 px-3 py-2 text-sm font-semibold text-[color:var(--ink)] shadow-[0_12px_28px_rgba(12,10,8,0.16)] transition hover:translate-x-0.5 hover:bg-white focus:outline-none focus:ring-2 focus:ring-white/80"
                 type="button"
-                onClick={goNext}
+                onPointerDown={(event) => {
+                  event.preventDefault();
+                  goNext();
+                }}
                 aria-label="Suivant"
               >
                 {">"}
@@ -110,7 +116,16 @@ export default function SpotlightCarousel({ items }: SpotlightCarouselProps) {
       </div>
 
       {activeItems.length > 1 && (
-        <div className="mt-4 flex items-center justify-center gap-3 text-xs text-[color:var(--muted)]">
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-xs text-[color:var(--muted)]">
+          <button
+            type="button"
+            onClick={goPrev}
+            className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/90 px-4 py-2 font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20"
+            aria-label="Image precedente"
+          >
+            <span aria-hidden="true">←</span>
+            <span>Precedent</span>
+          </button>
           <span className="rounded-full bg-white/80 px-2 py-1 font-semibold">
             {index + 1} / {activeItems.length}
           </span>
@@ -129,6 +144,15 @@ export default function SpotlightCarousel({ items }: SpotlightCarouselProps) {
               />
             ))}
           </div>
+          <button
+            type="button"
+            onClick={goNext}
+            className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/90 px-4 py-2 font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20"
+            aria-label="Image suivante"
+          >
+            <span>Suivant</span>
+            <span aria-hidden="true">→</span>
+          </button>
         </div>
       )}
     </div>
