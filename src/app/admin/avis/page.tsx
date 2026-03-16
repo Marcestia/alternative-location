@@ -32,87 +32,67 @@ export default async function ReviewsPage({
         </p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-        <div className="rounded-3xl border border-black/5 bg-white/80 p-6">
-          <h2 className="text-xl font-semibold">Ajouter un avis</h2>
-          {resolvedParams?.saved === "1" && (
-            <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
-              Avis ajoute.
-            </div>
-          )}
-          {resolvedParams?.saved === "0" && (
-            <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
-              Merci de renseigner un nom.
-            </div>
-          )}
-          <form action={addReview} className="mt-4 grid gap-4">
+      <div className="rounded-3xl border border-black/5 bg-white/80 p-6">
+        <h2 className="text-xl font-semibold">Ajouter un avis</h2>
+        {resolvedParams?.saved === "1" && (
+          <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
+            Avis ajoute.
+          </div>
+        )}
+        {resolvedParams?.saved === "0" && (
+          <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
+            Merci de renseigner un nom.
+          </div>
+        )}
+        <form action={addReview} className="mt-4 grid gap-4">
+          <input
+            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+            placeholder="Nom et prenom"
+            name="name"
+            required
+          />
+          <input
+            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+            placeholder="Email (optionnel)"
+            name="email"
+            type="email"
+          />
+          <textarea
+            className="min-h-[110px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+            name="text"
+            placeholder="Texte de l'avis"
+          />
+          <div className="grid gap-3 sm:grid-cols-3">
             <input
               className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-              placeholder="Nom et prenom"
-              name="name"
-              required
+              placeholder="Note (1-5)"
+              name="rating"
+              type="number"
+              min="1"
+              max="5"
+              defaultValue="5"
             />
             <input
               className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-              placeholder="Email (optionnel)"
-              name="email"
-              type="email"
+              placeholder="Ordre d'affichage"
+              name="sortOrder"
+              type="number"
+              min="0"
+              defaultValue="0"
             />
-            <textarea
-              className="min-h-[110px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-              name="text"
-              placeholder="Texte de l'avis"
-            />
-            <div className="grid gap-3 sm:grid-cols-3">
-              <input
-                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                placeholder="Note (1-5)"
-                name="rating"
-                type="number"
-                min="1"
-                max="5"
-                defaultValue="5"
-              />
-              <input
-                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                placeholder="Ordre d'affichage"
-                name="sortOrder"
-                type="number"
-                min="0"
-                defaultValue="0"
-              />
-            </div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <AdminImageInput label="Photo 1" name="imageData" />
-              <AdminImageInput label="Photo 2" name="imageData" />
-              <AdminImageInput label="Photo 3" name="imageData" />
-            </div>
-            <button
-              className="rounded-full bg-[color:var(--ink)] px-6 py-3 text-sm font-semibold text-white"
-              type="submit"
-            >
-              Enregistrer
-            </button>
-          </form>
-        </div>
-
-        <div className="rounded-3xl border border-black/5 bg-[color:var(--surface-2)] p-6">
-          <h2 className="text-xl font-semibold">Conseil</h2>
-          <p className="mt-2 text-sm text-[color:var(--muted)]">
-            3 a 6 avis suffisent pour une page d&apos;accueil claire et rassurante.
-          </p>
-          <ul className="mt-4 space-y-3 text-sm">
-            {[
-              "Varier les types d'evenements",
-              "Mettre une note coherente (4-5)",
-              "Ajouter 1 photo si possible",
-            ].map((tip) => (
-              <li key={tip} className="rounded-2xl bg-white/80 px-4 py-3">
-                {tip}
-              </li>
-            ))}
-          </ul>
-        </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <AdminImageInput label="Photo 1" name="imageData" />
+            <AdminImageInput label="Photo 2" name="imageData" />
+            <AdminImageInput label="Photo 3" name="imageData" />
+          </div>
+          <button
+            className="rounded-full bg-[color:var(--ink)] px-6 py-3 text-sm font-semibold text-white"
+            type="submit"
+          >
+            Enregistrer
+          </button>
+        </form>
       </div>
 
       <div className="rounded-3xl border border-black/5 bg-white/80 p-6">

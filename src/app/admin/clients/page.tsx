@@ -27,68 +27,48 @@ export default async function ClientsPage({
         </p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-        <div className="rounded-3xl border border-black/5 bg-white/80 p-6">
-          <h2 className="text-xl font-semibold">Ajouter un client</h2>
-          {resolvedParams?.saved === "1" && (
-            <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
-              Client ajouté.
-            </div>
-          )}
-          {resolvedParams?.saved === "0" && (
-            <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
-              Merci de renseigner un nom.
-            </div>
-          )}
-          <form action={addClient} className="mt-4 grid gap-3">
-            <input
-              className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-              placeholder="Nom et prénom"
-              name="name"
-              required
-            />
-            <input
-              className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-              placeholder="Email"
-              name="email"
-              type="email"
-            />
-            <input
-              className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-              placeholder="Téléphone"
-              name="phone"
-            />
-            <input
-              className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-              placeholder="Adresse"
-              name="address"
-            />
-            <button
-              className="rounded-full bg-[color:var(--ink)] px-6 py-3 text-sm font-semibold text-white"
-              type="submit"
-            >
-              Enregistrer
-            </button>
-          </form>
-        </div>
-
-        <div className="rounded-3xl border border-black/5 bg-[color:var(--surface-2)] p-6">
-          <h2 className="text-xl font-semibold">Conseil relation client</h2>
-          <p className="mt-2 text-sm text-[color:var(--muted)]">
-            Un fichier client propre aide à suivre les besoins récurrents.
-          </p>
-          <ul className="mt-4 space-y-3 text-sm">
-            {[
-              "Ajouter les préférences déco",
-              "Noter les contraintes de livraison",
-              "Garder l'historique des devis",
-            ].map((tip) => (
-              <li key={tip} className="rounded-2xl bg-white/80 px-4 py-3">
-                {tip}
-              </li>
-            ))}
-          </ul>
-        </div>
+      <div className="rounded-3xl border border-black/5 bg-white/80 p-6">
+        <h2 className="text-xl font-semibold">Ajouter un client</h2>
+        {resolvedParams?.saved === "1" && (
+          <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
+            Client ajouté.
+          </div>
+        )}
+        {resolvedParams?.saved === "0" && (
+          <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
+            Merci de renseigner un nom.
+          </div>
+        )}
+        <form action={addClient} className="mt-4 grid gap-3">
+          <input
+            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+            placeholder="Nom et prénom"
+            name="name"
+            required
+          />
+          <input
+            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+            placeholder="Email"
+            name="email"
+            type="email"
+          />
+          <input
+            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+            placeholder="Téléphone"
+            name="phone"
+          />
+          <input
+            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+            placeholder="Adresse"
+            name="address"
+          />
+          <button
+            className="rounded-full bg-[color:var(--ink)] px-6 py-3 text-sm font-semibold text-white"
+            type="submit"
+          >
+            Enregistrer
+          </button>
+        </form>
       </div>
 
       <div className="rounded-3xl border border-black/5 bg-white/80 p-6">
