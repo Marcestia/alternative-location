@@ -18,14 +18,14 @@ const siteUrl =
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: `${siteConfig.name} | Location vaisselle, decoration et mobilier`,
+  title: `${siteConfig.name} | Location vaisselle, décoration et mobilier`,
   description:
-    "Location de vaisselle, decoration, mobilier, sonorisation et ambiance pour mariages, anniversaires et evenements festifs a Galgon (33) et dans un rayon de 150 km.",
+    "Location de vaisselle, décoration, mobilier, sonorisation et ambiance pour mariages, anniversaires et évènements festifs a Galgon (33) et dans un rayon de 100 km.",
   keywords: [
     "location vaisselle",
-    "location decoration",
+    "location décoration",
     "location mobilier",
-    "location materiel evenementiel",
+    "location materiel évènementiel",
     "location sono",
     "location mariage",
     "Galgon",

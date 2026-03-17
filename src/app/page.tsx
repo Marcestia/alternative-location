@@ -19,15 +19,15 @@ const slugify = (value: string) =>
 const steps = [
   {
     title: "Choisir",
-    text: "Parcourez le catalogue et reperez les articles utiles pour votre evenement.",
+    text: "Parcourez notre catalogue et repérez les articles adaptés à votre événement.",
   },
   {
     title: "Demander",
-    text: "Envoyez votre besoin avec les dates, le lieu et les quantites souhaitees.",
+    text: "Envoyez votre demande avec les dates, le lieu et les quantités souhaitées via le formulaire de contact.",
   },
   {
     title: "Valider",
-    text: "Le devis signe et l'acompte de 30% sous 7 jours confirment la reservation.",
+    text: "Le devis signé et l’acompte de 30 % sous 7 jours confirment la réservation.",
   },
 ];
 
@@ -58,11 +58,11 @@ export default async function Home({
       },
       {
         "@type": "Place",
-        name: "Rayon de 150 km autour de Galgon",
+        name: "Rayon de 100 km autour de Galgon",
       },
     ],
     description:
-      "Location de vaisselle, decoration, mobilier, sonorisation et ambiance pour mariages, anniversaires et evenements festifs.",
+      "Location de vaisselle, décoration, mobilier et sonorisation pour tous vos événements festifs.",
     priceRange: "EUR",
     makesOffer: [
       {
@@ -76,7 +76,7 @@ export default async function Home({
         "@type": "Offer",
         itemOffered: {
           "@type": "Service",
-          name: "Location de decoration et mobilier",
+          name: "Location de décoration et mobilier",
         },
       },
       {
@@ -152,7 +152,7 @@ export default async function Home({
         ...otherCategories.slice(0, decorInsertIndex),
         {
           id: "decor-mobilier",
-          name: "Decoration & mobilier",
+          name: "Décoration & mobilier",
           description: decorDescription,
           heroImageUrl: decorHero,
           slug: "decoration-mobilier",
@@ -244,10 +244,10 @@ export default async function Home({
               <div className="pointer-events-none absolute -left-10 bottom-8 h-36 w-36 rounded-full bg-[color:var(--accent)]/18 blur-3xl" />
               <div className="relative space-y-5">
                 <div className="inline-flex items-center gap-2 rounded-full bg-[color:var(--surface)] px-4 py-2 text-[11px] uppercase tracking-[0.28em] text-[color:var(--accent)]">
-                  Location evenementielle
+                  Location événementielle
                 </div>
                 <h1 className="max-w-[12ch] text-4xl font-semibold leading-[0.95] sm:max-w-none sm:text-5xl">
-                  Une scenographie complete pour vos evenements.
+                  Une scénographie complète pour vos événements.
                 </h1>
                 <p className="max-w-xl text-sm text-[color:var(--muted)] sm:text-base">
                   {siteConfig.description}
@@ -257,7 +257,7 @@ export default async function Home({
                     className="rounded-full bg-[color:var(--accent)] px-6 py-3 text-center text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)]"
                     href="/catalogue"
                   >
-                    Acceder au catalogue
+                    Consulter le catalogue
                   </a>
                   <a
                     className="rounded-full border border-[color:var(--ink)]/20 bg-white/80 px-6 py-3 text-center text-sm font-semibold text-[color:var(--ink)]"
@@ -287,12 +287,12 @@ export default async function Home({
                     <ul className="mt-3 space-y-2 text-sm text-[color:var(--muted)]">
                       <li>Devis clair et rapide</li>
                       <li>Retrait ou livraison</li>
-                      <li>Caution et paiements geres hors ligne</li>
+                      <li>Caution et paiements gérés hors ligne</li>
                     </ul>
                   </div>
                   <div className="rounded-[26px] bg-white/88 p-5">
                     <p className="text-xs uppercase tracking-[0.28em] text-[color:var(--muted)]">
-                      Comment ca marche
+                      Comment ça marche
                     </p>
                     <ol className="mt-3 space-y-2 text-sm text-[color:var(--muted)]">
                       <li>1. Parcourez le catalogue</li>
@@ -320,7 +320,7 @@ export default async function Home({
                     Location evenementielle
                   </div>
                   <h1 className="text-5xl font-semibold leading-tight">
-                    Une scenographie complete pour vos evenements.
+                    Une scénographie complète pour vos événements
                   </h1>
                   <p className="max-w-2xl text-lg text-[color:var(--muted)]">
                     {siteConfig.description}
@@ -370,7 +370,7 @@ export default async function Home({
                     Univers
                   </p>
                   <h2 className="text-2xl font-semibold sm:text-3xl md:text-4xl">
-                    Tout pour une fete a votre image.
+                    Tout pour une fête à votre image.
                   </h2>
                 </div>
               </div>
@@ -418,17 +418,16 @@ export default async function Home({
                   Nous contacter
                 </h2>
                 <p className="mt-3 text-sm text-[color:var(--muted)]">
-                  Decrivez votre besoin, meme si un article semble indisponible.
-                  Pour les demandes particulieres, le plus simple est d'appeler.
+                  Décrivez votre besoin.
                 </p>
                 <p className="mt-2 text-xs text-[color:var(--muted)]">
-                  La reservation est confirmee apres validation du devis et
+                  La réservation est confirmée apres validation du devis et
                   versement d'un acompte de 30% sous 7 jours.
                 </p>
 
                 {sentStatus === "1" && (
                   <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                    Merci. Votre demande a bien ete envoyee. Nous revenons vers
+                    Merci. Votre demande à bien ete envoyée. Nous revenons vers
                     vous rapidement.
                   </div>
                 )}
@@ -587,24 +586,14 @@ export default async function Home({
                     Services
                   </p>
                   <p className="mt-2 text-sm font-medium">
-                    Retrait sur place ou livraison possible a partir de 1 EUR / km,
-                    voir avec l'entreprise.
+                    Retrait sur place ou livraison possible à partir de 1 EUR / km,
+                    voir avec Alternative location.
                   </p>
                 </div>
 
                 <div className="rounded-3xl bg-white/80 p-4 text-sm text-[color:var(--muted)]">
                   <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                    <a
-                      className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-3 py-2 text-xs font-semibold transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white sm:justify-start"
-                      href="https://l.facebook.com/l.php?u=https%3A%2F%2Fwww.instagram.com%2Falternative%2520%3Ffbclid%3DIwZXh0bgNhZW0CMTAAYnJpZBEwY005T2VENks2YjR5TmptTnNydGMGYXBwX2lkEDIyMjAzOTE3ODgyMDA4OTIAAR6t076-DYHhbWs92dQB7agKyareNSPQc5ia-0sncmvPY1A3Los8h4NKePLpwQ_aem_-TLiA3VKREGZEGAp_7bupw&h=AT6lRnscVWMiPrpxBjo8_L1CM0UuiHxpJazpV9oXtaCAX9qZN74UH-Zk4FD4_vaRXcYMZlZV-jSisNxe0RtXJngK5Jmus7f0doMhFmyWL4W4uKcckEBkt_BlypvdfJpnvnS3egOgaQ7i2fwY4iQR"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[linear-gradient(135deg,#fdc468,#df4996,#5f58d3)] text-[11px] font-bold text-white">
-                        IG
-                      </span>
-                      <span>Instagram</span>
-                    </a>
+                   
                     <a
                       className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-3 py-2 text-xs font-semibold transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white sm:justify-start"
                       href="https://www.facebook.com/p/Alternative-location-100063656164530/"
@@ -654,10 +643,10 @@ export default async function Home({
         <section className="sr-only">
           <div className="rounded-[32px] border border-black/5 bg-white/80 p-8">
             <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
-              Location evenementielle a Galgon
+              Location événementielle à Galgon
             </p>
             <h2 className="mt-3 text-3xl font-semibold">
-              Vaisselle, decoration, mobilier et sonorisation pour vos evenements.
+              Tout pour vos événements : vaisselle, décoration, mobilier et sonorisation.
             </h2>
             <div className="mt-4 space-y-3 text-sm text-[color:var(--muted)]">
               <p>
