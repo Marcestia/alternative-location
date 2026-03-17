@@ -137,7 +137,7 @@ export async function updateCategory(formData: FormData) {
   const sortOrder = Number(formData.get("sortOrder") || 0);
 
   if (!id || !name) {
-    redirect("/admin/stock");
+    redirect("/admin/parametres");
   }
 
   await prisma.itemCategory.update({
@@ -151,7 +151,7 @@ export async function updateCategory(formData: FormData) {
     },
   });
 
-  redirect("/admin/stock");
+  redirect("/admin/parametres");
 }
 
 export async function addSpotlight(formData: FormData) {

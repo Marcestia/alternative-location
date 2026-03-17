@@ -1,5 +1,5 @@
-﻿import { prisma } from "@/lib/prisma";
-import { resetNonStockData, saveCompanySettings } from "@/app/actions/settings";
+import { prisma } from "@/lib/prisma";
+import { saveCompanySettings } from "@/app/actions/settings";
 import {
   addSpotlight,
   deleteSpotlight,
@@ -15,7 +15,7 @@ export const revalidate = 0;
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: Promise<{ saved?: string; reset?: string }>;
+  searchParams?: Promise<{ saved?: string }>;
 }) {
   const resolvedParams = searchParams ? await searchParams : undefined;
   const [settings, categories, spotlights] = await Promise.all([
@@ -25,7 +25,6 @@ export default async function Page({
     }),
     prisma.spotlight.findMany({
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-      take: 5,
     }),
   ]);
   const ribUrl = process.env.R2_PUBLIC_BASE_URL
@@ -52,11 +51,6 @@ export default async function Page({
       {resolvedParams?.saved === "0" && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
           Le nom de l'entreprise est obligatoire.
-        </div>
-      )}
-      {resolvedParams?.reset === "1" && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
-          Donnees non-stock supprimees.
         </div>
       )}
 
@@ -232,23 +226,6 @@ export default async function Page({
         </a>
       </div>
 
-      <div className="rounded-3xl border border-rose-200 bg-rose-50/60 p-6">
-        <h2 className="text-xl font-semibold text-rose-900">Reinitialiser les donnees</h2>
-        <p className="mt-2 text-sm text-rose-900/80">
-          Supprime clients, demandes, devis, reservations, factures, avis et spotlights.
-          Le stock est conserve.
-        </p>
-        <form action={resetNonStockData} className="mt-4">
-          <button
-            className="rounded-full bg-rose-600 px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_30px_rgba(225,29,72,0.25)]"
-            type="submit"
-            data-action="reset-non-stock"
-          >
-            Supprimer les donnees de test
-          </button>
-        </form>
-      </div>
-
       <Script id="copy-rib-link" strategy="afterInteractive">
         {`
           document.addEventListener('click', (event) => {
@@ -263,14 +240,6 @@ export default async function Page({
               target.textContent = 'Copier le lien';
             }, 1200);
           });
-          document.addEventListener('click', (event) => {
-            const target = event.target;
-            if (!(target instanceof HTMLElement)) return;
-            if (!target.matches('[data-action=\"reset-non-stock\"]')) return;
-            if (!confirm('Supprimer tous les clients, demandes, devis, reservations, factures, avis et spotlights ?')) {
-              event.preventDefault();
-            }
-          });
         `}
       </Script>
 
@@ -284,7 +253,7 @@ export default async function Page({
           <div>
             <h3 className="text-lg font-semibold">Categories</h3>
             <p className="mt-1 text-sm text-[color:var(--muted)]">
-              Nom, description et bandeau de chaque categorie.
+              Nom, description et bandeau de chaque categorie. Les categories contenant "decoration", "mobilier" ou "meuble" sont regroupees ensemble sur la vitrine publique.
             </p>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               {categories.map((category) => (
@@ -340,7 +309,7 @@ export default async function Page({
           <div>
             <h3 className="text-lg font-semibold">Rubrique du moment</h3>
             <p className="mt-1 text-sm text-[color:var(--muted)]">
-              Jusqu'a 5 mises en avant visibles sur la page d'accueil.
+              Mises en avant visibles sur la page d'accueil, sans limite fixe.
             </p>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               {spotlights.map((spotlight) => (
@@ -403,42 +372,40 @@ export default async function Page({
             </form>
           ))}
             </div>
-            {spotlights.length < 5 && (
-              <form action={addSpotlight} className="mt-6 grid gap-3 md:max-w-2xl">
-                <h4 className="text-sm font-semibold">Ajouter une mise en avant</h4>
-                <label className="flex items-center gap-2 text-xs text-[color:var(--muted)]">
-                  <input type="checkbox" name="active" defaultChecked />
-                  Actif
-                </label>
-                <input
-                  className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                  name="title"
-                  placeholder="Titre"
-                  required
-                />
-                <textarea
-                  className="min-h-[100px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                  name="description"
-                  placeholder="Description"
-                />
-                <AdminImageInput
-                  name="imageData"
-                  label="Image (auto-redimensionnee)"
-                />
-                <input
-                  className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                  name="sortOrder"
-                  type="number"
-                  defaultValue="0"
-                />
-                <button
-                  className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[color:var(--muted)] hover:border-black/20"
-                  type="submit"
-                >
-                  Ajouter
-                </button>
-              </form>
-            )}
+            <form action={addSpotlight} className="mt-6 grid gap-3 md:max-w-2xl">
+              <h4 className="text-sm font-semibold">Ajouter une mise en avant</h4>
+              <label className="flex items-center gap-2 text-xs text-[color:var(--muted)]">
+                <input type="checkbox" name="active" defaultChecked />
+                Actif
+              </label>
+              <input
+                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                name="title"
+                placeholder="Titre"
+                required
+              />
+              <textarea
+                className="min-h-[100px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                name="description"
+                placeholder="Description"
+              />
+              <AdminImageInput
+                name="imageData"
+                label="Image (auto-redimensionnee)"
+              />
+              <input
+                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                name="sortOrder"
+                type="number"
+                defaultValue="0"
+              />
+              <button
+                className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[color:var(--muted)] hover:border-black/20"
+                type="submit"
+              >
+                Ajouter
+              </button>
+            </form>
           </div>
         </div>
       </div>

@@ -97,7 +97,6 @@ export default async function Home({
     prisma.spotlight.findMany({
       where: { active: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-      take: 5,
     }),
     prisma.itemCategory.findMany({
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
