@@ -516,11 +516,22 @@ export default async function Home({
                 <div className="mt-6 space-y-3 text-sm text-[color:var(--muted)]">
                   <p>
                     <strong className="text-[color:var(--ink)]">Telephone</strong>{" "}
-                    : {siteConfig.phone}
+                    :{" "}
+                    <a
+                      href={`tel:${siteConfig.phone.replace(/\s+/g, "")}`}
+                      className="underline-offset-4 transition hover:text-[color:var(--ink)] hover:underline"
+                    >
+                      {siteConfig.phone}
+                    </a>
                   </p>
                   <p>
                     <strong className="text-[color:var(--ink)]">Email</strong> :{" "}
-                    {siteConfig.email}
+                    <a
+                      href={`mailto:${siteConfig.email}`}
+                      className="underline-offset-4 transition hover:text-[color:var(--ink)] hover:underline"
+                    >
+                      {siteConfig.email}
+                    </a>
                   </p>
                   <p>
                     <strong className="text-[color:var(--ink)]">Adresse</strong>{" "}

@@ -10,6 +10,7 @@ import PDFDocument from "pdfkit/js/pdfkit.standalone";
 import { downloadBufferFromR2, getSignedUrlForKey, uploadBufferToR2 } from "@/lib/r2";
 
 const SIGNED_URL_TTL = 60 * 60 * 24 * 7;
+const ADVANCE_RATE_BPS = 3000;
 
 const formatPrice = (cents: number) =>
   (cents / 100).toLocaleString("fr-FR", {
@@ -23,6 +24,22 @@ const formatDate = (date: Date) =>
     month: "2-digit",
     year: "numeric",
   });
+
+const computeAdvanceAmountCents = (totalAmountCents: number) =>
+  Math.round((totalAmountCents * ADVANCE_RATE_BPS) / 10000);
+
+const computeBalanceDueCents = (options: {
+  totalAmountCents: number;
+  advanceAmountCents: number;
+  advanceReceivedAt?: Date | null;
+}) =>
+  Math.max(
+    options.totalAmountCents -
+      (options.advanceReceivedAt && options.advanceAmountCents > 0
+        ? options.advanceAmountCents
+        : 0),
+    0
+  );
 
 async function getNextInvoiceNumber() {
   const currentYear = new Date().getFullYear();
@@ -61,6 +78,10 @@ async function renderInvoicePdf(options: {
   taxRateBps: number;
   taxCents: number;
   totalCents: number;
+  advanceRateBps?: number;
+  advanceAmountCents?: number;
+  advanceReceivedAt?: Date | null;
+  balanceDueCents?: number;
   paymentTerms?: string | null;
   latePaymentPenalty?: string | null;
   recoveryFeeCents?: number | null;
@@ -227,6 +248,40 @@ async function renderInvoicePdf(options: {
       width: 150,
     });
 
+  if (options.advanceReceivedAt && options.advanceAmountCents && options.advanceAmountCents > 0) {
+    y += 16;
+    doc
+      .fontSize(10)
+      .fillColor("#111")
+      .text(
+        `Acompte recu (${((options.advanceRateBps || ADVANCE_RATE_BPS) / 100).toFixed(
+          0
+        )} %) : - ${formatPrice(options.advanceAmountCents)} EUR`,
+        colTotal - 120,
+        y,
+        {
+          align: "right",
+          width: 190,
+        }
+      );
+
+    y += 16;
+    doc
+      .fontSize(11)
+      .fillColor("#111")
+      .text(
+        `Net a payer : ${formatPrice(
+          options.balanceDueCents ?? options.totalCents
+        )} EUR`,
+        colTotal - 120,
+        y,
+        {
+          align: "right",
+          width: 190,
+        }
+      );
+  }
+
   doc.moveDown(3);
 
   doc
@@ -301,6 +356,7 @@ async function buildInvoiceDataFromQuote(quoteId: string) {
     ? Math.round((subtotalCents * taxRateBps) / 10000)
     : 0;
   const totalAmountCents = subtotalCents + taxAmountCents;
+  const advanceAmountCents = computeAdvanceAmountCents(totalAmountCents);
 
   const serviceDate = quote.eventDate ?? quote.endDate ?? quote.startDate;
   const dueDate = quote.eventDate ?? quote.endDate ?? quote.startDate;
@@ -321,6 +377,7 @@ async function buildInvoiceDataFromQuote(quoteId: string) {
     taxRateBps,
     taxAmountCents,
     totalAmountCents,
+    advanceAmountCents,
     vatApplicable,
     serviceDate,
     dueDate,
@@ -342,6 +399,7 @@ export async function createInvoiceForQuoteId(quoteId: string) {
     taxRateBps,
     taxAmountCents,
     totalAmountCents,
+    advanceAmountCents,
     vatApplicable,
     serviceDate,
     dueDate,
@@ -365,6 +423,8 @@ export async function createInvoiceForQuoteId(quoteId: string) {
       taxRateBps,
       taxAmountCents,
       totalAmountCents,
+      advanceRateBps: ADVANCE_RATE_BPS,
+      advanceAmountCents,
       paymentTerms: company?.paymentTerms || null,
       paymentMethod: null,
       latePaymentPenalty: company?.latePaymentPenalty || null,
@@ -383,6 +443,8 @@ export async function createInvoiceForQuoteId(quoteId: string) {
       taxRateBps,
       taxAmountCents,
       totalAmountCents,
+      advanceRateBps: ADVANCE_RATE_BPS,
+      advanceAmountCents,
       paymentTerms: company?.paymentTerms || null,
       paymentMethod: null,
       latePaymentPenalty: company?.latePaymentPenalty || null,
@@ -433,6 +495,14 @@ export async function createInvoiceForQuoteId(quoteId: string) {
     taxRateBps,
     taxCents: taxAmountCents,
     totalCents: totalAmountCents,
+    advanceRateBps: ADVANCE_RATE_BPS,
+    advanceAmountCents,
+    advanceReceivedAt: existing?.advanceReceivedAt || null,
+    balanceDueCents: computeBalanceDueCents({
+      totalAmountCents,
+      advanceAmountCents,
+      advanceReceivedAt: existing?.advanceReceivedAt || null,
+    }),
     paymentTerms: company?.paymentTerms || null,
     latePaymentPenalty: company?.latePaymentPenalty || null,
     recoveryFeeCents: company?.recoveryFeeCents ?? 4000,
@@ -579,6 +649,88 @@ export async function markInvoicePaid(formData: FormData) {
   redirect("/admin/factures");
 }
 
+export async function markInvoiceAdvanceReceived(formData: FormData) {
+  const id = String(formData.get("id") || "").trim();
+  if (!id) {
+    redirect("/admin/factures");
+  }
+
+  await prisma.invoice.update({
+    where: { id },
+    data: { advanceReceivedAt: new Date() },
+  });
+
+  const invoice = await prisma.invoice.findUnique({
+    where: { id },
+    include: { client: true, lines: { orderBy: { sortOrder: "asc" } } },
+  });
+
+  if (invoice) {
+    const company = await prisma.companySetting.findUnique({
+      where: { id: "company" },
+    });
+
+    const pdfBuffer = await renderInvoicePdf({
+      invoiceNumber: invoice.number,
+      issuedAt: invoice.issueDate,
+      serviceDate: invoice.serviceDate,
+      dueDate: invoice.dueDate,
+      companyName: company?.businessName || siteConfig.name,
+      companyAddress: company?.address || siteConfig.address,
+      companyCity: company?.city || null,
+      companyPostal: company?.postalCode || null,
+      companyPhone: company?.phone || siteConfig.phone,
+      companyEmail: company?.email || siteConfig.email,
+      companySiret: company?.siret || null,
+      companySiren: company?.siren || null,
+      companyLegalForm: company?.legalForm || null,
+      companyCapital: company?.capital || null,
+      companyVatNumber: company?.vatNumber || null,
+      clientName: invoice.client.name,
+      clientEmail: invoice.client.email,
+      clientPhone: invoice.client.phone,
+      clientAddress: invoice.client.address,
+      clientCity: null,
+      clientPostal: null,
+      lines: invoice.lines.map((line) => ({
+        label: line.label,
+        quantity: line.quantity,
+        unitPriceCents: line.unitPriceCents,
+      })),
+      subtotalCents: invoice.subtotalAmountCents,
+      taxRateBps: invoice.taxRateBps,
+      taxCents: invoice.taxAmountCents,
+      totalCents: invoice.totalAmountCents,
+      advanceRateBps: invoice.advanceRateBps,
+      advanceAmountCents: invoice.advanceAmountCents,
+      advanceReceivedAt: invoice.advanceReceivedAt,
+      balanceDueCents: computeBalanceDueCents({
+        totalAmountCents: invoice.totalAmountCents,
+        advanceAmountCents: invoice.advanceAmountCents,
+        advanceReceivedAt: invoice.advanceReceivedAt,
+      }),
+      paymentTerms: invoice.paymentTerms,
+      latePaymentPenalty: invoice.latePaymentPenalty,
+      recoveryFeeCents: invoice.recoveryFeeCents,
+      vatApplicable: (company?.vatApplicable ?? false) && invoice.taxRateBps > 0,
+    });
+
+    const fileName = `documents/facture-${invoice.id}.pdf`;
+    await uploadBufferToR2({
+      key: fileName,
+      body: pdfBuffer,
+      contentType: "application/pdf",
+    });
+
+    await prisma.invoice.update({
+      where: { id: invoice.id },
+      data: { pdfUrl: fileName },
+    });
+  }
+
+  redirect("/admin/factures?advance=1");
+}
+
 export async function regenerateInvoicePdf(formData: FormData) {
   const id = String(formData.get("id") || "").trim();
   if (!id) {
@@ -628,6 +780,14 @@ export async function regenerateInvoicePdf(formData: FormData) {
     taxRateBps: invoice.taxRateBps,
     taxCents: invoice.taxAmountCents,
     totalCents: invoice.totalAmountCents,
+    advanceRateBps: invoice.advanceRateBps,
+    advanceAmountCents: invoice.advanceAmountCents,
+    advanceReceivedAt: invoice.advanceReceivedAt,
+    balanceDueCents: computeBalanceDueCents({
+      totalAmountCents: invoice.totalAmountCents,
+      advanceAmountCents: invoice.advanceAmountCents,
+      advanceReceivedAt: invoice.advanceReceivedAt,
+    }),
     paymentTerms: invoice.paymentTerms,
     latePaymentPenalty: invoice.latePaymentPenalty,
     recoveryFeeCents: invoice.recoveryFeeCents,

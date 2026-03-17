@@ -169,6 +169,9 @@ model Invoice {
   taxRateBps  Int           @default(0)
   taxAmountCents Int        @default(0)
   totalAmountCents Int      @default(0)
+  advanceRateBps Int        @default(3000)
+  advanceAmountCents Int    @default(0)
+  advanceReceivedAt DateTime?
   paymentTerms String?
   paymentMethod String?
   latePaymentPenalty String?
