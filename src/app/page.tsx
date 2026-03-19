@@ -31,6 +31,140 @@ const steps = [
   },
 ];
 
+function UniverseIcon({ slug }: { slug: string }) {
+  const iconClass = "h-11 w-11 text-[color:var(--accent-2)]/90";
+  const normalizedSlug = slug.toLowerCase();
+
+  if (/decor|mobilier/.test(normalizedSlug)) {
+    return (
+      <svg viewBox="0 0 64 64" fill="none" className={iconClass} aria-hidden="true">
+        <path
+          d="M20 31c3-9 8-14 12-14s9 5 12 14"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+        />
+        <path
+          d="M24 24c3 3 4 6 4 9a4 4 0 1 1-8 0c0-3 1-6 4-9ZM40 24c3 3 4 6 4 9a4 4 0 1 1-8 0c0-3 1-6 4-9ZM32 18c4 4 6 8 6 12a6 6 0 1 1-12 0c0-4 2-8 6-12Z"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M32 37v12M25 49h14"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+        />
+        <path
+          d="M16 28c-3 2-5 5-5 9 0 7 9 12 21 12s21-5 21-12c0-4-2-7-5-9"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+        />
+      </svg>
+    );
+  }
+
+  if (/vaisselle/.test(normalizedSlug)) {
+    return (
+      <svg viewBox="0 0 64 64" fill="none" className={iconClass} aria-hidden="true">
+        <path
+          d="M20 13v18c0 4 3 7 7 7v13M15 13v10c0 4 3 7 7 7s7-3 7-7V13"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M43 13c4 0 6 5 6 10v28M43 13c-4 0-6 5-6 10 0 6 3 10 6 10"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
+  if (/electro/.test(normalizedSlug)) {
+    return (
+      <svg viewBox="0 0 64 64" fill="none" className={iconClass} aria-hidden="true">
+        <rect x="18" y="12" width="28" height="40" rx="8" stroke="currentColor" strokeWidth="1.9" />
+        <path
+          d="M24 18h16M28 12v6M36 12v6"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+        />
+        <path
+          d="M24 32h16M24 38h10"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+        />
+        <path
+          d="M34 23l-5 8h4l-3 9 7-10h-4l4-7Z"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
+  if (/ambi|sono/.test(normalizedSlug)) {
+    return (
+      <svg viewBox="0 0 64 64" fill="none" className={iconClass} aria-hidden="true">
+        <rect x="19" y="12" width="26" height="40" rx="8" stroke="currentColor" strokeWidth="1.9" />
+        <circle cx="32" cy="24" r="4.5" stroke="currentColor" strokeWidth="1.9" />
+        <circle cx="32" cy="39" r="8" stroke="currentColor" strokeWidth="1.9" />
+        <path
+          d="M49 25c2 1 4 4 4 7s-2 6-4 7M15 25c-2 1-4 4-4 7s2 6 4 7"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+        />
+      </svg>
+    );
+  }
+
+  if (/even/.test(normalizedSlug)) {
+    return (
+      <svg viewBox="0 0 64 64" fill="none" className={iconClass} aria-hidden="true">
+        <path
+          d="M17 19h30a4 4 0 0 1 4 4v19a4 4 0 0 1-4 4H17a4 4 0 0 1-4-4V23a4 4 0 0 1 4-4Z"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M21 27h13M21 33h9M40 29a5 5 0 1 0 0 .1ZM44 36l4 4"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 64 64" fill="none" className={iconClass} aria-hidden="true">
+      <path
+        d="M18 44V28a14 14 0 0 1 28 0v16M15 44h34M24 44v6M40 44v6M24 28h16"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default async function Home({
   searchParams,
 }: {
@@ -360,47 +494,42 @@ export default async function Home({
           className="mx-auto mt-8 w-full max-w-6xl px-4 sm:px-6 lg:mt-12 lg:px-12"
         >
           <div className="relative overflow-hidden rounded-[34px] border border-black/5 bg-white/90 p-5 shadow-[0_30px_60px_rgba(30,25,20,0.12)] sm:rounded-[40px] sm:p-8">
-            <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[color:var(--accent-2)]/20 blur-3xl" />
-            <div className="pointer-events-none absolute -left-20 bottom-6 h-56 w-56 rounded-full bg-[color:var(--accent)]/15 blur-3xl" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,_rgba(209,186,164,0.18),_transparent_68%)]" />
             <div className="relative">
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.3em] text-[color:var(--accent-2)]">
-                    Univers
-                  </p>
-                  <h2 className="text-2xl font-semibold sm:text-3xl md:text-4xl">
-                    Tout pour une fête à votre image.
-                  </h2>
-                </div>
+              <div className="mx-auto max-w-3xl text-center">
+                <p className="text-sm uppercase tracking-[0.3em] text-[color:var(--accent-2)]">
+                  Univers
+                </p>
+                <h2 className="mt-3 text-2xl font-semibold sm:text-3xl md:text-4xl">
+                  Tout pour votre evenement
+                </h2>
+                <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[color:var(--muted)] sm:text-base">
+                  Choisissez une famille puis accedez directement a la bonne
+                  section du catalogue.
+                </p>
               </div>
-              <div className="mt-6 grid gap-4 sm:mt-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-6">
-                {displayCategories.map((category) => (
-                  <a
-                    key={category.id}
-                    href={`/catalogue#cat-${category.slug ?? slugify(category.name)}`}
-                    className="block rounded-[26px] border border-white/70 bg-white/90 p-4 shadow-[0_24px_40px_rgba(30,25,20,0.08)] transition hover:-translate-y-1 hover:scale-[1.01] sm:p-6"
-                  >
-                    <div className="group mb-4 overflow-hidden rounded-2xl bg-[color:var(--surface)]">
-                      <div className="relative h-32 w-full sm:h-36">
-                        <img
-                          src={
-                            category.heroImageUrl ||
-                            categoryImages[category.slug ?? slugify(category.name)] ||
-                            "/vitrine/hero.jpg"
-                          }
-                          alt={category.name}
-                          className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.06]"
-                        />
+              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+                {displayCategories.map((category) => {
+                  const categorySlug = category.slug ?? slugify(category.name);
+
+                  return (
+                    <a
+                      key={category.id}
+                      href={`/catalogue#cat-${categorySlug}`}
+                      className="group flex min-h-[220px] flex-col items-center rounded-[28px] border border-[#f1e4da] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(249,242,235,0.92))] px-5 py-6 text-center shadow-[0_20px_40px_rgba(30,25,20,0.06)] transition duration-300 hover:-translate-y-1 hover:border-[color:var(--accent-2)]/30 hover:shadow-[0_28px_50px_rgba(30,25,20,0.1)]"
+                    >
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[#ead9cb] bg-white/92 shadow-[0_12px_24px_rgba(30,25,20,0.06)] transition duration-300 group-hover:scale-105">
+                        <UniverseIcon slug={categorySlug} />
                       </div>
-                    </div>
-                    <p className="mt-1 text-lg font-semibold sm:text-xl">
-                      {category.name}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
-                      {category.description || "Decouvrez la selection disponible."}
-                    </p>
-                  </a>
-                ))}
+                      <p className="mt-5 text-xl font-semibold leading-tight text-[color:var(--ink)]">
+                        {category.name}
+                      </p>
+                      <p className="mt-3 text-sm leading-6 text-[color:var(--muted)]">
+                        {category.description || "Decouvrez la selection disponible."}
+                      </p>
+                    </a>
+                  );
+                })}
               </div>
             </div>
           </div>
