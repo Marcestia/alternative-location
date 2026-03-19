@@ -501,7 +501,7 @@ export default async function Home({
                   Univers
                 </p>
                 <h2 className="mt-3 text-2xl font-semibold sm:text-3xl md:text-4xl">
-                  Tout pour votre evenement
+                  Tout pour votre événement
                 </h2>
                 <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[color:var(--muted)] sm:text-base">
                   Choisissez une famille puis accedez directement a la bonne

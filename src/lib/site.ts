@@ -14,5 +14,5 @@ export const siteConfig = {
   address: "14 impasse Moustron, 33133 Galgon, France",
   tagline: "Location de vaisselle, decoration, mobilier & sonorisation",
   description:
-    "Entreprise locale de location pour mariages, anniversaires et evenements festifs. Service chaleureux, simple et pro.",
+    "Entreprise locale de location pour mariages, anniversaires et événements festifs. Service chaleureux, simple et pro.",
 };

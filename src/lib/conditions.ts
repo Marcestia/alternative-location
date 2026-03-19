@@ -1,4 +1,4 @@
-export const CG_VERSION = "2026-02-10";
+export const CG_VERSION = "2026-03-19";
 
 type ConditionSection = {
   title: string;
@@ -12,7 +12,7 @@ export const CONDITIONS_SECTIONS: ConditionSection[] = [
     intro:
       "Le devis indique le détail de la prestation, le prix et la période de location. Sa signature vaut acceptation expresse des CG.",
     bullets: [
-      "Un acompte de 30% est exigible pour valider la réservation. À défaut, la réservation n'est pas confirmée.",
+      "Un acompte de 30 % est exigible pour valider la réservation. À défaut, la réservation n'est pas confirmée.",
       "La signature du devis vaut engagement de versement de l'acompte sous 7 jours.",
       "Le prix de la location correspond au montant indiqué sur le devis, hors frais de livraison à la charge du Locataire.",
       "Le règlement total et la caution sont exigibles lors de la remise du matériel.",
@@ -28,7 +28,7 @@ export const CONDITIONS_SECTIONS: ConditionSection[] = [
       "La société est fermée le dimanche (en cas d'impossibilité, un accord préalable est requis).",
       "Le retrait et le retour du matériel s'effectuent exclusivement à l'adresse de la société.",
       "La livraison est possible dans la limite de 80 km, au tarif de 1 EUR / km ; au-delà, un accord préalable est requis.",
-      "Tout retard donne lieu à une pénalité de 25%.",
+      "Tout retard donne lieu à une pénalité de 25 %.",
     ],
   },
   {
@@ -57,6 +57,9 @@ export const CONDITIONS_SECTIONS: ConditionSection[] = [
       "La décoration est restituée dans son emballage d'origine.",
       "Tables, bancs, mange-debout, percolateur, etc. sont restitués nettoyés et en état d'origine.",
       "Les clous sur le mobilier sont interdits.",
+      "Pour les nappes et textiles loués, l'usage de cierges magiques, bougies, chandelles et de toute source de chaleur directe est fortement déconseillé.",
+      "La cire de bougie, les brûlures, les trous, les taches tenaces ou toute dégradation irréversible sur les nappes et textiles loués peuvent entraîner une retenue partielle ou totale de la caution.",
+      "Les feutres, stylos, marqueurs et tout autre produit d'écriture ne doivent pas être utilisés directement sur les nappes ou autres textiles loués, y compris les produits dits lavables.",
       "Tout emballage ou caisse détérioré(e) ou cassé(e) sera facturé(e).",
       "Tout matériel cassé, manquant ou endommagé sera facturé au tarif perte ou casse.",
       "En cas d'abus constatés, une pénalité pourra être appliquée.",
