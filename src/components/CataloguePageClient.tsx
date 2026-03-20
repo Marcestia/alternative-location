@@ -73,20 +73,12 @@ function ItemCard({
           : "border-black/5 hover:border-black/10"
       }`}
     >
-      <div className="relative overflow-hidden rounded-[24px] bg-[color:var(--surface)]">
+      <div className="overflow-hidden rounded-[24px] bg-[color:var(--surface)]">
         <ImageLightbox
           src={item.imageUrl || "/vitrine/hero.jpg"}
           alt={item.name}
           className="h-44 w-full sm:h-52"
         />
-        <div className="pointer-events-none absolute inset-x-3 top-3 flex items-center justify-between gap-3">
-          <span className="rounded-full bg-white/94 px-3 py-1 text-[11px] font-semibold text-[color:var(--ink)] shadow-[0_8px_18px_rgba(30,25,20,0.12)] backdrop-blur">
-            {formatEuro(item.rentalPriceCents)}
-          </span>
-          <span className="rounded-full bg-[color:var(--ink)]/78 px-3 py-1 text-[11px] font-semibold text-white shadow-[0_8px_18px_rgba(30,25,20,0.16)] backdrop-blur">
-            {item.totalQty} dispo
-          </span>
-        </div>
       </div>
 
       <div className="mt-4 flex flex-1 flex-col">
@@ -97,6 +89,14 @@ function ItemCard({
           <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
             Location à l'unité. Cliquez sur l'image pour l'agrandir.
           </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="rounded-full bg-[color:var(--surface)] px-3 py-1 text-[11px] font-semibold text-[color:var(--ink)]">
+              {formatEuro(item.rentalPriceCents)}
+            </span>
+            <span className="rounded-full bg-[color:var(--ink)]/8 px-3 py-1 text-[11px] font-semibold text-[color:var(--ink)]">
+              {item.totalQty} disponible{item.totalQty > 1 ? "s" : ""}
+            </span>
+          </div>
         </div>
 
         <div className="mt-5 pt-1">
@@ -348,7 +348,7 @@ export default function CataloguePageClient({
                 Catalogue
               </p>
               <h1 className="mt-3 max-w-4xl text-3xl font-semibold leading-tight sm:text-4xl xl:text-5xl">
-                Une présentation plus élégante pour préparer votre location.
+                Choisissez facilement les articles adaptés à votre événement.
               </h1>
               <p className="mt-4 max-w-3xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
                 Parcourez chaque univers, agrandissez les visuels, ajoutez les
@@ -358,19 +358,18 @@ export default function CataloguePageClient({
 
               <div className="mt-6 flex flex-wrap gap-3">
                 <a
-                  href="/#contact"
-                  className="rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(217,119,55,0.35)] transition hover:-translate-y-0.5 hover:brightness-95"
-                >
-                  Demander un devis
-                </a>
-                <a
                   href="/"
-                  className="rounded-full border border-black/10 bg-white/90 px-5 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20"
+                  className="rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(217,119,55,0.35)] transition hover:-translate-y-0.5 hover:brightness-95"
                 >
                   Retour à l'accueil
                 </a>
+                <a
+                  href="/#contact"
+                  className="rounded-full border border-black/10 bg-white/90 px-5 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20"
+                >
+                  Demander un devis
+                </a>
               </div>
-
             </div>
 
             <div className="grid gap-3 xl:grid-cols-1">
@@ -378,7 +377,9 @@ export default function CataloguePageClient({
                 <p className="text-[11px] uppercase tracking-[0.26em] text-[color:var(--accent-2)]/80">
                   Contact
                 </p>
-                <p className="mt-2 text-lg font-semibold text-[color:var(--ink)]">Téléphone, e-mail ou formulaire</p>
+                <p className="mt-2 text-lg font-semibold text-[color:var(--ink)]">
+                  Téléphone, e-mail ou formulaire
+                </p>
                 <p className="mt-2 text-sm text-[color:var(--muted)]">
                   Nous préparons le devis avec vous, selon les quantités et les dates.
                 </p>
@@ -421,19 +422,19 @@ export default function CataloguePageClient({
                     <a
                       key={section.id}
                       href={`#${section.id}`}
+                      className="block rounded-2xl border border-transparent bg-[color:var(--surface)]/65 px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:border-black/10 hover:bg-white"
+                    >
+                      {section.label}
+                    </a>
+                  ))}
+                  <a
+                    href="#contact"
                     className="block rounded-2xl border border-transparent bg-[color:var(--surface)]/65 px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:border-black/10 hover:bg-white"
                   >
-                    {section.label}
+                    Nous contacter
                   </a>
-                ))}
-                <a
-                  href="#contact"
-                  className="block rounded-2xl border border-transparent bg-[color:var(--surface)]/65 px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:border-black/10 hover:bg-white"
-                >
-                  Nous contacter
-                </a>
+                </div>
               </div>
-            </div>
             </div>
           </aside>
 
