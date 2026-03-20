@@ -18,16 +18,20 @@ const slugify = (value: string) =>
 
 const steps = [
   {
-    title: "Choisir",
-    text: "Parcourez notre catalogue et repérez les articles adaptés à votre événement.",
+    title: "Vous remplissez le formulaire",
+    text: "Vous nous indiquez vos dates, le lieu, le type d'événement et les articles souhaités. Plus votre demande est précise, plus le devis est rapide à préparer.",
   },
   {
-    title: "Demander",
-    text: "Envoyez votre demande avec les dates, le lieu et les quantités souhaitées via le formulaire de contact.",
+    title: "Nous préparons votre devis",
+    text: "Nous vérifions les disponibilités et nous vous envoyons un devis personnalisé, accompagné des conditions générales.",
   },
   {
-    title: "Valider",
-    text: "Le devis signé et l’acompte de 30 % sous 7 jours confirment la réservation.",
+    title: "Vous validez la réservation",
+    text: "Vous signez le devis en ligne. La réservation est ensuite confirmée, avec un acompte de 30 % à régler sous 7 jours.",
+  },
+  {
+    title: "Retrait ou livraison",
+    text: "Nous organisons le retrait sur place ou la livraison selon votre besoin. Le solde et la caution sont demandés avant la remise du matériel.",
   },
 ];
 
@@ -425,12 +429,13 @@ export default async function Home({
                   </div>
                   <div className="rounded-[26px] bg-white/88 p-5">
                     <p className="text-xs uppercase tracking-[0.28em] text-[color:var(--muted)]">
-                      Comment ça marche
+                      Comment ça se passe ?
                     </p>
                     <ol className="mt-3 space-y-2 text-sm text-[color:var(--muted)]">
-                      <li>1. Parcourez le catalogue</li>
-                      <li>2. Contactez-nous avec vos dates</li>
-                      <li>3. Devis signe + acompte 30% sous 7 jours</li>
+                      <li>1. Formulaire rempli avec vos dates et besoins</li>
+                      <li>2. Devis personnalisé envoyé avec les conditions générales</li>
+                      <li>3. Signature du devis et acompte de 30 % sous 7 jours</li>
+                      <li>4. Retrait sur place ou livraison selon votre besoin</li>
                     </ol>
                   </div>
                 </div>
@@ -671,7 +676,7 @@ export default async function Home({
               <div className="h-full space-y-5 rounded-[28px] border border-black/5 bg-[color:var(--surface-2)] p-5 sm:rounded-[32px] sm:space-y-6 sm:p-8">
                 <div>
                   <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
-                    Comment ca marche
+                    Comment ça se passe ?
                   </p>
                   <ol className="mt-3 space-y-2 text-sm leading-6 text-[color:var(--muted)]">
                     {steps.map((step, index) => (
@@ -724,10 +729,17 @@ export default async function Home({
                   <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
                     Services
                   </p>
-                  <p className="mt-2 text-sm font-medium">
-                    Retrait sur place ou livraison possible à partir de 1 EUR / km,
-                    voir avec Alternative location.
-                  </p>
+                  <div className="mt-2 space-y-2 text-sm font-medium">
+                    <p>
+                      Retrait sur place ou livraison possible à partir de 1 EUR / km,
+                      selon la distance.
+                    </p>
+                    <p>Paiement possible par virement, chèque ou espèces.</p>
+                    <p>
+                      Le matériel est restitué après l&apos;événement, puis contrôlé
+                      avant restitution de la caution.
+                    </p>
+                  </div>
                 </div>
 
                 <div className="rounded-3xl bg-white/80 p-4 text-sm text-[color:var(--muted)]">
@@ -794,12 +806,12 @@ export default async function Home({
                 un rayon de 150 km.
               </p>
               <p>
-                Nous proposons la location de vaisselle, decoration, mobilier,
+                Nous proposons la location de vaisselle, décoration, mobilier,
                 ambiance et sonorisation avec un service simple et fiable.
               </p>
               <p>
-                Retrait sur place a Galgon ou livraison possible a partir de 1
-                EUR / km selon disponibilites.
+                Retrait sur place à Galgon ou livraison possible à partir de 1
+                EUR / km selon disponibilités.
               </p>
             </div>
           </div>
