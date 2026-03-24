@@ -14,6 +14,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
     },
     {
+      url: `${siteUrl}/galerie`,
+      lastModified,
+    },
+    {
       url: `${siteUrl}/conditions`,
       lastModified,
     },

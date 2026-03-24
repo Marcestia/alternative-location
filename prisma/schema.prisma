@@ -53,6 +53,11 @@ enum ReviewStatus {
   REJECTED
 }
 
+enum GalleryMediaType {
+  IMAGE
+  VIDEO
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -247,6 +252,22 @@ model Spotlight {
   sortOrder   Int     @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([active])
+  @@index([sortOrder])
+}
+
+model GalleryMedia {
+  id         String           @id @default(cuid())
+  title      String
+  subtitle   String?
+  type       GalleryMediaType @default(IMAGE)
+  mediaUrl   String
+  posterUrl  String?
+  active     Boolean          @default(true)
+  sortOrder  Int              @default(0)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 
   @@index([active])
   @@index([sortOrder])

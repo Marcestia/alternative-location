@@ -7,9 +7,15 @@ type ImageLightboxProps = {
   src: string;
   alt: string;
   className?: string;
+  imgClassName?: string;
 };
 
-export default function ImageLightbox({ src, alt, className }: ImageLightboxProps) {
+export default function ImageLightbox({
+  src,
+  alt,
+  className,
+  imgClassName,
+}: ImageLightboxProps) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -28,7 +34,7 @@ export default function ImageLightbox({ src, alt, className }: ImageLightboxProp
         <img
           src={src}
           alt={alt}
-          className="block h-full w-full cursor-zoom-in object-cover"
+          className={`block cursor-zoom-in ${imgClassName ?? "h-full w-full object-cover"}`}
           draggable={false}
         />
       </button>

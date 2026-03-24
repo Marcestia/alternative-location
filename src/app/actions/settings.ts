@@ -91,6 +91,7 @@ export async function resetNonStockData() {
   await prisma.quote.deleteMany();
   await prisma.contactRequest.deleteMany();
   await prisma.spotlight.deleteMany();
+  await prisma.galleryMedia.deleteMany();
   await prisma.numberSequence.deleteMany();
   await prisma.client.deleteMany();
 

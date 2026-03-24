@@ -28,6 +28,7 @@ export async function GET() {
     items: await safeFetch(() => prisma.item.findMany(), []),
     itemImages: await safeFetch(() => prisma.itemImage.findMany(), []),
     spotlights: await safeFetch(() => prisma.spotlight.findMany(), []),
+    galleryMedia: await safeFetch(() => prisma.galleryMedia.findMany(), []),
     contactRequests: await safeFetch(() => prisma.contactRequest.findMany(), []),
     quotes: await safeFetch(() => prisma.quote.findMany(), []),
     quoteLines: await safeFetch(() => prisma.quoteLine.findMany(), []),

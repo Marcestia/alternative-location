@@ -1,5 +1,6 @@
 import Script from "next/script";
 import SpotlightCarousel from "@/components/SpotlightCarousel";
+import GalleryPreviewSection from "@/components/GalleryPreviewSection";
 import DateRangePicker from "@/components/DateRangePicker";
 import ReviewsSection from "@/components/ReviewsSection";
 import ContactSubmitButton from "@/components/ContactSubmitButton";
@@ -7,6 +8,10 @@ import { createContactRequest } from "@/app/actions/contact";
 import { submitReviewPublic } from "@/app/actions/reviews";
 import { prisma } from "@/lib/prisma";
 import { siteConfig } from "@/lib/site";
+import { sampleGalleryItems } from "@/lib/gallery";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const slugify = (value: string) =>
   value
@@ -231,7 +236,7 @@ export default async function Home({
   const sentStatus = resolvedParams?.sent;
   const reviewStatus = resolvedParams?.review;
 
-  const [spotlights, categories, reviews] = await Promise.all([
+  const [spotlights, categories, reviews, galleryMedia] = await Promise.all([
     prisma.spotlight.findMany({
       where: { active: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
@@ -243,6 +248,11 @@ export default async function Home({
       where: { status: { not: "REJECTED" } },
       include: { images: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      take: 6,
+    }),
+    prisma.galleryMedia.findMany({
+      where: { active: true },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       take: 6,
     }),
   ]);
@@ -299,6 +309,7 @@ export default async function Home({
     : otherCategories;
 
   const whatsappNumber = siteConfig.whatsapp.replace(/\D/g, "");
+  const displayGalleryMedia = galleryMedia.length > 0 ? galleryMedia : sampleGalleryItems;
 
   return (
     <div className="min-h-screen text-[15px] text-[color:var(--ink)]">
@@ -343,6 +354,12 @@ export default async function Home({
               </a>
               <a
                 className="rounded-full border border-black/10 bg-white/70 px-4 py-2 transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white hover:text-[color:var(--ink)] hover:shadow-[0_10px_24px_rgba(30,25,20,0.08)]"
+                href="/galerie"
+              >
+                Galerie
+              </a>
+              <a
+                className="rounded-full border border-black/10 bg-white/70 px-4 py-2 transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white hover:text-[color:var(--ink)] hover:shadow-[0_10px_24px_rgba(30,25,20,0.08)]"
                 href="#contact"
               >
                 Contact
@@ -350,7 +367,7 @@ export default async function Home({
             </nav>
           </div>
 
-          <div className="mt-4 grid grid-cols-3 gap-2 text-sm font-medium text-[color:var(--muted)] md:hidden">
+          <div className="mt-4 grid grid-cols-4 gap-2 text-sm font-medium text-[color:var(--muted)] md:hidden">
             <a
               className="rounded-full border border-black/10 bg-white px-3 py-2 text-center transition active:scale-[0.98]"
               href="#univers"
@@ -362,6 +379,12 @@ export default async function Home({
               href="/catalogue"
             >
               Catalogue
+            </a>
+            <a
+              className="rounded-full border border-black/10 bg-white px-3 py-2 text-center transition active:scale-[0.98]"
+              href="/galerie"
+            >
+              Galerie
             </a>
             <a
               className="rounded-full bg-[color:var(--ink)] px-3 py-2 text-center text-white transition active:scale-[0.98]"
@@ -539,6 +562,8 @@ export default async function Home({
             </div>
           </div>
         </section>
+
+        <GalleryPreviewSection items={displayGalleryMedia} />
 
         <section
           id="contact"

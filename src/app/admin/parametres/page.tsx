@@ -1,6 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { saveCompanySettings } from "@/app/actions/settings";
 import {
+  addGalleryMedia,
+  deleteGalleryMedia,
+  updateGalleryMedia,
+} from "@/app/actions/gallery";
+import {
   addSpotlight,
   deleteSpotlight,
   updateCategory,
@@ -15,15 +20,18 @@ export const revalidate = 0;
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: Promise<{ saved?: string }>;
+  searchParams?: Promise<{ saved?: string; gallery?: string }>;
 }) {
   const resolvedParams = searchParams ? await searchParams : undefined;
-  const [settings, categories, spotlights] = await Promise.all([
+  const [settings, categories, spotlights, galleryMedia] = await Promise.all([
     prisma.companySetting.findUnique({ where: { id: "company" } }),
     prisma.itemCategory.findMany({
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     }),
     prisma.spotlight.findMany({
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    }),
+    prisma.galleryMedia.findMany({
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     }),
   ]);
@@ -51,6 +59,26 @@ export default async function Page({
       {resolvedParams?.saved === "0" && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
           Le nom de l'entreprise est obligatoire.
+        </div>
+      )}
+      {resolvedParams?.gallery === "1" && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
+          Galerie enregistree.
+        </div>
+      )}
+      {resolvedParams?.gallery === "deleted" && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
+          Element galerie supprime.
+        </div>
+      )}
+      {resolvedParams?.gallery === "missing" && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
+          Ajoutez une image ou une video avant d'enregistrer cet element.
+        </div>
+      )}
+      {resolvedParams?.gallery === "0" && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
+          Verifiez les informations de la galerie avant d'enregistrer.
         </div>
       )}
 
@@ -393,6 +421,209 @@ export default async function Page({
                 name="imageData"
                 label="Image (auto-redimensionnee)"
               />
+              <input
+                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                name="sortOrder"
+                type="number"
+                defaultValue="0"
+              />
+              <button
+                className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[color:var(--muted)] hover:border-black/20"
+                type="submit"
+              >
+                Ajouter
+              </button>
+            </form>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold">Galerie</h3>
+            <p className="mt-1 text-sm text-[color:var(--muted)]">
+              Photos et videos de mise en scene. Elles alimentent la page Galerie et l'aperçu sur la page d'accueil.
+            </p>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              {galleryMedia.map((media) => (
+                <form
+                  key={media.id}
+                  action={updateGalleryMedia}
+                  encType="multipart/form-data"
+                  className="rounded-2xl border border-black/5 bg-white p-4"
+                >
+                  <input type="hidden" name="id" value={media.id} />
+                  <div className="grid gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <label className="flex items-center gap-2 text-xs text-[color:var(--muted)]">
+                        <input
+                          type="checkbox"
+                          name="active"
+                          defaultChecked={media.active}
+                        />
+                        Actif
+                      </label>
+                      <select
+                        name="type"
+                        defaultValue={media.type}
+                        className="rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-semibold text-[color:var(--muted)]"
+                      >
+                        <option value="IMAGE">Photo</option>
+                        <option value="VIDEO">Video</option>
+                      </select>
+                    </div>
+
+                    <input
+                      className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                      name="title"
+                      placeholder="Titre"
+                      defaultValue={media.title}
+                      required
+                    />
+                    <textarea
+                      className="min-h-[90px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                      name="subtitle"
+                      placeholder="Sous-titre"
+                      defaultValue={media.subtitle ?? ""}
+                    />
+
+                    {media.type === "IMAGE" ? (
+                      <div className="overflow-hidden rounded-2xl border border-black/5 bg-[color:var(--surface)]">
+                        <img
+                          src={media.mediaUrl}
+                          alt={media.title}
+                          className="h-48 w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="overflow-hidden rounded-2xl border border-black/5 bg-[color:var(--surface)] p-3">
+                        {media.posterUrl ? (
+                          <img
+                            src={media.posterUrl}
+                            alt={media.title}
+                            className="h-44 w-full rounded-xl object-cover"
+                          />
+                        ) : (
+                          <video
+                            src={media.mediaUrl}
+                            className="h-44 w-full rounded-xl object-cover"
+                            muted
+                            playsInline
+                            controls
+                          />
+                        )}
+                      </div>
+                    )}
+
+                    <AdminImageInput
+                      name="imageData"
+                      label="Photo (pour un element Photo)"
+                      initialUrl={media.type === "IMAGE" ? media.mediaUrl : undefined}
+                    />
+                    <input type="hidden" name="mediaUrl" value={media.mediaUrl} />
+
+                    <div className="grid gap-2 rounded-2xl border border-dashed border-black/10 bg-[color:var(--surface)] p-4">
+                      <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--muted)]">
+                        Video
+                      </p>
+                      <input
+                        className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                        name="videoUrl"
+                        placeholder="URL video existante (optionnel)"
+                        defaultValue={media.type === "VIDEO" ? media.mediaUrl : ""}
+                      />
+                      <input
+                        className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-[color:var(--ink)] file:px-4 file:py-2 file:text-xs file:font-semibold file:text-white"
+                        name="videoFile"
+                        type="file"
+                        accept="video/*"
+                      />
+                      <AdminImageInput
+                        name="posterData"
+                        label="Poster video (optionnel)"
+                        initialUrl={media.posterUrl ?? undefined}
+                      />
+                    </div>
+
+                    <input
+                      className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                      name="sortOrder"
+                      type="number"
+                      defaultValue={media.sortOrder}
+                    />
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[color:var(--muted)] hover:border-black/20"
+                        type="submit"
+                      >
+                        Enregistrer
+                      </button>
+                      <button
+                        className="rounded-full border border-rose-200 px-4 py-2 text-xs font-semibold text-rose-700"
+                        type="submit"
+                        formAction={deleteGalleryMedia}
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              ))}
+            </div>
+
+            <form
+              action={addGalleryMedia}
+              encType="multipart/form-data"
+              className="mt-6 grid gap-3 md:max-w-3xl"
+            >
+              <h4 className="text-sm font-semibold">Ajouter un element galerie</h4>
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="flex items-center gap-2 text-xs text-[color:var(--muted)]">
+                  <input type="checkbox" name="active" defaultChecked />
+                  Actif
+                </label>
+                <select
+                  name="type"
+                  defaultValue="IMAGE"
+                  className="rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-semibold text-[color:var(--muted)]"
+                >
+                  <option value="IMAGE">Photo</option>
+                  <option value="VIDEO">Video</option>
+                </select>
+              </div>
+              <input
+                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                name="title"
+                placeholder="Titre"
+                required
+              />
+              <textarea
+                className="min-h-[90px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                name="subtitle"
+                placeholder="Sous-titre"
+              />
+              <AdminImageInput
+                name="imageData"
+                label="Photo (pour un element Photo)"
+              />
+              <div className="grid gap-2 rounded-2xl border border-dashed border-black/10 bg-[color:var(--surface)] p-4">
+                <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--muted)]">
+                  Video
+                </p>
+                <input
+                  className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                  name="videoUrl"
+                  placeholder="URL video existante (optionnel)"
+                />
+                <input
+                  className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-[color:var(--ink)] file:px-4 file:py-2 file:text-xs file:font-semibold file:text-white"
+                  name="videoFile"
+                  type="file"
+                  accept="video/*"
+                />
+                <AdminImageInput
+                  name="posterData"
+                  label="Poster video (optionnel)"
+                />
+              </div>
               <input
                 className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
                 name="sortOrder"
