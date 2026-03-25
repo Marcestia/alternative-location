@@ -50,7 +50,7 @@ export default async function GaleriePage() {
       : sampleGalleryItems;
 
   const heroItems = displayItems
-    .slice(0, 3)
+    .slice(0, 4)
     .filter((item) => getGalleryPreviewUrl(item));
 
   const groupedSections = displaySections
@@ -66,18 +66,18 @@ export default async function GaleriePage() {
     <main className="min-h-screen bg-[linear-gradient(180deg,#f6f0e9_0%,#faf7f3_18%,#ffffff_100%)] px-4 py-6 text-[color:var(--ink)] sm:px-6 lg:px-10">
       <section className="mx-auto max-w-7xl">
         <div className="overflow-hidden rounded-[22px] border border-black/5 bg-white/92 shadow-[0_35px_90px_rgba(30,25,20,0.10)]">
-          <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="grid gap-0 lg:grid-cols-[0.72fr_1.28fr]">
             <div className="flex flex-col justify-between p-6 sm:p-8 lg:p-10">
               <div>
                 <p className="text-xs uppercase tracking-[0.36em] text-[color:var(--accent-2)]">
                   Galerie d&apos;ambiances
                 </p>
-                <h1 className="mt-4 max-w-[12ch] text-4xl font-semibold leading-[0.95] sm:text-5xl">
-                  Des mises en scene plus immersives
+                <h1 className="mt-4 max-w-[10ch] text-4xl font-semibold leading-[0.95] sm:text-5xl">
+                  Des thèmes, puis les photos en grand format
                 </h1>
-                <p className="mt-5 max-w-xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-                  Creez vos propres sections depuis l&apos;admin, ajoutez les images
-                  ou videos que vous voulez, puis retirez celles qui ne servent plus.
+                <p className="mt-5 max-w-md text-sm leading-7 text-[color:var(--muted)] sm:text-base">
+                  Une galerie simple, visuelle et directe pour montrer les mises en
+                  scène, les ambiances et les détails.
                 </p>
               </div>
 
@@ -98,8 +98,8 @@ export default async function GaleriePage() {
 
               {items.length === 0 ? (
                 <div className="mt-6 rounded-[16px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                  Apercu de demonstration. Ajoutez vos propres sections et medias
-                  depuis les parametres admin.
+                  Aperçu de démonstration. Ajoutez vos propres sections et médias
+                  depuis les paramètres admin.
                 </div>
               ) : null}
             </div>
@@ -107,7 +107,7 @@ export default async function GaleriePage() {
             <div className="grid min-h-[340px] gap-3 bg-[linear-gradient(180deg,rgba(244,238,231,0.8),rgba(255,255,255,0.92))] p-4 sm:grid-cols-2 sm:p-5">
               {heroItems.map((item, index) => {
                 const previewUrl = getGalleryPreviewUrl(item);
-                const large = index === 0;
+                const large = index === 0 || index === 3;
 
                 return (
                   <div
@@ -138,26 +138,12 @@ export default async function GaleriePage() {
       <section className="mx-auto mt-8 max-w-7xl space-y-10">
         {groupedSections.map((section) => (
           <div key={section.id} className="space-y-4">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.36em] text-[color:var(--accent-2)]">
-                  {section.name}
-                </p>
-                {section.description ? (
-                  <p className="mt-2 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
-                    {section.description}
-                  </p>
-                ) : null}
-              </div>
-              {section.coverImageUrl ? (
-                <div className="overflow-hidden rounded-full border border-black/5 bg-white p-1 shadow-[0_12px_30px_rgba(30,25,20,0.08)]">
-                  <img
-                    src={section.coverImageUrl}
-                    alt={section.name}
-                    className="h-14 w-24 rounded-full object-cover"
-                  />
-                </div>
-              ) : null}
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-black/10" />
+              <p className="text-xs uppercase tracking-[0.36em] text-[color:var(--accent-2)]">
+                {section.name}
+              </p>
+              <div className="h-px flex-1 bg-black/10" />
             </div>
             <GalleryMasonry items={section.items} />
           </div>
@@ -165,13 +151,12 @@ export default async function GaleriePage() {
 
         {unsectionedItems.length > 0 ? (
           <div className="space-y-4">
-            <div>
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-black/10" />
               <p className="text-xs uppercase tracking-[0.36em] text-[color:var(--accent-2)]">
-                Selection libre
+                Sélection libre
               </p>
-              <p className="mt-2 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
-                Medias ajoutes sans section specifique.
-              </p>
+              <div className="h-px flex-1 bg-black/10" />
             </div>
             <GalleryMasonry items={unsectionedItems} />
           </div>
