@@ -1,5 +1,4 @@
 import Script from "next/script";
-import SpotlightCarousel from "@/components/SpotlightCarousel";
 import GalleryPreviewSection from "@/components/GalleryPreviewSection";
 import DateRangePicker from "@/components/DateRangePicker";
 import ReviewsSection from "@/components/ReviewsSection";
@@ -9,6 +8,7 @@ import { submitReviewPublic } from "@/app/actions/reviews";
 import { prisma } from "@/lib/prisma";
 import { siteConfig } from "@/lib/site";
 import { sampleGalleryItems } from "@/lib/gallery";
+import heroImage from "./hero.png";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -236,11 +236,7 @@ export default async function Home({
   const sentStatus = resolvedParams?.sent;
   const reviewStatus = resolvedParams?.review;
 
-  const [spotlights, categories, reviews, galleryMedia] = await Promise.all([
-    prisma.spotlight.findMany({
-      where: { active: true },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    }),
+  const [categories, reviews, galleryMedia] = await Promise.all([
     prisma.itemCategory.findMany({
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     }),
@@ -420,7 +416,7 @@ export default async function Home({
                 <div className="inline-flex items-center gap-2 rounded-full bg-[color:var(--surface)] px-4 py-2 text-[11px] uppercase tracking-[0.28em] text-[color:var(--accent)]">
                   Location événementielle
                 </div>
-                <h1 className="max-w-[12ch] text-4xl font-semibold leading-[0.95] sm:max-w-none sm:text-5xl">
+                <h1 className="max-w-[12ch] text-5xl font-semibold leading-[0.92] sm:max-w-none sm:text-6xl">
                   Une scénographie complète pour vos événements.
                 </h1>
                 <p className="max-w-xl text-sm text-[color:var(--muted)] sm:text-base">
@@ -442,15 +438,11 @@ export default async function Home({
                 </div>
 
                 <div className="overflow-hidden rounded-[28px] border border-white/70 bg-white/90 shadow-[0_20px_50px_rgba(30,25,20,0.12)]">
-                  <div className="h-[320px] p-3 sm:h-[380px]">
-                    {spotlights.length > 0 ? (
-                      <SpotlightCarousel items={spotlights} />
-                    ) : (
-                      <div className="flex h-full items-center justify-center rounded-[24px] bg-[color:var(--surface-2)] p-4 text-center text-xs text-[color:var(--muted)]">
-                        Ajoutez une rubrique "Du moment" depuis l'admin.
-                      </div>
-                    )}
-                  </div>
+                  <img
+                    src={heroImage.src}
+                    alt="Alternative Location"
+                    className="h-[320px] w-full object-cover sm:h-[380px]"
+                  />
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -483,21 +475,21 @@ export default async function Home({
           <div className="hidden lg:block">
             <div className="relative h-[100svh] w-full overflow-hidden rounded-b-[40px]">
               <img
-                src="/vitrine/hero.jpg"
+                src={heroImage.src}
                 alt="Alternative Location"
                 className="absolute inset-0 h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/65 to-white/25" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(216,111,63,0.18),transparent_45%)]" />
-              <div className="relative z-10 flex h-full items-end px-12 pb-16">
-                <div className="max-w-3xl space-y-6">
+              <div className="relative z-10 flex h-full items-end px-12 pb-16 xl:px-16 xl:pb-20">
+                <div className="max-w-4xl space-y-6">
                   <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-xs uppercase tracking-[0.3em] text-[color:var(--accent)] shadow-[0_12px_30px_rgba(30,25,20,0.08)]">
                     Location evenementielle
                   </div>
-                  <h1 className="text-5xl font-semibold leading-tight">
+                  <h1 className="text-6xl font-semibold leading-[1.02] xl:text-7xl">
                     Une scénographie complète pour vos événements
                   </h1>
-                  <p className="max-w-2xl text-lg text-[color:var(--muted)]">
+                  <p className="max-w-3xl text-xl text-[color:var(--muted)]">
                     {siteConfig.description}
                   </p>
                   <div className="flex flex-wrap gap-4">
@@ -514,17 +506,6 @@ export default async function Home({
                       Parler du projet
                     </a>
                   </div>
-                </div>
-              </div>
-              <div className="absolute right-10 top-1/2 w-[620px] -translate-y-1/2 xl:w-[720px]">
-                <div className="h-[520px] overflow-hidden xl:h-[620px]">
-                  {spotlights.length > 0 ? (
-                    <SpotlightCarousel items={spotlights} />
-                  ) : (
-                    <div className="rounded-2xl bg-[color:var(--surface-2)] p-4 text-xs text-[color:var(--muted)]">
-                      Ajoutez une rubrique "Du moment" depuis l'admin.
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
