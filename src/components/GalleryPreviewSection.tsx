@@ -1,4 +1,4 @@
-import { getGalleryPreviewUrl, type GalleryMediaView } from "@/lib/gallery";
+import { getGalleryPreviewUrl, getGalleryLabel, type GalleryMediaView } from "@/lib/gallery";
 
 type GalleryPreviewSectionProps = {
   items: GalleryMediaView[];
@@ -14,65 +14,65 @@ export default function GalleryPreviewSection({
 
   return (
     <section className="mx-auto mt-8 w-full max-w-6xl px-4 sm:px-6 lg:mt-12 lg:px-12">
-      <div className="overflow-hidden rounded-[34px] border border-black/5 bg-white/90 p-5 shadow-[0_30px_60px_rgba(30,25,20,0.12)] sm:rounded-[40px] sm:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-sm uppercase tracking-[0.3em] text-[color:var(--accent-2)]">
-              Galerie
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold sm:text-3xl">
-              Un apercu tres visuel de nos ambiances
-            </h2>
-            <p className="mt-3 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-              Une page dediee pour feuilleter les photos de presentation, voir
-              les mises en scene et se projeter plus facilement.
-            </p>
+      <div className="overflow-hidden rounded-[22px] border border-black/5 bg-white/92 shadow-[0_30px_70px_rgba(30,25,20,0.10)]">
+        <div className="grid gap-0 lg:grid-cols-[0.82fr_1.18fr]">
+          <div className="flex flex-col justify-between p-6 sm:p-8">
+            <div>
+              <p className="text-xs uppercase tracking-[0.34em] text-[color:var(--accent-2)]">
+                Galerie
+              </p>
+              <h2 className="mt-4 text-3xl font-semibold leading-tight sm:text-4xl">
+                Un avant-gout des ambiances
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
+                Une selection visuelle plus libre, plus editoriale, pour montrer
+                le rendu avant meme d&apos;entrer dans le catalogue.
+              </p>
+            </div>
+            <div className="mt-8">
+              <a
+                href="/galerie"
+                className="inline-flex rounded-full bg-[color:var(--ink)] px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5"
+              >
+                Ouvrir la galerie
+              </a>
+            </div>
           </div>
+
           <a
             href="/galerie"
-            className="inline-flex rounded-full bg-[color:var(--ink)] px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5"
+            className="grid gap-3 bg-[linear-gradient(180deg,rgba(244,238,231,0.8),rgba(255,255,255,0.92))] p-4 sm:grid-cols-2 sm:p-5"
           >
-            Ouvrir la galerie
-          </a>
-        </div>
+            {previewItems.map((item, index) => {
+              const previewUrl = getGalleryPreviewUrl(item);
+              if (!previewUrl) return null;
 
-        <a
-          href="/galerie"
-          className="mt-6 grid auto-rows-[180px] gap-4 md:grid-cols-2 xl:grid-cols-[1.3fr_0.85fr_0.85fr] xl:auto-rows-[220px]"
-        >
-          {previewItems.map((item, index) => {
-            const previewUrl = getGalleryPreviewUrl(item);
-            if (!previewUrl) return null;
-
-            const large = index === 0;
-            const tileClass = large
-              ? "md:row-span-2"
-              : index === 3
-                ? "md:col-span-2 xl:col-span-1"
-                : "";
-
-            return (
-              <article
-                key={item.id}
-                className={`group overflow-hidden rounded-[28px] border border-black/5 bg-[color:var(--surface)] ${tileClass}`}
-              >
-                <div className={`relative ${large ? "aspect-[4/5] xl:h-full" : "aspect-[4/3]"}`}>
+              return (
+                <article
+                  key={item.id}
+                  className={`group relative overflow-hidden rounded-[18px] bg-[color:var(--surface)] shadow-[0_16px_35px_rgba(30,25,20,0.10)] ${
+                    index === 0 ? "sm:row-span-2" : ""
+                  }`}
+                >
                   <img
                     src={previewUrl}
                     alt={item.title}
-                    className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                    className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.05]"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-5 text-white">
-                    <p className="text-base font-semibold leading-tight sm:text-lg">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent opacity-100 md:opacity-80 md:group-hover:opacity-100" />
+                  <div className="absolute inset-x-0 bottom-0 p-4 text-white">
+                    <p className="text-[10px] uppercase tracking-[0.28em] text-white/75">
+                      {getGalleryLabel(item)}
+                    </p>
+                    <p className="mt-2 text-lg font-semibold leading-tight">
                       {item.title}
                     </p>
                   </div>
-                </div>
-              </article>
-            );
-          })}
-        </a>
+                </article>
+              );
+            })}
+          </a>
+        </div>
       </div>
     </section>
   );

@@ -252,6 +252,7 @@ export default async function Home({
     }),
     prisma.galleryMedia.findMany({
       where: { active: true },
+      include: { section: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       take: 6,
     }),
@@ -309,7 +310,20 @@ export default async function Home({
     : otherCategories;
 
   const whatsappNumber = siteConfig.whatsapp.replace(/\D/g, "");
-  const displayGalleryMedia = galleryMedia.length > 0 ? galleryMedia : sampleGalleryItems;
+  const displayGalleryMedia =
+    galleryMedia.length > 0
+      ? galleryMedia.map((item) => ({
+          id: item.id,
+          title: item.title,
+          subtitle: item.subtitle,
+          type: item.type,
+          mediaUrl: item.mediaUrl,
+          posterUrl: item.posterUrl,
+          sortOrder: item.sortOrder,
+          sectionId: item.sectionId,
+          sectionName: item.section?.name ?? null,
+        }))
+      : sampleGalleryItems;
 
   return (
     <div className="min-h-screen text-[15px] text-[color:var(--ink)]">

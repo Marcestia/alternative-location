@@ -257,6 +257,21 @@ model Spotlight {
   @@index([sortOrder])
 }
 
+model GallerySection {
+  id            String         @id @default(cuid())
+  name          String         @unique
+  description   String?
+  coverImageUrl String?
+  active        Boolean        @default(true)
+  sortOrder     Int            @default(0)
+  mediaItems    GalleryMedia[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([active])
+  @@index([sortOrder])
+}
+
 model GalleryMedia {
   id         String           @id @default(cuid())
   title      String
@@ -266,11 +281,14 @@ model GalleryMedia {
   posterUrl  String?
   active     Boolean          @default(true)
   sortOrder  Int              @default(0)
+  sectionId  String?
+  section    GallerySection?  @relation(fields: [sectionId], references: [id], onDelete: SetNull)
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
 
   @@index([active])
   @@index([sortOrder])
+  @@index([sectionId])
 }
 
 model Review {

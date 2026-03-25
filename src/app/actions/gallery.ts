@@ -46,6 +46,13 @@ async function saveImageData(imageData: string, baseName: string) {
   });
 }
 
+async function saveSectionImageData(imageData: string, baseName: string) {
+  return uploadImageDataToR2(imageData, {
+    prefix: "gallery-sections",
+    baseName,
+  });
+}
+
 async function saveVideoFile(file: File, baseName: string) {
   if (!file || file.size === 0) return null;
 
@@ -123,6 +130,7 @@ export async function addGalleryMedia(formData: FormData) {
   const subtitle = getText(formData.get("subtitle"));
   const active = getActive(formData.get("active"));
   const sortOrder = getSortOrder(formData.get("sortOrder"));
+  const sectionId = getText(formData.get("sectionId")) || null;
 
   if (!title) {
     redirect("/admin/parametres?gallery=0");
@@ -143,6 +151,7 @@ export async function addGalleryMedia(formData: FormData) {
       posterUrl: resolved.posterUrl,
       active,
       sortOrder,
+      sectionId,
     },
   });
 
@@ -155,6 +164,7 @@ export async function updateGalleryMedia(formData: FormData) {
   const subtitle = getText(formData.get("subtitle"));
   const active = getActive(formData.get("active"));
   const sortOrder = getSortOrder(formData.get("sortOrder"));
+  const sectionId = getText(formData.get("sectionId")) || null;
 
   if (!id || !title) {
     redirect("/admin/parametres?gallery=0");
@@ -189,6 +199,7 @@ export async function updateGalleryMedia(formData: FormData) {
       posterUrl: resolved.posterUrl,
       active,
       sortOrder,
+      sectionId,
     },
   });
 
@@ -207,4 +218,85 @@ export async function deleteGalleryMedia(formData: FormData) {
   });
 
   redirect("/admin/parametres?gallery=deleted");
+}
+
+export async function addGallerySection(formData: FormData) {
+  const name = getText(formData.get("name"));
+  const description = getText(formData.get("description"));
+  const active = getActive(formData.get("active"));
+  const sortOrder = getSortOrder(formData.get("sortOrder"));
+  const imageData = getText(formData.get("coverImageData"));
+
+  if (!name) {
+    redirect("/admin/parametres?gallerySection=0");
+  }
+
+  const coverImageUrl = imageData
+    ? await saveSectionImageData(imageData, name)
+    : null;
+
+  await prisma.gallerySection.create({
+    data: {
+      name,
+      description: description || null,
+      coverImageUrl,
+      active,
+      sortOrder,
+    },
+  });
+
+  redirect("/admin/parametres?gallerySection=1");
+}
+
+export async function updateGallerySection(formData: FormData) {
+  const id = getText(formData.get("id"));
+  const name = getText(formData.get("name"));
+  const description = getText(formData.get("description"));
+  const active = getActive(formData.get("active"));
+  const sortOrder = getSortOrder(formData.get("sortOrder"));
+  const imageData = getText(formData.get("coverImageData"));
+  const currentCoverImageUrl = getText(formData.get("coverImageUrl"));
+  const clearCoverImage = getActive(formData.get("clearCoverImage"));
+
+  if (!id || !name) {
+    redirect("/admin/parametres?gallerySection=0");
+  }
+
+  const coverImageUrl = clearCoverImage
+    ? null
+    : imageData
+      ? await saveSectionImageData(imageData, name)
+      : currentCoverImageUrl || null;
+
+  await prisma.gallerySection.update({
+    where: { id },
+    data: {
+      name,
+      description: description || null,
+      coverImageUrl,
+      active,
+      sortOrder,
+    },
+  });
+
+  redirect("/admin/parametres?gallerySection=1");
+}
+
+export async function deleteGallerySection(formData: FormData) {
+  const id = getText(formData.get("id"));
+
+  if (!id) {
+    redirect("/admin/parametres?gallerySection=0");
+  }
+
+  await prisma.galleryMedia.updateMany({
+    where: { sectionId: id },
+    data: { sectionId: null },
+  });
+
+  await prisma.gallerySection.delete({
+    where: { id },
+  });
+
+  redirect("/admin/parametres?gallerySection=deleted");
 }

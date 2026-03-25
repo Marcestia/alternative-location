@@ -1,72 +1,130 @@
-import type { GalleryMedia } from "@/generated/prisma";
+export type GallerySectionView = {
+  id: string;
+  name: string;
+  description: string | null;
+  coverImageUrl: string | null;
+  active: boolean;
+  sortOrder: number;
+};
 
-export type GalleryMediaView = Pick<
-  GalleryMedia,
-  "id" | "title" | "subtitle" | "type" | "mediaUrl" | "posterUrl" | "sortOrder"
->;
+export type GalleryMediaView = {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  type: "IMAGE" | "VIDEO";
+  mediaUrl: string;
+  posterUrl: string | null;
+  active?: boolean;
+  sortOrder: number;
+  sectionId: string | null;
+  sectionName: string | null;
+};
+
+export const sampleGallerySections: GallerySectionView[] = [
+  {
+    id: "sample-romance",
+    name: "Romance",
+    description: "Tons clairs, fleurs et tables lumineuses.",
+    coverImageUrl: "/vitrine/hero.jpg",
+    active: true,
+    sortOrder: 0,
+  },
+  {
+    id: "sample-tables",
+    name: "Tables",
+    description: "Dressages, vaisselle et details de reception.",
+    coverImageUrl: "/vitrine/vaisselle.jpg",
+    active: true,
+    sortOrder: 1,
+  },
+  {
+    id: "sample-ambiance",
+    name: "Ambiance",
+    description: "Lumieres, volume et atmosphere generale.",
+    coverImageUrl: "/vitrine/ambiance.jpg",
+    active: true,
+    sortOrder: 2,
+  },
+];
 
 export const sampleGalleryItems: GalleryMediaView[] = [
   {
     id: "sample-hero",
-    title: "Table de reception",
-    subtitle:
-      "Une ambiance claire et elegante pour les repas, brunchs et receptions.",
+    title: "Romantic Rose",
+    subtitle: "Reception romantique aux tons clairs et details floraux.",
     type: "IMAGE",
     mediaUrl: "/vitrine/hero.jpg",
     posterUrl: null,
     sortOrder: 0,
+    sectionId: "sample-romance",
+    sectionName: "Romance",
   },
   {
     id: "sample-decoration",
-    title: "Decoration et details",
-    subtitle:
-      "Vases, centres de table, compositions et accessoires de presentation.",
+    title: "Boho Chic",
+    subtitle: "Textures naturelles, vases et details decoratifs doux.",
     type: "IMAGE",
     mediaUrl: "/vitrine/decoration.jpg",
     posterUrl: null,
     sortOrder: 1,
+    sectionId: "sample-romance",
+    sectionName: "Romance",
   },
   {
     id: "sample-mobilier",
-    title: "Mobilier de reception",
-    subtitle:
-      "Tables, bancs et petit mobilier pour structurer votre evenement.",
+    title: "Garden Reception",
+    subtitle: "Mobilier de reception et implantation soignee en exterieur.",
     type: "IMAGE",
     mediaUrl: "/vitrine/mobilier.jpg",
     posterUrl: null,
     sortOrder: 2,
+    sectionId: "sample-ambiance",
+    sectionName: "Ambiance",
   },
   {
     id: "sample-vaisselle",
-    title: "Vaisselle et dressage",
-    subtitle:
-      "Assiettes, verres et couverts pour une presentation propre et harmonieuse.",
+    title: "Timeless Table",
+    subtitle: "Dressage sobre et harmonieux pour une table elegante.",
     type: "IMAGE",
     mediaUrl: "/vitrine/vaisselle.jpg",
     posterUrl: null,
     sortOrder: 3,
+    sectionId: "sample-tables",
+    sectionName: "Tables",
   },
   {
     id: "sample-ambiance",
-    title: "Ambiance et eclairage",
-    subtitle:
-      "Mise en scene lumineuse et materiel d'ambiance pour vos soirees.",
+    title: "Golden Lights",
+    subtitle: "Ambiance lumineuse et materiel decoratif pour la soiree.",
     type: "IMAGE",
     mediaUrl: "/vitrine/ambiance.jpg",
     posterUrl: null,
     sortOrder: 4,
+    sectionId: "sample-ambiance",
+    sectionName: "Ambiance",
   },
   {
     id: "sample-electro",
-    title: "Materiel pratique",
-    subtitle:
-      "Electromenager et equipements utiles selon le format de votre reception.",
+    title: "Reception Service",
+    subtitle: "Equipements utiles pour le confort et le rythme du service.",
     type: "IMAGE",
     mediaUrl: "/vitrine/electromenager.jpg",
     posterUrl: null,
     sortOrder: 5,
+    sectionId: "sample-tables",
+    sectionName: "Tables",
   },
 ];
+
+export const getGalleryLabel = (item: GalleryMediaView) => {
+  if (item.type === "VIDEO") return "Video";
+  if (item.sectionName) return item.sectionName;
+  if (item.subtitle) {
+    const shortLabel = item.subtitle.split(/[,.]/)[0]?.trim();
+    if (shortLabel && shortLabel.length <= 38) return shortLabel;
+  }
+  return "Ambiance";
+};
 
 export const getGalleryPreviewUrl = (item: GalleryMediaView) =>
   item.type === "IMAGE" ? item.mediaUrl : item.posterUrl || "";

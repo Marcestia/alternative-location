@@ -134,11 +134,19 @@ export async function updateCategory(formData: FormData) {
   const description = String(formData.get("description") || "").trim();
   const heroTitle = String(formData.get("heroTitle") || "").trim();
   const heroImageUrl = String(formData.get("heroImageUrl") || "").trim();
+  const imageData = String(formData.get("heroImageData") || "").trim();
+  const clearHeroImage = String(formData.get("clearHeroImage") || "") === "on";
   const sortOrder = Number(formData.get("sortOrder") || 0);
 
   if (!id || !name) {
     redirect("/admin/parametres");
   }
+
+  const savedHeroImageUrl = clearHeroImage
+    ? null
+    : imageData
+      ? await saveImageData(imageData, name || "category", "categories")
+      : heroImageUrl || null;
 
   await prisma.itemCategory.update({
     where: { id },
@@ -146,12 +154,59 @@ export async function updateCategory(formData: FormData) {
       name,
       description: description || null,
       heroTitle: heroTitle || null,
-      heroImageUrl: heroImageUrl || null,
+      heroImageUrl: savedHeroImageUrl,
       sortOrder: Number.isFinite(sortOrder) ? sortOrder : 0,
     },
   });
 
-  redirect("/admin/parametres");
+  redirect("/admin/parametres?category=1");
+}
+
+export async function addCategory(formData: FormData) {
+  const name = String(formData.get("name") || "").trim();
+  const description = String(formData.get("description") || "").trim();
+  const heroTitle = String(formData.get("heroTitle") || "").trim();
+  const imageData = String(formData.get("heroImageData") || "").trim();
+  const sortOrder = Number(formData.get("sortOrder") || 0);
+
+  if (!name) {
+    redirect("/admin/parametres?category=0");
+  }
+
+  const heroImageUrl = imageData
+    ? await saveImageData(imageData, name || "category", "categories")
+    : null;
+
+  await prisma.itemCategory.create({
+    data: {
+      name,
+      description: description || null,
+      heroTitle: heroTitle || null,
+      heroImageUrl,
+      sortOrder: Number.isFinite(sortOrder) ? sortOrder : 0,
+    },
+  });
+
+  redirect("/admin/parametres?category=1");
+}
+
+export async function deleteCategory(formData: FormData) {
+  const id = String(formData.get("id") || "").trim();
+
+  if (!id) {
+    redirect("/admin/parametres?category=0");
+  }
+
+  await prisma.item.updateMany({
+    where: { categoryId: id },
+    data: { categoryId: null },
+  });
+
+  await prisma.itemCategory.delete({
+    where: { id },
+  });
+
+  redirect("/admin/parametres?category=deleted");
 }
 
 export async function addSpotlight(formData: FormData) {
