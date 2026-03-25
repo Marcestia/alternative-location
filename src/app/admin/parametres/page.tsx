@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { prisma } from "@/lib/prisma";
 import { saveCompanySettings } from "@/app/actions/settings";
 import {
@@ -22,10 +23,54 @@ import Script from "next/script";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+type SearchParams = {
+  saved?: string;
+  gallery?: string;
+  gallerySection?: string;
+  category?: string;
+};
+
+function Notice({ tone, children }: { tone: "success" | "warning"; children: ReactNode }) {
+  const styles =
+    tone === "success"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+      : "border-amber-200 bg-amber-50 text-amber-800";
+
+  return <div className={`rounded-2xl border px-4 py-3 text-sm ${styles}`}>{children}</div>;
+}
+
+function SectionShell({
+  id,
+  eyebrow,
+  title,
+  description,
+  children,
+}: {
+  id: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      id={id}
+      className="rounded-3xl border border-black/5 bg-white/85 p-6 shadow-[0_15px_30px_rgba(22,18,14,0.08)]"
+    >
+      <div className="border-b border-black/5 pb-5">
+        <p className="text-xs uppercase tracking-[0.28em] text-[color:var(--muted)]">{eyebrow}</p>
+        <h2 className="mt-2 text-2xl font-semibold text-[color:var(--ink)]">{title}</h2>
+        <p className="mt-2 max-w-3xl text-sm text-[color:var(--muted)]">{description}</p>
+      </div>
+      <div className="mt-6">{children}</div>
+    </section>
+  );
+}
+
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: Promise<{ saved?: string; gallery?: string; gallerySection?: string; category?: string }>;
+  searchParams?: Promise<SearchParams>;
 }) {
   const resolvedParams = searchParams ? await searchParams : undefined;
   const [settings, categories, spotlights, galleryMedia, gallerySections] = await Promise.all([
@@ -47,84 +92,131 @@ export default async function Page({
     ? `${process.env.R2_PUBLIC_BASE_URL.replace(/\/$/, "")}/documents/IBAN.pdf`
     : "";
 
+  const notices = [
+    resolvedParams?.saved === "1"
+      ? { tone: "success" as const, text: "Parametres enregistres." }
+      : null,
+    resolvedParams?.saved === "0"
+      ? { tone: "warning" as const, text: "Le nom de l'entreprise est obligatoire." }
+      : null,
+    resolvedParams?.category === "1"
+      ? { tone: "success" as const, text: "Categorie enregistree." }
+      : null,
+    resolvedParams?.category === "deleted"
+      ? { tone: "success" as const, text: "Categorie supprimee." }
+      : null,
+    resolvedParams?.category === "0"
+      ? {
+          tone: "warning" as const,
+          text: "Verifiez le nom de la categorie avant d'enregistrer.",
+        }
+      : null,
+    resolvedParams?.gallery === "1"
+      ? { tone: "success" as const, text: "Element galerie enregistre." }
+      : null,
+    resolvedParams?.gallery === "deleted"
+      ? { tone: "success" as const, text: "Element galerie supprime." }
+      : null,
+    resolvedParams?.gallery === "missing"
+      ? {
+          tone: "warning" as const,
+          text: "Ajoutez une image ou une video avant d'enregistrer cet element.",
+        }
+      : null,
+    resolvedParams?.gallery === "0"
+      ? {
+          tone: "warning" as const,
+          text: "Verifiez les informations de la galerie avant d'enregistrer.",
+        }
+      : null,
+    resolvedParams?.gallerySection === "1"
+      ? { tone: "success" as const, text: "Section galerie enregistree." }
+      : null,
+    resolvedParams?.gallerySection === "deleted"
+      ? { tone: "success" as const, text: "Section galerie supprimee." }
+      : null,
+    resolvedParams?.gallerySection === "0"
+      ? {
+          tone: "warning" as const,
+          text: "Verifiez le nom de la section avant d'enregistrer.",
+        }
+      : null,
+  ].filter(Boolean) as Array<{ tone: "success" | "warning"; text: string }>;
+
+  const navItems = [
+    { href: "#entreprise", label: "Entreprise", meta: "coordonnees" },
+    { href: "#catalogue", label: "Catalogue", meta: `${categories.length} categories` },
+    { href: "#accueil", label: "Accueil", meta: `${spotlights.length} mises en avant` },
+    {
+      href: "#galerie",
+      label: "Galerie",
+      meta: `${gallerySections.length} sections / ${galleryMedia.length} medias`,
+    },
+    { href: "#export", label: "Export", meta: "sauvegarde" },
+  ];
+
   return (
     <section className="space-y-6">
-      <header className="rounded-3xl border border-black/5 bg-white/80 p-8 shadow-[0_15px_30px_rgba(22,18,14,0.08)]">
-        <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
-          Espace entreprise
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold">Parametres</h1>
-        <p className="mt-2 text-sm text-[color:var(--muted)]">
-          Informations legales, regles de facturation et site.
-        </p>
+      <header className="rounded-3xl border border-black/5 bg-white/85 p-8 shadow-[0_15px_30px_rgba(22,18,14,0.08)]">
+        <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">Espace entreprise</p>
+        <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="text-3xl font-semibold">Parametres</h1>
+            <p className="mt-2 max-w-2xl text-sm text-[color:var(--muted)]">
+              Informations de reference pour l'entreprise, le catalogue, la page
+              d'accueil et la galerie.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-black/5 bg-[color:var(--surface)]/80 px-4 py-3 text-sm text-[color:var(--muted)]">
+            <p className="font-medium text-[color:var(--ink)]">Lecture simple</p>
+            <p className="mt-1">1 bloc = 1 sujet. Modifiez, enregistrez, puis passez au suivant.</p>
+          </div>
+        </div>
       </header>
 
-      {resolvedParams?.saved === "1" && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
-          Parametres enregistres.
+      <nav className="rounded-3xl border border-black/5 bg-white/80 p-3 shadow-[0_15px_30px_rgba(22,18,14,0.06)]">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+          {navItems.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className="rounded-2xl border border-black/5 bg-[color:var(--surface)]/80 px-4 py-3 transition hover:-translate-y-0.5 hover:border-black/10 hover:bg-white"
+            >
+              <div className="text-sm font-semibold text-[color:var(--ink)]">{item.label}</div>
+              <div className="mt-1 text-xs uppercase tracking-[0.18em] text-[color:var(--muted)]">
+                {item.meta}
+              </div>
+            </a>
+          ))}
         </div>
-      )}
-      {resolvedParams?.saved === "0" && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
-          Le nom de l'entreprise est obligatoire.
-        </div>
-      )}
-      {resolvedParams?.category === "1" && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
-          Categorie enregistree.
-        </div>
-      )}
-      {resolvedParams?.category === "deleted" && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
-          Categorie supprimee.
-        </div>
-      )}
-      {resolvedParams?.category === "0" && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
-          Verifiez le nom de la categorie avant d'enregistrer.
-        </div>
-      )}
-      {resolvedParams?.gallery === "1" && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
-          Galerie enregistree.
-        </div>
-      )}
-      {resolvedParams?.gallery === "deleted" && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
-          Element galerie supprime.
-        </div>
-      )}
-      {resolvedParams?.gallery === "missing" && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
-          Ajoutez une image ou une video avant d'enregistrer cet element.
-        </div>
-      )}
-      {resolvedParams?.gallery === "0" && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
-          Verifiez les informations de la galerie avant d'enregistrer.
-        </div>
-      )}
-      {resolvedParams?.gallerySection === "1" && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
-          Section galerie enregistree.
-        </div>
-      )}
-      {resolvedParams?.gallerySection === "deleted" && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
-          Section galerie supprimee.
-        </div>
-      )}
-      {resolvedParams?.gallerySection === "0" && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
-          Verifiez le nom de la section avant d'enregistrer.
-        </div>
-      )}
+      </nav>
 
+      {notices.length ? (
+        <div className="space-y-3">
+          {notices.map((notice) => (
+            <Notice key={`${notice.tone}-${notice.text}`} tone={notice.tone}>
+              {notice.text}
+            </Notice>
+          ))}
+        </div>
+      ) : null}
+
+      <SectionShell
+        id="entreprise"
+        eyebrow="Entreprise"
+        title="Identite et facturation"
+        description="Coordonnees, mentions legales, TVA et regles de paiement."
+      >
       <form
         action={saveCompanySettings}
-        className="rounded-3xl border border-black/5 bg-white/80 p-6 shadow-[0_15px_30px_rgba(22,18,14,0.08)]"
+        className="space-y-6"
       >
-        <h2 className="text-xl font-semibold">Parametres facturation</h2>
+        <div>
+          <h3 className="text-xl font-semibold">Parametres facturation</h3>
+          <p className="mt-2 text-sm text-[color:var(--muted)]">
+            Informations legales et bancaires utilisees dans les devis, factures et emails.
+          </p>
+        </div>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <input
             className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
@@ -278,19 +370,21 @@ export default async function Page({
           Enregistrer
         </button>
       </form>
+      </SectionShell>
 
-      <div className="rounded-3xl border border-black/5 bg-white/80 p-6">
-        <h2 className="text-xl font-semibold">Export base de donnees</h2>
-        <p className="mt-2 text-sm text-[color:var(--muted)]">
-          Telechargez un export JSON complet pour sauvegarde ou migration.
-        </p>
+      <SectionShell
+        id="export"
+        eyebrow="Sauvegarde"
+        title="Export base de donnees"
+        description="Telechargez un export JSON complet pour sauvegarde ou migration."
+      >
         <a
-          className="mt-4 inline-flex rounded-full bg-[color:var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)]"
+          className="inline-flex rounded-full bg-[color:var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)]"
           href="/admin/parametres/export"
         >
           Telecharger l'export
         </a>
-      </div>
+      </SectionShell>
 
       <Script id="copy-rib-link" strategy="afterInteractive">
         {`
@@ -309,18 +403,13 @@ export default async function Page({
         `}
       </Script>
 
-      <div className="rounded-3xl border border-black/5 bg-white/80 p-6">
-        <h2 className="text-xl font-semibold">Parametres site</h2>
-        <p className="mt-2 text-sm text-[color:var(--muted)]">
-          Categories du catalogue et rubrique du moment.
-        </p>
-
-        <div className="mt-6 space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold">Categories</h3>
-            <p className="mt-1 text-sm text-[color:var(--muted)]">
-              Creez, modifiez ou supprimez les categories du catalogue. Vous pouvez aussi definir une image de bandeau pour chaque section.
-            </p>
+      <SectionShell
+        id="catalogue"
+        eyebrow="Catalogue"
+        title="Categories"
+        description="Creez, modifiez ou supprimez les categories du catalogue. Vous pouvez aussi definir une image de bandeau pour chaque section."
+      >
+          <div className="rounded-2xl border border-black/5 bg-[color:var(--surface)]/50 p-5">
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               {categories.map((category) => (
                 <form
@@ -383,7 +472,7 @@ export default async function Page({
                 </form>
               ))}
             </div>
-            <form action={addCategory} className="mt-6 grid gap-3 md:max-w-2xl">
+            <form action={addCategory} className="mt-6 grid gap-3 rounded-2xl border border-dashed border-black/10 bg-white p-5 md:max-w-2xl">
               <h4 className="text-sm font-semibold">Ajouter une categorie</h4>
               <input
                 className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
@@ -416,12 +505,15 @@ export default async function Page({
               </button>
             </form>
           </div>
+      </SectionShell>
 
-          <div>
-            <h3 className="text-lg font-semibold">Rubrique du moment</h3>
-            <p className="mt-1 text-sm text-[color:var(--muted)]">
-              Mises en avant visibles sur la page d'accueil, sans limite fixe.
-            </p>
+      <SectionShell
+        id="accueil"
+        eyebrow="Page d'accueil"
+        title="Rubrique du moment"
+        description="Mises en avant visibles sur la page d'accueil, sans limite fixe."
+      >
+          <div className="rounded-2xl border border-black/5 bg-[color:var(--surface)]/50 p-5">
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               {spotlights.map((spotlight) => (
                 <form
@@ -483,7 +575,7 @@ export default async function Page({
             </form>
           ))}
             </div>
-            <form action={addSpotlight} className="mt-6 grid gap-3 md:max-w-2xl">
+            <form action={addSpotlight} className="mt-6 grid gap-3 rounded-2xl border border-dashed border-black/10 bg-white p-5 md:max-w-2xl">
               <h4 className="text-sm font-semibold">Ajouter une mise en avant</h4>
               <label className="flex items-center gap-2 text-xs text-[color:var(--muted)]">
                 <input type="checkbox" name="active" defaultChecked />
@@ -518,12 +610,15 @@ export default async function Page({
               </button>
             </form>
           </div>
+      </SectionShell>
 
-          <div>
-            <h3 className="text-lg font-semibold">Galerie</h3>
-            <p className="mt-1 text-sm text-[color:var(--muted)]">
-              Creez des sections, ajoutez vos photos ou videos, puis retirez les blocs ou medias que vous ne voulez plus afficher.
-            </p>
+      <SectionShell
+        id="galerie"
+        eyebrow="Galerie"
+        title="Sections et medias"
+        description="Creez des sections, ajoutez vos photos ou videos, puis retirez les blocs ou medias que vous ne voulez plus afficher."
+      >
+          <div className="rounded-2xl border border-black/5 bg-[color:var(--surface)]/50 p-5">
 
             <div className="mt-6">
               <h4 className="text-sm font-semibold">Sections galerie</h4>
@@ -593,7 +688,7 @@ export default async function Page({
               <form
                 action={addGallerySection}
                 encType="multipart/form-data"
-                className="mt-6 grid gap-3 md:max-w-2xl"
+                className="mt-6 grid gap-3 rounded-2xl border border-dashed border-black/10 bg-white p-5 md:max-w-2xl"
               >
                 <h5 className="text-sm font-semibold">Ajouter une section</h5>
                 <label className="flex items-center gap-2 text-xs text-[color:var(--muted)]">
@@ -772,7 +867,7 @@ export default async function Page({
             <form
               action={addGalleryMedia}
               encType="multipart/form-data"
-              className="mt-6 grid gap-3 md:max-w-3xl"
+              className="mt-6 grid gap-3 rounded-2xl border border-dashed border-black/10 bg-white p-5 md:max-w-3xl"
             >
               <h4 className="text-sm font-semibold">Ajouter un element galerie</h4>
               <div className="flex flex-wrap items-center gap-3">
@@ -850,8 +945,7 @@ export default async function Page({
               </button>
             </form>
           </div>
-        </div>
-      </div>
+      </SectionShell>
     </section>
   );
 }
