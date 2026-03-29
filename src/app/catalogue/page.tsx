@@ -55,9 +55,14 @@ export default async function CataloguePage() {
     list.map((item) => ({
       id: item.id,
       name: item.name,
+      description: item.description,
       rentalPriceCents: item.rentalPriceCents,
       totalQty: item.totalQty,
       imageUrl: item.images[0]?.url || null,
+      images: item.images.map((image) => ({
+        url: image.url,
+        alt: image.alt,
+      })),
       categoryId: item.categoryId,
     }));
 

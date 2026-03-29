@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import ImageLightbox from "@/components/ImageLightbox";
+import { createPortal } from "react-dom";
 
 type CategoryVM = {
   id: string;
@@ -13,9 +13,11 @@ type CategoryVM = {
 type ItemVM = {
   id: string;
   name: string;
+  description: string | null;
   rentalPriceCents: number;
   totalQty: number;
   imageUrl: string | null;
+  images: { url: string; alt: string | null }[];
   categoryId: string | null;
 };
 
@@ -51,89 +53,174 @@ const euroFormatter = new Intl.NumberFormat("fr-FR", {
 
 const formatEuro = (cents: number) => euroFormatter.format(cents / 100);
 
-function ItemCard({
+function CatalogueItemModal({
   item,
   quantity,
+  onClose,
   onAdd,
   onRemove,
 }: {
   item: ItemVM;
   quantity: number;
+  onClose: () => void;
   onAdd: (item: ItemVM) => void;
   onRemove: (item: ItemVM) => void;
+}) {
+  const [mounted, setMounted] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const images = item.images.length
+    ? item.images
+    : [{ url: item.imageUrl || "/vitrine/hero.jpg", alt: item.name }];
+  const canIncrease = quantity < Math.max(item.totalQty, 1);
+
+  useEffect(() => {
+    setMounted(true);
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+      if (event.key === "ArrowRight") setActiveIndex((current) => (current + 1) % images.length);
+      if (event.key === "ArrowLeft") setActiveIndex((current) => (current - 1 + images.length) % images.length);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [images.length, onClose]);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [item.id]);
+
+  if (!mounted) return null;
+
+  const activeImage = images[activeIndex];
+
+  return createPortal(
+    <div className="fixed inset-0 z-[220] flex items-center justify-center bg-[rgba(16,12,9,0.76)] p-3 backdrop-blur-md sm:p-5" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="relative w-full max-w-6xl overflow-hidden rounded-[30px] border border-white/10 bg-[#fbf7f2] shadow-[0_35px_120px_rgba(0,0,0,0.35)]" onClick={(event) => event.stopPropagation()}>
+        <button type="button" onClick={onClose} className="absolute right-4 top-4 z-10 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-[color:var(--ink)] transition hover:bg-white">
+          Fermer
+        </button>
+        <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="bg-[#f1ebe4] p-4 sm:p-6">
+            <div className="relative overflow-hidden rounded-[24px] bg-white shadow-[0_16px_35px_rgba(30,25,20,0.08)]">
+              <img src={activeImage.url} alt={activeImage.alt || item.name} className="max-h-[68vh] w-full object-contain bg-white" />
+              {images.length > 1 ? (
+                <>
+                  <button type="button" onClick={() => setActiveIndex((current) => (current - 1 + images.length) % images.length)} className="absolute left-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg font-semibold text-[color:var(--ink)] shadow-[0_12px_30px_rgba(0,0,0,0.12)] transition hover:bg-white" aria-label="Image precedente">&larr;</button>
+                  <button type="button" onClick={() => setActiveIndex((current) => (current + 1) % images.length)} className="absolute right-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg font-semibold text-[color:var(--ink)] shadow-[0_12px_30px_rgba(0,0,0,0.12)] transition hover:bg-white" aria-label="Image suivante">&rarr;</button>
+                </>
+              ) : null}
+            </div>
+            {images.length > 1 ? (
+              <div className="mt-4 grid grid-cols-4 gap-3 sm:grid-cols-5">
+                {images.map((image, index) => (
+                  <button key={`${item.id}-${image.url}-${index}`} type="button" onClick={() => setActiveIndex(index)} className={`overflow-hidden rounded-[18px] border bg-white transition ${index === activeIndex ? "border-[color:var(--accent)] ring-2 ring-[color:var(--accent)]/15" : "border-black/8 hover:border-black/20"}`} aria-label={`Voir l'image ${index + 1} de ${item.name}`}>
+                    <img src={image.url} alt={image.alt || `${item.name} ${index + 1}`} className="h-20 w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+          <div className="flex flex-col justify-between gap-6 p-5 sm:p-8">
+            <div>
+              <p className="text-xs uppercase tracking-[0.34em] text-[color:var(--accent-2)]">Article du catalogue</p>
+              <h2 className="mt-3 text-3xl font-semibold leading-tight text-[color:var(--ink)]">{item.name}</h2>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="rounded-full bg-[color:var(--surface)] px-3 py-1 text-xs font-semibold text-[color:var(--ink)]">{formatEuro(item.rentalPriceCents)}</span>
+                <span className="rounded-full bg-[color:var(--ink)]/8 px-3 py-1 text-xs font-semibold text-[color:var(--ink)]">{item.totalQty} disponible{item.totalQty > 1 ? "s" : ""}</span>
+                <span className="rounded-full bg-[color:var(--accent)]/10 px-3 py-1 text-xs font-semibold text-[color:var(--accent)]">{images.length} photo{images.length > 1 ? "s" : ""}</span>
+              </div>
+              <p className="mt-5 text-sm leading-7 text-[color:var(--muted)]">{item.description || "Consultez toutes les photos de cet article puis ajoutez la quantite souhaitee a votre estimation."}</p>
+            </div>
+            <div className="space-y-4 rounded-[24px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,240,233,0.94))] p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-[color:var(--muted)]">Quantit? s?lectionn?e</p>
+                  <p className="mt-1 text-2xl font-semibold text-[color:var(--ink)]">{quantity}</p>
+                </div>
+                <p className="text-right text-sm font-semibold text-[color:var(--ink)]">{formatEuro(item.rentalPriceCents * quantity)}</p>
+              </div>
+              <div className="flex items-center justify-between rounded-full border border-emerald-200 bg-emerald-50 px-2 py-2">
+                <button type="button" onClick={() => onRemove(item)} disabled={quantity === 0} className="h-10 w-10 rounded-full bg-white text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-40">-</button>
+                <button type="button" onClick={() => onAdd(item)} disabled={!canIncrease} className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40">Ajouter a l'estimation</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+function ItemCard({
+  item,
+  quantity,
+  onAdd,
+  onRemove,
+  onOpenDetails,
+}: {
+  item: ItemVM;
+  quantity: number;
+  onAdd: (item: ItemVM) => void;
+  onRemove: (item: ItemVM) => void;
+  onOpenDetails: (item: ItemVM) => void;
 }) {
   const isSelected = quantity > 0;
   const canIncrease = quantity < Math.max(item.totalQty, 1);
 
   return (
-    <article
-      className={`group flex h-full flex-col rounded-[32px] border bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(248,242,236,0.94))] p-4 shadow-[0_24px_50px_rgba(30,25,20,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_rgba(30,25,20,0.1)] sm:p-5 ${
-        isSelected
-          ? "border-emerald-500 ring-2 ring-emerald-100"
-          : "border-black/5 hover:border-black/10"
-      }`}
-    >
-      <div className="overflow-hidden rounded-[24px] bg-[color:var(--surface)]">
-        <ImageLightbox
-          src={item.imageUrl || "/vitrine/hero.jpg"}
-          alt={item.name}
-          className="h-44 w-full sm:h-52"
-        />
+    <article className={`group flex h-full flex-col rounded-[32px] border bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(248,242,236,0.94))] p-4 shadow-[0_24px_50px_rgba(30,25,20,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_rgba(30,25,20,0.1)] sm:p-5 ${isSelected ? "border-emerald-500 ring-2 ring-emerald-100" : "border-black/5 hover:border-black/10"}`}>
+      <div className="relative overflow-hidden rounded-[24px] bg-[color:var(--surface)]">
+          <button type="button" onClick={() => onOpenDetails(item)} className="block h-44 w-full text-left sm:h-52" aria-label={`Voir le detail de ${item.name}`}>
+          <img src={item.imageUrl || "/vitrine/hero.jpg"} alt={item.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" draggable={false} />
+        </button>
+        {item.images.length > 1 ? (
+          <>
+            <div className="pointer-events-none absolute right-3 top-3 rounded-full bg-[rgba(18,14,11,0.72)] px-3 py-1 text-[11px] font-semibold text-white shadow-[0_10px_18px_rgba(0,0,0,0.18)]">
+              {item.images.length} photos
+            </div>
+            <div className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-2 shadow-[0_10px_18px_rgba(0,0,0,0.12)]">
+              {item.images.slice(0, 3).map((image, index) => (
+                <span
+                  key={`${item.id}-thumb-${index}`}
+                  className="h-2.5 w-2.5 rounded-full bg-[color:var(--accent)]/85"
+                  aria-hidden="true"
+                />
+              ))}
+              {item.images.length > 3 ? (
+                <span className="pl-1 text-[10px] font-semibold text-[color:var(--ink)]">
+                  +{item.images.length - 3}
+                </span>
+              ) : null}
+            </div>
+          </>
+        ) : null}
       </div>
-
       <div className="mt-4 flex flex-1 flex-col">
         <div>
-          <h3 className="text-base font-semibold leading-tight text-[color:var(--ink)] sm:text-lg">
-            {item.name}
-          </h3>
-          <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
-            Location à l'unité. Cliquez sur l'image pour l'agrandir.
-          </p>
+          <h3 className="text-base font-semibold leading-tight text-[color:var(--ink)] sm:text-lg">{item.name}</h3>
+          <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">{item.images.length > 1 ? `${item.images.length} photos disponibles. Ouvrez la fiche pour toutes les voir.` : "Location a l'unite. Ouvrez la fiche pour voir le detail."}</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <span className="rounded-full bg-[color:var(--surface)] px-3 py-1 text-[11px] font-semibold text-[color:var(--ink)]">
-              {formatEuro(item.rentalPriceCents)}
-            </span>
-            <span className="rounded-full bg-[color:var(--ink)]/8 px-3 py-1 text-[11px] font-semibold text-[color:var(--ink)]">
-              {item.totalQty} disponible{item.totalQty > 1 ? "s" : ""}
-            </span>
+            <span className="rounded-full bg-[color:var(--surface)] px-3 py-1 text-[11px] font-semibold text-[color:var(--ink)]">{formatEuro(item.rentalPriceCents)}</span>
+            <span className="rounded-full bg-[color:var(--ink)]/8 px-3 py-1 text-[11px] font-semibold text-[color:var(--ink)]">{item.totalQty} disponible{item.totalQty > 1 ? "s" : ""}</span>
           </div>
         </div>
-
         <div className="mt-5 pt-1">
+          <button type="button" onClick={() => onOpenDetails(item)} className="mb-3 w-full rounded-full border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20">Voir le detail</button>
           {!isSelected ? (
-            <button
-              type="button"
-              onClick={() => onAdd(item)}
-              className="w-full rounded-full border border-black/10 bg-[color:var(--surface)]/65 px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white"
-            >
-              Ajouter au calcul
-            </button>
+            <button type="button" onClick={() => onAdd(item)} className="w-full rounded-full border border-black/10 bg-[color:var(--surface)]/65 px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white">Ajouter au calcul</button>
           ) : (
             <div className="rounded-[24px] border border-emerald-200 bg-emerald-50/90 p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
               <div className="flex items-center justify-between gap-2 rounded-full border border-emerald-200 bg-white/90 px-2 py-1.5">
-                <button
-                  type="button"
-                  onClick={() => onRemove(item)}
-                  className="h-9 w-9 rounded-full bg-emerald-50 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
-                  aria-label={`Retirer ${item.name}`}
-                >
-                  -
-                </button>
+                <button type="button" onClick={() => onRemove(item)} className="h-9 w-9 rounded-full bg-emerald-50 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100" aria-label={`Retirer ${item.name}`}>-</button>
                 <div className="text-center">
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-700/75">
-                    Quantité
-                  </p>
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-700/75">Quantite</p>
                   <p className="text-sm font-semibold text-emerald-800">{quantity}</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => onAdd(item)}
-                  disabled={!canIncrease}
-                  className="h-9 w-9 rounded-full bg-emerald-600 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label={`Ajouter ${item.name}`}
-                >
-                  +
-                </button>
+                <button type="button" onClick={() => onAdd(item)} disabled={!canIncrease} className="h-9 w-9 rounded-full bg-emerald-600 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40" aria-label={`Ajouter ${item.name}`}>+</button>
               </div>
             </div>
           )}
@@ -153,6 +240,7 @@ export default function CataloguePageClient({
 }: CataloguePageClientProps) {
   const [selected, setSelected] = useState<Record<string, SelectedItemVM>>({});
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
+  const [activeItemId, setActiveItemId] = useState<string | null>(null);
 
   const selectedItems = useMemo(() => Object.values(selected), [selected]);
   const selectedCount = useMemo(
@@ -167,8 +255,8 @@ export default function CataloguePageClient({
       ),
     [selectedItems]
   );
-
   const sections = useMemo<SectionVM[]>(() => {
+
     const baseSections = grouped.map(({ category, items }) => ({
       id: `cat-${category.slug}`,
       label: category.name,
@@ -200,6 +288,14 @@ export default function CataloguePageClient({
       },
     ];
   }, [decorCategories.length, decorDescription, decorItems, grouped, uncategorized]);
+  const allItems = useMemo(
+    () => sections.flatMap((section) => section.items),
+    [sections]
+  );
+  const activeItem = useMemo(
+    () => allItems.find((item) => item.id === activeItemId) ?? null,
+    [activeItemId, allItems]
+  );
 
   useEffect(() => {
     if (!mobileSummaryOpen) return;
@@ -474,6 +570,7 @@ export default function CataloguePageClient({
                         quantity={selected[item.id]?.quantity || 0}
                         onAdd={addItem}
                         onRemove={removeItem}
+                        onOpenDetails={(selectedItem) => setActiveItemId(selectedItem.id)}
                       />
                     ))}
                   </div>
@@ -542,6 +639,16 @@ export default function CataloguePageClient({
           </div>
         </div>
       )}
+
+      {activeItem ? (
+        <CatalogueItemModal
+          item={activeItem}
+          quantity={selected[activeItem.id]?.quantity || 0}
+          onClose={() => setActiveItemId(null)}
+          onAdd={addItem}
+          onRemove={removeItem}
+        />
+      ) : null}
     </div>
   );
 }
