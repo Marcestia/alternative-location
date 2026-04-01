@@ -5,6 +5,7 @@ import ReviewsSection from "@/components/ReviewsSection";
 import ContactSubmitButton from "@/components/ContactSubmitButton";
 import { createContactRequest } from "@/app/actions/contact";
 import { submitReviewPublic } from "@/app/actions/reviews";
+import { CATEGORY_GROUP_META, CATEGORY_GROUP_ORDER } from "@/lib/catalog";
 import { prisma } from "@/lib/prisma";
 import { siteConfig } from "@/lib/site";
 import { sampleGalleryItems } from "@/lib/gallery";
@@ -119,6 +120,25 @@ function UniverseIcon({ slug }: { slug: string }) {
           strokeWidth="1.9"
           strokeLinecap="round"
           strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
+  if (/materiel-service/.test(normalizedSlug)) {
+    return (
+      <svg viewBox="0 0 64 64" fill="none" className={iconClass} aria-hidden="true">
+        <path
+          d="M18 23h28a6 6 0 0 1 6 6v13a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4V29a6 6 0 0 1 6-6Z"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M24 18h16M20 32h24M24 46v4M40 46v4"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
         />
       </svg>
     );
@@ -255,55 +275,20 @@ export default async function Home({
   ]);
 
   const categoryImages: Record<string, string> = {
-    vaisselle: "/vitrine/vaisselle.jpg",
+    "ambiance-son": "/vitrine/ambiance.jpg",
+    "materiel-service": "/vitrine/electromenager.jpg",
     decoration: "/vitrine/mobilier.jpg",
-    mobilier: "/vitrine/mobilier.jpg",
-    meuble: "/vitrine/mobilier.jpg",
-    electro: "/vitrine/electromenager.jpg",
-    electromenager: "/vitrine/electromenager.jpg",
-    ambiance: "/vitrine/ambiance.jpg",
   };
 
-  const normalizedCategories = categories.map((category) => ({
-    ...category,
-    slug: slugify(category.name),
+  const displayCategories = CATEGORY_GROUP_ORDER.filter((group) =>
+    categories.some((category) => category.group === group)
+  ).map((group) => ({
+    id: group,
+    name: CATEGORY_GROUP_META[group].label,
+    description: CATEGORY_GROUP_META[group].description,
+    heroImageUrl: categoryImages[CATEGORY_GROUP_META[group].slug],
+    slug: CATEGORY_GROUP_META[group].slug,
   }));
-
-  const decorCategories = normalizedCategories.filter((category) =>
-    /decor|mobilier|meuble/i.test(category.slug)
-  );
-  const otherCategories = normalizedCategories.filter(
-    (category) => !/decor|mobilier|meuble/i.test(category.slug)
-  );
-
-  const decorInsertIndex = decorCategories.length
-    ? Math.min(
-        ...decorCategories.map((category) =>
-          normalizedCategories.findIndex((entry) => entry.id === category.id)
-        )
-      )
-    : -1;
-
-  const decorDescription =
-    decorCategories.find((category) => category.description)?.description ||
-    "Tables, chaises, housses, centres de table et ambiances.";
-  const decorHero =
-    decorCategories.find((category) => category.heroImageUrl)?.heroImageUrl ||
-    categoryImages.decoration;
-
-  const displayCategories = decorCategories.length
-    ? [
-        ...otherCategories.slice(0, decorInsertIndex),
-        {
-          id: "decor-mobilier",
-          name: "Décoration & mobilier",
-          description: decorDescription,
-          heroImageUrl: decorHero,
-          slug: "decoration-mobilier",
-        },
-        ...otherCategories.slice(decorInsertIndex),
-      ]
-    : otherCategories;
 
   const whatsappNumber = siteConfig.whatsapp.replace(/\D/g, "");
   const displayGalleryMedia =
@@ -538,7 +523,7 @@ export default async function Home({
                   return (
                     <a
                       key={category.id}
-                      href={`/catalogue#cat-${categorySlug}`}
+                      href={`/catalogue#group-${categorySlug}`}
                       className="group flex min-h-[220px] flex-col items-center rounded-[28px] border border-[#f1e4da] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(249,242,235,0.92))] px-5 py-6 text-center shadow-[0_20px_40px_rgba(30,25,20,0.06)] transition duration-300 hover:-translate-y-1 hover:border-[color:var(--accent-2)]/30 hover:shadow-[0_28px_50px_rgba(30,25,20,0.1)]"
                     >
                       <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[#ead9cb] bg-white/92 shadow-[0_12px_24px_rgba(30,25,20,0.06)] transition duration-300 group-hover:scale-105">

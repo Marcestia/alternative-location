@@ -19,6 +19,7 @@ import {
 } from "@/app/actions/stock";
 import AdminImageInput from "@/components/AdminImageInput";
 import Script from "next/script";
+import { CATEGORY_GROUP_META, CATEGORY_GROUP_ORDER } from "@/lib/catalog";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -29,6 +30,11 @@ type SearchParams = {
   gallerySection?: string;
   category?: string;
 };
+
+const categoryGroupOptions = CATEGORY_GROUP_ORDER.map((group) => ({
+  value: group,
+  label: CATEGORY_GROUP_META[group].label,
+}));
 
 function Notice({ tone, children }: { tone: "success" | "warning"; children: ReactNode }) {
   const styles =
@@ -91,6 +97,11 @@ export default async function Page({
   const ribUrl = process.env.R2_PUBLIC_BASE_URL
     ? `${process.env.R2_PUBLIC_BASE_URL.replace(/\/$/, "")}/documents/IBAN.pdf`
     : "";
+  const groupedCategories = CATEGORY_GROUP_ORDER.map((group) => ({
+    group,
+    label: CATEGORY_GROUP_META[group].label,
+    items: categories.filter((category) => category.group === group),
+  })).filter((group) => group.items.length > 0);
 
   const notices = [
     resolvedParams?.saved === "1"
@@ -410,70 +421,104 @@ export default async function Page({
         description="Creez, modifiez ou supprimez les categories du catalogue. Vous pouvez aussi definir une image de bandeau pour chaque section."
       >
           <div className="rounded-2xl border border-black/5 bg-[color:var(--surface)]/50 p-5">
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              {categories.map((category) => (
-                <form
-                  key={category.id}
-                  action={updateCategory}
-                  className="rounded-2xl border border-black/5 bg-white p-4"
-                >
-                  <input type="hidden" name="id" value={category.id} />
-                  <div className="grid gap-3">
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                      name="name"
-                      defaultValue={category.name}
-                      required
-                    />
-                    <textarea
-                      className="min-h-[90px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                      name="description"
-                      placeholder="Phrase de presentation"
-                      defaultValue={category.description ?? ""}
-                    />
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                      name="heroTitle"
-                      placeholder="Titre du bandeau (optionnel)"
-                      defaultValue={category.heroTitle ?? ""}
-                    />
-                    <AdminImageInput
-                      name="heroImageData"
-                      label="Image de bandeau"
-                      initialUrl={category.heroImageUrl ?? undefined}
-                    />
-                    <input type="hidden" name="heroImageUrl" value={category.heroImageUrl ?? ""} />
-                    <label className="flex items-center gap-2 text-xs text-[color:var(--muted)]">
-                      <input type="checkbox" name="clearHeroImage" />
-                      Retirer l'image actuelle
-                    </label>
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                      name="sortOrder"
-                      type="number"
-                      defaultValue={category.sortOrder}
-                    />
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[color:var(--muted)] hover:border-black/20"
-                        type="submit"
-                      >
-                        Enregistrer
-                      </button>
-                      <button
-                        className="rounded-full border border-rose-200 px-4 py-2 text-xs font-semibold text-rose-700"
-                        type="submit"
-                        formAction={deleteCategory}
-                      >
-                        Supprimer
-                      </button>
-                    </div>
+            <div className="mt-4 space-y-6">
+              {groupedCategories.map((group) => (
+                <div key={group.group} className="space-y-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--accent-2)]">
+                      Famille
+                    </p>
+                    <h4 className="mt-2 text-lg font-semibold">{group.label}</h4>
                   </div>
-                </form>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {group.items.map((category) => (
+                      <form
+                        key={category.id}
+                        action={updateCategory}
+                        className="rounded-2xl border border-black/5 bg-white p-4"
+                      >
+                        <input type="hidden" name="id" value={category.id} />
+                        <div className="grid gap-3">
+                          <select
+                            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                            name="group"
+                            defaultValue={category.group}
+                          >
+                            {categoryGroupOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                          <input
+                            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                            name="name"
+                            defaultValue={category.name}
+                            required
+                          />
+                          <textarea
+                            className="min-h-[90px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                            name="description"
+                            placeholder="Phrase de presentation"
+                            defaultValue={category.description ?? ""}
+                          />
+                          <input
+                            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                            name="heroTitle"
+                            placeholder="Titre du bandeau (optionnel)"
+                            defaultValue={category.heroTitle ?? ""}
+                          />
+                          <AdminImageInput
+                            name="heroImageData"
+                            label="Image de bandeau"
+                            initialUrl={category.heroImageUrl ?? undefined}
+                          />
+                          <input type="hidden" name="heroImageUrl" value={category.heroImageUrl ?? ""} />
+                          <label className="flex items-center gap-2 text-xs text-[color:var(--muted)]">
+                            <input type="checkbox" name="clearHeroImage" />
+                            Retirer l'image actuelle
+                          </label>
+                          <input
+                            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                            name="sortOrder"
+                            type="number"
+                            defaultValue={category.sortOrder}
+                          />
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[color:var(--muted)] hover:border-black/20"
+                              type="submit"
+                            >
+                              Enregistrer
+                            </button>
+                            <button
+                              className="rounded-full border border-rose-200 px-4 py-2 text-xs font-semibold text-rose-700"
+                              type="submit"
+                              formAction={deleteCategory}
+                            >
+                              Supprimer
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
             <form action={addCategory} className="mt-6 grid gap-3 rounded-2xl border border-dashed border-black/10 bg-white p-5 md:max-w-2xl">
               <h4 className="text-sm font-semibold">Ajouter une categorie</h4>
+              <select
+                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                name="group"
+                defaultValue="MATERIEL_SERVICE"
+              >
+                {categoryGroupOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
               <input
                 className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
                 name="name"

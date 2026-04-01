@@ -58,6 +58,12 @@ enum GalleryMediaType {
   VIDEO
 }
 
+enum CategoryGroup {
+  AMBIANCE_SON
+  MATERIEL_SERVICE
+  DECORATION
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -85,6 +91,7 @@ model Client {
 model ItemCategory {
   id          String @id @default(cuid())
   name        String @unique
+  group       CategoryGroup @default(MATERIEL_SERVICE)
   description String?
   heroTitle   String?
   heroImageUrl String?

@@ -1,4 +1,5 @@
 import CataloguePageClient from "@/components/CataloguePageClient";
+import { CATEGORY_GROUP_META, CATEGORY_GROUP_ORDER } from "@/lib/catalog";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -29,26 +30,6 @@ export default async function CataloguePage() {
     slug: slugify(category.name),
   }));
 
-  const decorCategories = withSlug.filter((category) =>
-    /decor|mobilier|meuble/i.test(category.slug)
-  );
-  const otherCategories = withSlug.filter(
-    (category) => !/decor|mobilier|meuble/i.test(category.slug)
-  );
-
-  const grouped = otherCategories.map((category) => ({
-    category,
-    items: items.filter((item) => item.categoryId === category.id),
-  }));
-
-  const decorItems = decorCategories.flatMap((category) =>
-    items.filter((item) => item.categoryId === category.id)
-  );
-
-  const decorDescription =
-    decorCategories.find((category) => category.description)?.description ||
-    "Tables, chaises, housses, centres de table et ambiances.";
-
   const uncategorized = items.filter((item) => !item.categoryId);
 
   const normalizeItems = (list: typeof items) =>
@@ -66,18 +47,26 @@ export default async function CataloguePage() {
       categoryId: item.categoryId,
     }));
 
-  const groupedForClient = grouped.map(({ category, items: groupItems }) => ({
-    category,
-    items: normalizeItems(groupItems),
-  }));
+  const sections = CATEGORY_GROUP_ORDER.flatMap((group) =>
+    withSlug
+      .filter((category) => category.group === group)
+      .map((category) => ({
+        id: `cat-${category.slug}`,
+        label: category.name,
+        description: category.description,
+        group: {
+          key: group,
+          label: CATEGORY_GROUP_META[group].label,
+          slug: CATEGORY_GROUP_META[group].slug,
+          description: CATEGORY_GROUP_META[group].description,
+        },
+        items: normalizeItems(items.filter((item) => item.categoryId === category.id)),
+      }))
+  );
 
   return (
     <CataloguePageClient
-      otherCategories={otherCategories}
-      decorCategories={decorCategories}
-      grouped={groupedForClient}
-      decorItems={normalizeItems(decorItems)}
-      decorDescription={decorDescription}
+      sections={sections}
       uncategorized={normalizeItems(uncategorized)}
     />
   );

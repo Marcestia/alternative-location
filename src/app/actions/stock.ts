@@ -1,5 +1,6 @@
 ﻿"use server";
 
+import type { CategoryGroup } from "@/generated/prisma";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { siteConfig } from "@/lib/site";
@@ -14,6 +15,17 @@ const parseEuroToCents = (value: FormDataEntryValue | null) => {
 
 async function saveImageData(imageData: string, baseName: string, prefix: string) {
   return uploadImageDataToR2(imageData, { prefix, baseName });
+}
+
+const CATEGORY_GROUP_VALUES: CategoryGroup[] = [
+  "AMBIANCE_SON",
+  "MATERIEL_SERVICE",
+  "DECORATION",
+];
+
+function parseCategoryGroup(value: FormDataEntryValue | null): CategoryGroup {
+  const raw = String(value || "").trim() as CategoryGroup;
+  return CATEGORY_GROUP_VALUES.includes(raw) ? raw : "MATERIEL_SERVICE";
 }
 
 export async function addItem(formData: FormData) {
@@ -131,6 +143,7 @@ export async function deleteItem(formData: FormData) {
 export async function updateCategory(formData: FormData) {
   const id = String(formData.get("id") || "").trim();
   const name = String(formData.get("name") || "").trim();
+  const group = parseCategoryGroup(formData.get("group"));
   const description = String(formData.get("description") || "").trim();
   const heroTitle = String(formData.get("heroTitle") || "").trim();
   const heroImageUrl = String(formData.get("heroImageUrl") || "").trim();
@@ -152,6 +165,7 @@ export async function updateCategory(formData: FormData) {
     where: { id },
     data: {
       name,
+      group,
       description: description || null,
       heroTitle: heroTitle || null,
       heroImageUrl: savedHeroImageUrl,
@@ -164,6 +178,7 @@ export async function updateCategory(formData: FormData) {
 
 export async function addCategory(formData: FormData) {
   const name = String(formData.get("name") || "").trim();
+  const group = parseCategoryGroup(formData.get("group"));
   const description = String(formData.get("description") || "").trim();
   const heroTitle = String(formData.get("heroTitle") || "").trim();
   const imageData = String(formData.get("heroImageData") || "").trim();
@@ -180,6 +195,7 @@ export async function addCategory(formData: FormData) {
   await prisma.itemCategory.create({
     data: {
       name,
+      group,
       description: description || null,
       heroTitle: heroTitle || null,
       heroImageUrl,

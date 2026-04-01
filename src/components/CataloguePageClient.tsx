@@ -25,25 +25,22 @@ type SelectedItemVM = ItemVM & {
   quantity: number;
 };
 
-type GroupVM = {
-  category: CategoryVM;
-  items: ItemVM[];
-};
-
-type CataloguePageClientProps = {
-  otherCategories: CategoryVM[];
-  decorCategories: CategoryVM[];
-  grouped: GroupVM[];
-  decorItems: ItemVM[];
-  decorDescription: string;
-  uncategorized: ItemVM[];
-};
-
 type SectionVM = {
   id: string;
   label: string;
   description: string | null;
+  group: {
+    key: string;
+    label: string;
+    slug: string;
+    description: string;
+  };
   items: ItemVM[];
+};
+
+type CataloguePageClientProps = {
+  sections: SectionVM[];
+  uncategorized: ItemVM[];
 };
 
 const euroFormatter = new Intl.NumberFormat("fr-FR", {
@@ -231,11 +228,7 @@ function ItemCard({
 }
 
 export default function CataloguePageClient({
-  otherCategories,
-  decorCategories,
-  grouped,
-  decorItems,
-  decorDescription,
+  sections,
   uncategorized,
 }: CataloguePageClientProps) {
   const [selected, setSelected] = useState<Record<string, SelectedItemVM>>({});
@@ -255,47 +248,59 @@ export default function CataloguePageClient({
       ),
     [selectedItems]
   );
-  const sections = useMemo<SectionVM[]>(() => {
-
-    const baseSections = grouped.map(({ category, items }) => ({
-      id: `cat-${category.slug}`,
-      label: category.name,
-      description: category.description,
-      items,
-    }));
-
-    const decoratedSections = decorCategories.length
-      ? [
-          {
-            id: "cat-decoration-mobilier",
-            label: "Décoration & mobilier",
-            description: decorDescription,
-            items: decorItems,
-          },
-          ...baseSections,
-        ]
-      : baseSections;
-
-    if (!uncategorized.length) return decoratedSections;
+  const displaySections = useMemo<SectionVM[]>(() => {
+    if (!uncategorized.length) return sections;
 
     return [
-      ...decoratedSections,
+      ...sections,
       {
         id: "cat-autres",
         label: "Autres articles",
         description: null,
+        group: {
+          key: "AUTRES",
+          label: "Autres",
+          slug: "autres",
+          description: "Articles non rattaches a une sous-categorie.",
+        },
         items: uncategorized,
       },
     ];
-  }, [decorCategories.length, decorDescription, decorItems, grouped, uncategorized]);
+  }, [sections, uncategorized]);
   const allItems = useMemo(
-    () => sections.flatMap((section) => section.items),
-    [sections]
+    () => displaySections.flatMap((section) => section.items),
+    [displaySections]
   );
   const activeItem = useMemo(
     () => allItems.find((item) => item.id === activeItemId) ?? null,
     [activeItemId, allItems]
   );
+  const sectionGroups = useMemo(() => {
+    const groups = new Map<
+      string,
+      {
+        key: string;
+        label: string;
+        slug: string;
+        description: string;
+        sections: SectionVM[];
+      }
+    >();
+
+    for (const section of displaySections) {
+      const existing = groups.get(section.group.slug);
+      if (existing) {
+        existing.sections.push(section);
+      } else {
+        groups.set(section.group.slug, {
+          ...section.group,
+          sections: [section],
+        });
+      }
+    }
+
+    return Array.from(groups.values());
+  }, [displaySections]);
 
   useEffect(() => {
     if (!mobileSummaryOpen) return;
@@ -514,14 +519,26 @@ export default function CataloguePageClient({
                   Navigation
                 </p>
                 <div className="mt-4 space-y-2">
-                  {sections.map((section) => (
-                    <a
-                      key={section.id}
-                      href={`#${section.id}`}
-                      className="block rounded-2xl border border-transparent bg-[color:var(--surface)]/65 px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:border-black/10 hover:bg-white"
-                    >
-                      {section.label}
-                    </a>
+                  {sectionGroups.map((group) => (
+                    <div key={group.slug} className="space-y-2">
+                      <a
+                        href={`#group-${group.slug}`}
+                        className="block rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:border-black/10"
+                      >
+                        {group.label}
+                      </a>
+                      <div className="space-y-1 pl-2">
+                        {group.sections.map((section) => (
+                          <a
+                            key={section.id}
+                            href={`#${section.id}`}
+                            className="block rounded-2xl border border-transparent bg-[color:var(--surface)]/65 px-4 py-2 text-xs font-semibold text-[color:var(--muted)] transition hover:border-black/10 hover:bg-white hover:text-[color:var(--ink)]"
+                          >
+                            {section.label}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                   <a
                     href="#contact"
@@ -535,46 +552,69 @@ export default function CataloguePageClient({
           </aside>
 
           <main className="space-y-6 sm:space-y-8 xl:space-y-10">
-            {sections.map((section) => (
-              <section
-                key={section.id}
-                id={section.id}
-                className="scroll-mt-24 rounded-[34px] border border-black/5 bg-white/88 p-5 shadow-[0_18px_40px_rgba(30,25,20,0.06)] sm:p-7"
-              >
-                <div className="flex flex-wrap items-end justify-between gap-4 border-b border-black/6 pb-5">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
-                      {section.label}
-                    </p>
-                    {section.description && (
+            {sectionGroups.map((group) => (
+              <section key={group.slug} id={`group-${group.slug}`} className="scroll-mt-24 space-y-5">
+                <div className="rounded-[34px] border border-black/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(247,240,233,0.88))] p-5 shadow-[0_18px_40px_rgba(30,25,20,0.06)] sm:p-7">
+                  <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--accent-2)]">
+                    Famille
+                  </p>
+                  <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+                    <div>
+                      <h2 className="text-2xl font-semibold text-[color:var(--ink)] sm:text-3xl">
+                        {group.label}
+                      </h2>
                       <p className="mt-2 max-w-3xl text-sm leading-6 text-[color:var(--muted)]">
-                        {section.description}
+                        {group.description}
                       </p>
-                    )}
-                  </div>
-                  <div className="rounded-full border border-black/8 bg-[color:var(--surface)]/70 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]">
-                    {section.items.length} article(s)
+                    </div>
+                    <div className="rounded-full border border-black/8 bg-white/80 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]">
+                      {group.sections.reduce((sum, section) => sum + section.items.length, 0)} article(s)
+                    </div>
                   </div>
                 </div>
 
-                {section.items.length === 0 ? (
-                  <div className="mt-5 rounded-[24px] border border-dashed border-black/10 bg-[color:var(--surface)] p-6 text-sm text-[color:var(--muted)]">
-                    Aucun article pour le moment.
-                  </div>
-                ) : (
-                  <div className="mt-6 grid gap-4 md:grid-cols-2 2xl:grid-cols-3 2xl:gap-6">
-                    {section.items.map((item) => (
-                      <ItemCard
-                        key={item.id}
-                        item={item}
-                        quantity={selected[item.id]?.quantity || 0}
-                        onAdd={addItem}
-                        onRemove={removeItem}
-                        onOpenDetails={(selectedItem) => setActiveItemId(selectedItem.id)}
-                      />
-                    ))}
-                  </div>
-                )}
+                {group.sections.map((section) => (
+                  <section
+                    key={section.id}
+                    id={section.id}
+                    className="scroll-mt-24 rounded-[34px] border border-black/5 bg-white/88 p-5 shadow-[0_18px_40px_rgba(30,25,20,0.06)] sm:p-7"
+                  >
+                    <div className="flex flex-wrap items-end justify-between gap-4 border-b border-black/6 pb-5">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
+                          {section.label}
+                        </p>
+                        {section.description && (
+                          <p className="mt-2 max-w-3xl text-sm leading-6 text-[color:var(--muted)]">
+                            {section.description}
+                          </p>
+                        )}
+                      </div>
+                      <div className="rounded-full border border-black/8 bg-[color:var(--surface)]/70 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]">
+                        {section.items.length} article(s)
+                      </div>
+                    </div>
+
+                    {section.items.length === 0 ? (
+                      <div className="mt-5 rounded-[24px] border border-dashed border-black/10 bg-[color:var(--surface)] p-6 text-sm text-[color:var(--muted)]">
+                        Aucun article pour le moment.
+                      </div>
+                    ) : (
+                      <div className="mt-6 grid gap-4 md:grid-cols-2 2xl:grid-cols-3 2xl:gap-6">
+                        {section.items.map((item) => (
+                          <ItemCard
+                            key={item.id}
+                            item={item}
+                            quantity={selected[item.id]?.quantity || 0}
+                            onAdd={addItem}
+                            onRemove={removeItem}
+                            onOpenDetails={(selectedItem) => setActiveItemId(selectedItem.id)}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                ))}
               </section>
             ))}
           </main>

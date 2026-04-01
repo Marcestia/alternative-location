@@ -4,6 +4,7 @@ import {
   updateItem,
 } from "@/app/actions/stock";
 import AdminImageInput from "@/components/AdminImageInput";
+import { CATEGORY_GROUP_META, CATEGORY_GROUP_ORDER } from "@/lib/catalog";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +33,11 @@ export default async function StockPage({
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     }),
   ]);
+  const groupedCategories = CATEGORY_GROUP_ORDER.map((group) => ({
+    group,
+    label: CATEGORY_GROUP_META[group].label,
+    items: categories.filter((category) => category.group === group),
+  })).filter((group) => group.items.length > 0);
 
   return (
     <section className="space-y-6">
@@ -83,10 +89,14 @@ export default async function StockPage({
                 defaultValue=""
               >
                 <option value="">Choisir une cat&eacute;gorie</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
+                {groupedCategories.map((group) => (
+                  <optgroup key={group.group} label={group.label}>
+                    {group.items.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </label>
@@ -149,10 +159,14 @@ export default async function StockPage({
               defaultValue={categoryFilter}
             >
               <option value="">Toutes les cat&eacute;gories</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
+              {groupedCategories.map((group) => (
+                <optgroup key={group.group} label={group.label}>
+                  {group.items.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
             <button
@@ -263,10 +277,14 @@ export default async function StockPage({
                           defaultValue={item.categoryId ?? ""}
                         >
                           <option value="">Choisir une cat&eacute;gorie</option>
-                          {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                              {category.name}
-                            </option>
+                          {groupedCategories.map((group) => (
+                            <optgroup key={group.group} label={group.label}>
+                              {group.items.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                  {category.name}
+                                </option>
+                              ))}
+                            </optgroup>
                           ))}
                         </select>
                       </label>
