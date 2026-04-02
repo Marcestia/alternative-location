@@ -18,19 +18,19 @@ export const CATEGORY_GROUP_META: Record<
     label: "Ambiance et son",
     slug: "ambiance-son",
     description:
-      "Jeux, sonorisation, lumieres et projecteurs pour animer vos evenements.",
+      "Jeux, sonorisation, lumières et projecteurs pour animer vos événements.",
   },
   MATERIEL_SERVICE: {
-    label: "Materiel de service",
+    label: "Matériel de service",
     slug: "materiel-service",
     description:
-      "Materiel de table, reception et equipements electriques pour le service.",
+      "Matériel de table, réception et équipements électriques pour le service.",
   },
   DECORATION: {
-    label: "Decoration",
+    label: "Décoration",
     slug: "decoration",
     description:
-      "Univers decoratifs, linge, vases, arches et accessoires de mise en scene.",
+      "Univers décoratifs, linge, vases, arches et accessoires de mise en scène.",
   },
 };
 
@@ -57,4 +57,3 @@ export const DEFAULT_CATEGORY_STRUCTURE: Array<{
 export function getCategoryGroupMeta(group: CategoryGroup) {
   return CATEGORY_GROUP_META[group];
 }
-

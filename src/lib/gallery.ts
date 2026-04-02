@@ -32,7 +32,7 @@ export const sampleGallerySections: GallerySectionView[] = [
   {
     id: "sample-tables",
     name: "Tables",
-    description: "Dressages, vaisselle et details de reception.",
+    description: "Dressages, vaisselle et détails de réception.",
     coverImageUrl: "/vitrine/vaisselle.jpg",
     active: true,
     sortOrder: 1,
@@ -40,7 +40,7 @@ export const sampleGallerySections: GallerySectionView[] = [
   {
     id: "sample-ambiance",
     name: "Ambiance",
-    description: "Lumieres, volume et atmosphere generale.",
+    description: "Lumières, volume et atmosphère générale.",
     coverImageUrl: "/vitrine/ambiance.jpg",
     active: true,
     sortOrder: 2,
@@ -51,7 +51,7 @@ export const sampleGalleryItems: GalleryMediaView[] = [
   {
     id: "sample-hero",
     title: "Romantic Rose",
-    subtitle: "Reception romantique aux tons clairs et details floraux.",
+    subtitle: "Réception romantique aux tons clairs et détails floraux.",
     type: "IMAGE",
     mediaUrl: "/vitrine/hero.jpg",
     posterUrl: null,
@@ -62,7 +62,7 @@ export const sampleGalleryItems: GalleryMediaView[] = [
   {
     id: "sample-decoration",
     title: "Boho Chic",
-    subtitle: "Textures naturelles, vases et details decoratifs doux.",
+    subtitle: "Textures naturelles, vases et détails décoratifs doux.",
     type: "IMAGE",
     mediaUrl: "/vitrine/decoration.jpg",
     posterUrl: null,
@@ -73,7 +73,7 @@ export const sampleGalleryItems: GalleryMediaView[] = [
   {
     id: "sample-mobilier",
     title: "Garden Reception",
-    subtitle: "Mobilier de reception et implantation soignee en exterieur.",
+    subtitle: "Mobilier de réception et implantation soignée en extérieur.",
     type: "IMAGE",
     mediaUrl: "/vitrine/mobilier.jpg",
     posterUrl: null,
@@ -84,7 +84,7 @@ export const sampleGalleryItems: GalleryMediaView[] = [
   {
     id: "sample-vaisselle",
     title: "Timeless Table",
-    subtitle: "Dressage sobre et harmonieux pour une table elegante.",
+    subtitle: "Dressage sobre et harmonieux pour une table élégante.",
     type: "IMAGE",
     mediaUrl: "/vitrine/vaisselle.jpg",
     posterUrl: null,
@@ -95,7 +95,7 @@ export const sampleGalleryItems: GalleryMediaView[] = [
   {
     id: "sample-ambiance",
     title: "Golden Lights",
-    subtitle: "Ambiance lumineuse et materiel decoratif pour la soiree.",
+    subtitle: "Ambiance lumineuse et matériel décoratif pour la soirée.",
     type: "IMAGE",
     mediaUrl: "/vitrine/ambiance.jpg",
     posterUrl: null,
@@ -106,7 +106,7 @@ export const sampleGalleryItems: GalleryMediaView[] = [
   {
     id: "sample-electro",
     title: "Reception Service",
-    subtitle: "Equipements utiles pour le confort et le rythme du service.",
+    subtitle: "Équipements utiles pour le confort et le rythme du service.",
     type: "IMAGE",
     mediaUrl: "/vitrine/electromenager.jpg",
     posterUrl: null,
@@ -117,7 +117,7 @@ export const sampleGalleryItems: GalleryMediaView[] = [
 ];
 
 export const getGalleryLabel = (item: GalleryMediaView) => {
-  if (item.type === "VIDEO") return "Video";
+  if (item.type === "VIDEO") return "Vidéo";
   if (item.sectionName) return item.sectionName;
   if (item.subtitle) {
     const shortLabel = item.subtitle.split(/[,.]/)[0]?.trim();

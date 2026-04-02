@@ -1,4 +1,4 @@
-import Script from "next/script";
+﻿import Script from "next/script";
 import GalleryPreviewSection from "@/components/GalleryPreviewSection";
 import DateRangePicker from "@/components/DateRangePicker";
 import ReviewsSection from "@/components/ReviewsSection";
@@ -469,7 +469,7 @@ export default async function Home({
               <div className="relative z-10 flex h-full items-end px-12 pb-16 xl:px-16 xl:pb-20">
                 <div className="max-w-4xl space-y-6">
                   <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-xs uppercase tracking-[0.3em] text-[color:var(--accent)] shadow-[0_12px_30px_rgba(30,25,20,0.08)]">
-                    Location evenementielle
+                    Location événementielle
                   </div>
                   <h1 className="text-6xl font-semibold leading-[1.02] xl:text-7xl">
                     Une scénographie complète pour vos événements
@@ -512,11 +512,11 @@ export default async function Home({
                   Tout pour votre événement
                 </h2>
                 <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[color:var(--muted)] sm:text-base">
-                  Choisissez une famille puis accedez directement a la bonne
+                  Choisissez une famille puis accédez directement à la bonne
                   section du catalogue.
                 </p>
               </div>
-              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
                 {displayCategories.map((category) => {
                   const categorySlug = category.slug ?? slugify(category.name);
 
@@ -533,7 +533,7 @@ export default async function Home({
                         {category.name}
                       </p>
                       <p className="mt-3 text-sm leading-6 text-[color:var(--muted)]">
-                        {category.description || "Decouvrez la selection disponible."}
+                        {category.description || "Découvrez la sélection disponible."}
                       </p>
                     </a>
                   );
@@ -559,13 +559,13 @@ export default async function Home({
                   Décrivez votre besoin.
                 </p>
                 <p className="mt-2 text-xs text-[color:var(--muted)]">
-                  La réservation est confirmée apres validation du devis et
+                  La réservation est confirmée après validation du devis et
                   versement d'un acompte de 30% sous 7 jours.
                 </p>
 
                 {sentStatus === "1" && (
                   <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                    Merci. Votre demande à bien ete envoyée. Nous revenons vers
+                    Merci. Votre demande a bien été envoyée. Nous revenons vers
                     vous rapidement.
                   </div>
                 )}
@@ -585,7 +585,7 @@ export default async function Home({
                     <input
                       className="rounded-2xl border border-black/10 bg-white px-4 py-3"
                       name="name"
-                      placeholder="Nom et prenom"
+                      placeholder="Nom et prénom"
                       required
                     />
                     <input
@@ -598,29 +598,29 @@ export default async function Home({
                     <input
                       className="rounded-2xl border border-black/10 bg-white px-4 py-3"
                       name="phone"
-                      placeholder="Telephone"
+                      placeholder="Téléphone"
                     />
                     <input
                       className="rounded-2xl border border-black/10 bg-white px-4 py-3"
                       name="eventType"
-                      placeholder="Type d'evenement"
+                      placeholder="Type d'événement"
                     />
                     <input
                       className="rounded-2xl border border-black/10 bg-white px-4 py-3"
                       name="eventLocation"
-                      placeholder="Lieu de l'evenement"
+                      placeholder="Lieu de l'événement"
                     />
                     <input
                       className="rounded-2xl border border-black/10 bg-white px-4 py-3"
                       name="guestCount"
                       type="number"
                       min="1"
-                      placeholder="Nombre d'invites"
+                      placeholder="Nombre d'invités"
                     />
                     <input
                       className="rounded-2xl border border-black/10 bg-white px-4 py-3"
                       name="budget"
-                      placeholder="Budget estime (EUR)"
+                      placeholder="Budget estimé (EUR)"
                     />
                     <DateRangePicker startName="startDate" endName="endDate" />
                   </div>
@@ -628,7 +628,7 @@ export default async function Home({
                   <textarea
                     className="min-h-[140px] rounded-2xl border border-black/10 bg-white px-4 py-3"
                     name="message"
-                    placeholder="Expliquez votre demande, les quantites et le style souhaite."
+                    placeholder="Expliquez votre demande, les quantités et le style souhaité."
                     required
                   />
 
@@ -653,7 +653,7 @@ export default async function Home({
 
                 <div className="mt-6 space-y-3 text-sm text-[color:var(--muted)]">
                   <p>
-                    <strong className="text-[color:var(--ink)]">Telephone</strong>{" "}
+                    <strong className="text-[color:var(--ink)]">Téléphone</strong>{" "}
                     :{" "}
                     <a
                       href={`tel:${siteConfig.phone.replace(/\s+/g, "")}`}
@@ -806,8 +806,8 @@ export default async function Home({
             </h2>
             <div className="mt-4 space-y-3 text-sm text-[color:var(--muted)]">
               <p>
-                Alternative Location accompagne mariages, anniversaires, fetes
-                de famille et evenements professionnels a Galgon (33133) et dans
+                Alternative Location accompagne mariages, anniversaires, fêtes
+                de famille et événements professionnels à Galgon (33133) et dans
                 un rayon de 150 km.
               </p>
               <p>
@@ -825,3 +825,5 @@ export default async function Home({
     </div>
   );
 }
+
+
