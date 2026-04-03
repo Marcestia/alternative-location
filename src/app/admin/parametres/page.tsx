@@ -45,17 +45,44 @@ function Notice({ tone, children }: { tone: "success" | "warning"; children: Rea
   return <div className={`rounded-2xl border px-4 py-3 text-sm ${styles}`}>{children}</div>;
 }
 
+function HelpContent({
+  purpose,
+  steps,
+}: {
+  purpose: string;
+  steps: string[];
+}) {
+  return (
+    <div className="space-y-3">
+      <p>{purpose}</p>
+      <div>
+        <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--ink)]">Mode d'emploi</p>
+        <ul className="mt-2 space-y-2">
+          {steps.map((step) => (
+            <li key={step} className="flex gap-2">
+              <span className="mt-[0.45rem] h-1.5 w-1.5 rounded-full bg-[color:var(--accent)]" />
+              <span>{step}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 function SectionShell({
   id,
   eyebrow,
   title,
   description,
+  helpContent,
   children,
 }: {
   id: string;
   eyebrow: string;
   title: string;
   description: string;
+  helpContent?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -64,9 +91,30 @@ function SectionShell({
       className="rounded-3xl border border-black/5 bg-white/85 p-6 shadow-[0_15px_30px_rgba(22,18,14,0.08)]"
     >
       <div className="border-b border-black/5 pb-5">
-        <p className="text-xs uppercase tracking-[0.28em] text-[color:var(--muted)]">{eyebrow}</p>
-        <h2 className="mt-2 text-2xl font-semibold text-[color:var(--ink)]">{title}</h2>
-        <p className="mt-2 max-w-3xl text-sm text-[color:var(--muted)]">{description}</p>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.28em] text-[color:var(--muted)]">{eyebrow}</p>
+            <h2 className="mt-2 text-2xl font-semibold text-[color:var(--ink)]">{title}</h2>
+            <p className="mt-2 max-w-3xl text-sm text-[color:var(--muted)]">{description}</p>
+          </div>
+
+          {helpContent ? (
+            <details className="group relative lg:max-w-sm">
+              <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-[color:var(--ink)] shadow-[0_8px_18px_rgba(22,18,14,0.06)] transition hover:-translate-y-0.5 hover:border-black/20">
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-black/10 bg-white text-xs font-bold text-[color:var(--accent)]">
+                  ?
+                </span>
+                <span>Aide</span>
+                <span className="ml-auto text-xs text-[color:var(--muted)] transition group-open:rotate-180">
+                  v
+                </span>
+              </summary>
+              <div className="mt-3 rounded-2xl border border-black/8 bg-[color:var(--surface)]/95 px-4 py-4 text-sm leading-6 text-[color:var(--muted)] shadow-[0_16px_32px_rgba(22,18,14,0.08)] lg:absolute lg:right-0 lg:top-full lg:z-10 lg:mt-2 lg:w-[360px]">
+                {helpContent}
+              </div>
+            </details>
+          ) : null}
+        </div>
       </div>
       <div className="mt-6">{children}</div>
     </section>
@@ -217,6 +265,16 @@ export default async function Page({
         eyebrow="Entreprise"
         title="Identite et facturation"
         description="Coordonnees, mentions legales, TVA et regles de paiement."
+        helpContent={
+          <HelpContent
+            purpose="Cette section centralise les informations de l'entreprise reutilisees dans les devis, les factures, les emails et les PDF."
+            steps={[
+              "Renseignez les coordonnees, les mentions legales et les informations bancaires.",
+              "Mettez a jour la TVA et les conditions de paiement si besoin.",
+              "Cliquez sur Enregistrer pour appliquer ces donnees partout dans l'outil.",
+            ]}
+          />
+        }
       >
       <form
         action={saveCompanySettings}
@@ -388,6 +446,16 @@ export default async function Page({
         eyebrow="Sauvegarde"
         title="Export base de donnees"
         description="Telechargez un export JSON complet pour sauvegarde ou migration."
+        helpContent={
+          <HelpContent
+            purpose="Cet export sert de sauvegarde technique. Il permet de recuperer les donnees du site pour archive, controle ou migration vers un autre systeme."
+            steps={[
+              "Cliquez sur Telecharger l'export pour recuperer un fichier JSON complet.",
+              "Conservez ce fichier dans un endroit sur et datez vos sauvegardes.",
+              "L'export ne modifie rien sur le site : il sert uniquement a sauvegarder les donnees.",
+            ]}
+          />
+        }
       >
         <a
           className="inline-flex rounded-full bg-[color:var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)]"
@@ -419,6 +487,16 @@ export default async function Page({
         eyebrow="Catalogue"
         title="Categories"
         description="Creez, modifiez ou supprimez les categories du catalogue. Vous pouvez aussi definir une image de bandeau pour chaque section."
+        helpContent={
+          <HelpContent
+            purpose="Cette section organise le catalogue public. Les categories crees ici servent a ranger les articles dans les bonnes familles et a structurer la navigation du site."
+            steps={[
+              "Choisissez d'abord la bonne famille pour classer la categorie au bon endroit.",
+              "Ajoutez un nom, une description et, si besoin, une image de bandeau.",
+              "Utilisez l'ordre pour ajuster l'affichage, puis enregistrez vos modifications.",
+            ]}
+          />
+        }
       >
           <div className="rounded-2xl border border-black/5 bg-[color:var(--surface)]/50 p-5">
             <div className="mt-4 space-y-6">
@@ -557,6 +635,16 @@ export default async function Page({
         eyebrow="Page d'accueil"
         title="Rubrique du moment"
         description="Mises en avant visibles sur la page d'accueil, sans limite fixe."
+        helpContent={
+          <HelpContent
+            purpose="La rubrique du moment permet d'afficher des mises en avant sur la page d'accueil pour presenter une ambiance, une formule ou une actualite."
+            steps={[
+              "Creez autant de mises en avant que necessaire.",
+              "Ajoutez un titre, un texte, une image et un ordre d'affichage.",
+              "Decochez Actif pour masquer temporairement un bloc sans le supprimer.",
+            ]}
+          />
+        }
       >
           <div className="rounded-2xl border border-black/5 bg-[color:var(--surface)]/50 p-5">
             <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -662,6 +750,16 @@ export default async function Page({
         eyebrow="Galerie"
         title="Sections et medias"
         description="Creez des sections, ajoutez vos photos ou videos, puis retirez les blocs ou medias que vous ne voulez plus afficher."
+        helpContent={
+          <HelpContent
+            purpose="Cette section alimente la galerie du site. Vous pouvez y creer des themes, ajouter des photos ou des videos, puis les ordonner selon le rendu souhaite."
+            steps={[
+              "Commencez par creer une section pour regrouper vos contenus par ambiance.",
+              "Ajoutez ensuite les medias et rattachez-les a la bonne section ou laissez-les sans section.",
+              "Utilisez Actif, l'ordre et Supprimer pour garder une galerie propre et coherente.",
+            ]}
+          />
+        }
       >
           <div className="rounded-2xl border border-black/5 bg-[color:var(--surface)]/50 p-5">
 
@@ -994,3 +1092,4 @@ export default async function Page({
     </section>
   );
 }
+
