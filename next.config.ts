@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     },
   },
   allowedDevOrigins: ["http://100.70.61.15:3001"],
+  serverExternalPackages: ["@huggingface/transformers"],
 };
 
 export default nextConfig;

@@ -113,6 +113,7 @@ model Item {
   active      Boolean @default(true)
   categoryId  String?
   category    ItemCategory? @relation(fields: [categoryId], references: [id])
+  embedding   ItemEmbedding?
   images      ItemImage[]
   reservationItems ReservationItem[]
   quoteItems  QuoteItem[]
@@ -121,6 +122,18 @@ model Item {
 
   @@index([categoryId])
   @@index([active])
+}
+
+model ItemEmbedding {
+  itemId          String   @id
+  contentHash     String
+  embeddingModel  String
+  sourceText      String
+  embedding       Json
+  dimensions      Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  item            Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
 }
 
 model ItemImage {

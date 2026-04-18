@@ -1,14 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { startTransition, useDeferredValue, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { createPortal } from "react-dom";
-
-type CategoryVM = {
-  id: string;
-  name: string;
-  description: string | null;
-  slug: string;
-};
 
 type ItemVM = {
   id: string;
@@ -43,12 +37,358 @@ type CataloguePageClientProps = {
   uncategorized: ItemVM[];
 };
 
+type SemanticSearchMode = "semantic" | "approximate" | "none" | "unavailable";
+
+type SemanticSearchState = {
+  itemIds: string[];
+  mode: SemanticSearchMode;
+  query: string;
+  status: "idle" | "loading" | "ready" | "unavailable" | "error";
+};
+
 const euroFormatter = new Intl.NumberFormat("fr-FR", {
   style: "currency",
   currency: "EUR",
 });
 
 const formatEuro = (cents: number) => euroFormatter.format(cents / 100);
+
+const normalizeSearchValue = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const buildSearchText = (parts: Array<string | null | undefined>) =>
+  normalizeSearchValue(parts.filter(Boolean).join(" "));
+
+const buildSearchTerms = (value: string) =>
+  normalizeSearchValue(value).split(" ").filter(Boolean);
+
+const SEARCH_SYNONYM_GROUPS = [
+  ["chaise", "siege", "fauteuil", "tabouret", "assise"],
+  ["table", "mange", "debout", "haute", "cocktail", "gueridon"],
+  ["verre", "gobelet", "flute", "coupe"],
+  ["couvert", "fourchette", "couteau", "cuillere", "menagere"],
+  ["nappe", "linge", "toile"],
+  ["vase", "soliflore"],
+  ["photophore", "bougeoir", "chandelier"],
+  ["lumiere", "lampe", "luminaire", "eclairage"],
+  ["son", "audio", "enceinte"],
+  ["jeu", "animation", "loisir"],
+  ["arche", "portique"],
+  ["decoration", "deco", "ornement"],
+  ["reception", "buffet", "service"],
+];
+
+type SearchIndex = {
+  text: string;
+  tokens: string[];
+  normalizedTokens: string[];
+  phoneticTokens: string[];
+};
+
+type SearchScore = {
+  score: number;
+  strongMatches: number;
+  weakestTermScore: number;
+};
+
+const singularizeSearchToken = (token: string) => {
+  if (token.endsWith("aux") && token.length > 4) {
+    return `${token.slice(0, -3)}al`;
+  }
+  if (token.endsWith("s") && token.length > 3) {
+    return token.slice(0, -1);
+  }
+  return token;
+};
+
+const collapseRepeatedLetters = (token: string) =>
+  token.replace(/(.)\1{1,}/g, "$1");
+
+const normalizeSearchToken = (token: string) =>
+  singularizeSearchToken(collapseRepeatedLetters(token));
+
+const createSearchSynonymMap = (groups: string[][]) => {
+  const synonymMap = new Map<string, string[]>();
+
+  for (const group of groups) {
+    for (const term of group) {
+      synonymMap.set(term, group.filter((candidate) => candidate !== term));
+    }
+  }
+
+  return synonymMap;
+};
+
+const SEARCH_SYNONYM_MAP = createSearchSynonymMap(SEARCH_SYNONYM_GROUPS);
+
+const buildSearchIndex = (parts: Array<string | null | undefined>): SearchIndex => {
+  const text = buildSearchText(parts);
+  const tokens = text ? text.split(" ") : [];
+  const normalizedTokens = tokens.map((token) => normalizeSearchToken(token));
+  return {
+    text,
+    tokens,
+    normalizedTokens,
+    phoneticTokens: normalizedTokens.map((token) =>
+      token
+        .replace(/eau/g, "o")
+        .replace(/au/g, "o")
+        .replace(/ou/g, "u")
+        .replace(/ph/g, "f")
+        .replace(/qu/g, "k")
+        .replace(/[cq]/g, "k")
+        .replace(/y/g, "i")
+        .replace(/z/g, "s")
+        .replace(/h/g, "")
+    ),
+  };
+};
+
+const expandSearchTerm = (term: string) => {
+  const variants = new Set<string>();
+  const queue = [normalizeSearchToken(term)];
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (!current || variants.has(current)) continue;
+
+    variants.add(current);
+    const synonyms = SEARCH_SYNONYM_MAP.get(current) || [];
+    for (const synonym of synonyms) {
+      queue.push(normalizeSearchToken(synonym));
+    }
+  }
+
+  return Array.from(variants);
+};
+
+const getTypoTolerance = (termLength: number) => {
+  if (termLength >= 8) return 2;
+  if (termLength >= 4) return 1;
+  return 0;
+};
+
+const getEditDistanceWithinLimit = (left: string, right: string, maxDistance: number) => {
+  if (left === right) return 0;
+  if (Math.abs(left.length - right.length) > maxDistance) return null;
+
+  let previousRow = Array.from({ length: right.length + 1 }, (_, index) => index);
+
+  for (let i = 1; i <= left.length; i += 1) {
+    const currentRow = [i];
+    let minInRow = currentRow[0];
+
+    for (let j = 1; j <= right.length; j += 1) {
+      const substitutionCost = left[i - 1] === right[j - 1] ? 0 : 1;
+      const candidate = Math.min(
+        previousRow[j] + 1,
+        currentRow[j - 1] + 1,
+        previousRow[j - 1] + substitutionCost
+      );
+
+      currentRow.push(candidate);
+      if (candidate < minInRow) minInRow = candidate;
+    }
+
+    if (minInRow > maxDistance) return null;
+    previousRow = currentRow;
+  }
+
+  return previousRow[right.length] <= maxDistance ? previousRow[right.length] : null;
+};
+
+const buildBigrams = (token: string) => {
+  if (token.length < 2) return [token];
+
+  const bigrams: string[] = [];
+  for (let index = 0; index < token.length - 1; index += 1) {
+    bigrams.push(token.slice(index, index + 2));
+  }
+  return bigrams;
+};
+
+const getDiceCoefficient = (left: string, right: string) => {
+  if (!left || !right) return 0;
+  if (left === right) return 1;
+
+  const leftBigrams = buildBigrams(left);
+  const rightCounts = new Map<string, number>();
+
+  for (const bigram of buildBigrams(right)) {
+    rightCounts.set(bigram, (rightCounts.get(bigram) || 0) + 1);
+  }
+
+  let intersection = 0;
+  for (const bigram of leftBigrams) {
+    const count = rightCounts.get(bigram) || 0;
+    if (count > 0) {
+      intersection += 1;
+      rightCounts.set(bigram, count - 1);
+    }
+  }
+
+  return (2 * intersection) / (leftBigrams.length + buildBigrams(right).length);
+};
+
+const scoreSearchVariant = (searchIndex: SearchIndex, variant: string) => {
+  const normalizedVariant = normalizeSearchToken(variant);
+  if (!normalizedVariant) return 0;
+
+  const phoneticVariant = normalizedVariant
+    .replace(/eau/g, "o")
+    .replace(/au/g, "o")
+    .replace(/ou/g, "u")
+    .replace(/ph/g, "f")
+    .replace(/qu/g, "k")
+    .replace(/[cq]/g, "k")
+    .replace(/y/g, "i")
+    .replace(/z/g, "s")
+    .replace(/h/g, "");
+
+  let bestScore = searchIndex.text.includes(normalizedVariant) ? 0.9 : 0;
+
+  for (let index = 0; index < searchIndex.normalizedTokens.length; index += 1) {
+    const token = searchIndex.normalizedTokens[index];
+
+    if (token === normalizedVariant) {
+      return 1;
+    }
+
+    if (
+      token.startsWith(normalizedVariant) ||
+      normalizedVariant.startsWith(token)
+    ) {
+      bestScore = Math.max(bestScore, 0.92);
+    } else if (
+      token.includes(normalizedVariant) ||
+      normalizedVariant.includes(token)
+    ) {
+      bestScore = Math.max(bestScore, 0.84);
+    }
+
+    const maxDistance = getTypoTolerance(Math.max(normalizedVariant.length, token.length));
+    const distance = getEditDistanceWithinLimit(normalizedVariant, token, maxDistance);
+    if (distance !== null) {
+      const similarity =
+        1 - distance / Math.max(normalizedVariant.length, token.length, 1);
+      bestScore = Math.max(bestScore, 0.58 + similarity * 0.24);
+    }
+
+    const diceCoefficient = getDiceCoefficient(normalizedVariant, token);
+    if (diceCoefficient >= 0.45) {
+      bestScore = Math.max(bestScore, 0.38 + diceCoefficient * 0.42);
+    }
+
+    if (searchIndex.phoneticTokens[index] === phoneticVariant) {
+      bestScore = Math.max(bestScore, 0.76);
+    }
+  }
+
+  return bestScore;
+};
+
+const scoreSearchIndex = (
+  searchIndex: SearchIndex,
+  normalizedQuery: string,
+  queryVariants: string[][]
+): SearchScore => {
+  if (!queryVariants.length) {
+    return { score: 1, strongMatches: 0, weakestTermScore: 1 };
+  }
+
+  const termScores = queryVariants.map((variants) =>
+    variants.reduce(
+      (bestScore, variant) => Math.max(bestScore, scoreSearchVariant(searchIndex, variant)),
+      0
+    )
+  );
+
+  const averageScore =
+    termScores.reduce((sum, score) => sum + score, 0) / termScores.length;
+  const strongMatches = termScores.filter((score) => score >= 0.72).length;
+  const phraseBonus =
+    normalizedQuery.length > 2 && searchIndex.text.includes(normalizedQuery) ? 0.08 : 0;
+  const coverageBonus = strongMatches === queryVariants.length ? 0.04 : 0;
+
+  return {
+    score: averageScore + phraseBonus + coverageBonus,
+    strongMatches,
+    weakestTermScore: Math.min(...termScores),
+  };
+};
+
+const isDirectSearchMatch = (searchScore: SearchScore, termCount: number) => {
+  if (termCount <= 1) {
+    return searchScore.score >= 0.58;
+  }
+
+  return searchScore.score >= 0.6 && searchScore.weakestTermScore >= 0.36;
+};
+
+const isApproximateSearchMatch = (searchScore: SearchScore, termCount: number) => {
+  if (termCount <= 1) {
+    return searchScore.score >= 0.42;
+  }
+
+  return searchScore.score >= 0.48;
+};
+
+function groupSections(sections: SectionVM[]) {
+  const groups = new Map<
+    string,
+    {
+      key: string;
+      label: string;
+      slug: string;
+      description: string;
+      sections: SectionVM[];
+    }
+  >();
+
+  for (const section of sections) {
+    const existing = groups.get(section.group.slug);
+    if (existing) {
+      existing.sections.push(section);
+    } else {
+      groups.set(section.group.slug, {
+        ...section.group,
+        sections: [section],
+      });
+    }
+  }
+
+  return Array.from(groups.values());
+}
+
+function buildRankedSections(sections: SectionVM[], rankedItemIds: string[]) {
+  if (!rankedItemIds.length) return [];
+
+  const rankMap = new Map(rankedItemIds.map((itemId, index) => [itemId, index]));
+
+  return sections
+    .map((section) => ({
+      ...section,
+      items: section.items
+        .filter((item) => rankMap.has(item.id))
+        .sort((left, right) => {
+          const leftRank = rankMap.get(left.id) ?? Number.MAX_SAFE_INTEGER;
+          const rightRank = rankMap.get(right.id) ?? Number.MAX_SAFE_INTEGER;
+          return leftRank - rightRank;
+        }),
+    }))
+    .filter((section) => section.items.length > 0)
+    .sort((left, right) => {
+      const leftRank = rankMap.get(left.items[0]?.id || "") ?? Number.MAX_SAFE_INTEGER;
+      const rightRank = rankMap.get(right.items[0]?.id || "") ?? Number.MAX_SAFE_INTEGER;
+      return leftRank - rightRank;
+    });
+}
 
 function CatalogueItemModal({
   item,
@@ -63,7 +403,6 @@ function CatalogueItemModal({
   onAdd: (item: ItemVM) => void;
   onRemove: (item: ItemVM) => void;
 }) {
-  const [mounted, setMounted] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const images = item.images.length
     ? item.images
@@ -71,7 +410,6 @@ function CatalogueItemModal({
   const canIncrease = quantity < Math.max(item.totalQty, 1);
 
   useEffect(() => {
-    setMounted(true);
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
       if (event.key === "ArrowRight") setActiveIndex((current) => (current + 1) % images.length);
@@ -85,11 +423,7 @@ function CatalogueItemModal({
     };
   }, [images.length, onClose]);
 
-  useEffect(() => {
-    setActiveIndex(0);
-  }, [item.id]);
-
-  if (!mounted) return null;
+  if (typeof document === "undefined") return null;
 
   const activeImage = images[activeIndex];
 
@@ -141,7 +475,7 @@ function CatalogueItemModal({
               </div>
               <div className="flex items-center justify-between rounded-full border border-emerald-200 bg-emerald-50 px-2 py-2">
                 <button type="button" onClick={() => onRemove(item)} disabled={quantity === 0} className="h-10 w-10 rounded-full bg-white text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-40">-</button>
-                <button type="button" onClick={() => onAdd(item)} disabled={!canIncrease} className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40">Ajouter a l'estimation</button>
+                <button type="button" onClick={() => onAdd(item)} disabled={!canIncrease} className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40">Ajouter a l&apos;estimation</button>
               </div>
             </div>
           </div>
@@ -234,6 +568,14 @@ export default function CataloguePageClient({
   const [selected, setSelected] = useState<Record<string, SelectedItemVM>>({});
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [semanticSearchState, setSemanticSearchState] = useState<SemanticSearchState>({
+    itemIds: [],
+    mode: "none",
+    query: "",
+    status: "idle",
+  });
+  const deferredSearchTerm = useDeferredValue(searchTerm);
 
   const selectedItems = useMemo(() => Object.values(selected), [selected]);
   const selectedCount = useMemo(
@@ -271,36 +613,233 @@ export default function CataloguePageClient({
     () => displaySections.flatMap((section) => section.items),
     [displaySections]
   );
-  const activeItem = useMemo(
-    () => allItems.find((item) => item.id === activeItemId) ?? null,
-    [activeItemId, allItems]
+  const normalizedSearchTerm = useMemo(
+    () => normalizeSearchValue(deferredSearchTerm),
+    [deferredSearchTerm]
   );
-  const sectionGroups = useMemo(() => {
-    const groups = new Map<
-      string,
-      {
-        key: string;
-        label: string;
-        slug: string;
-        description: string;
-        sections: SectionVM[];
-      }
-    >();
+  const hasSearchQuery = normalizedSearchTerm.length > 0;
+  const searchTerms = useMemo(
+    () => buildSearchTerms(deferredSearchTerm),
+    [deferredSearchTerm]
+  );
+  const searchQueryVariants = useMemo(
+    () => searchTerms.map((term) => expandSearchTerm(term)),
+    [searchTerms]
+  );
+  const fallbackSearchState = useMemo(() => {
+    if (!searchQueryVariants.length) {
+      return { mode: "default" as const, sections: displaySections };
+    }
 
-    for (const section of displaySections) {
-      const existing = groups.get(section.group.slug);
-      if (existing) {
-        existing.sections.push(section);
+    const scoredSections = displaySections.map((section) => {
+      const sectionSearchScore = scoreSearchIndex(
+        buildSearchIndex([
+          section.label,
+          section.description,
+          section.group.label,
+          section.group.description,
+        ]),
+        normalizedSearchTerm,
+        searchQueryVariants
+      );
+      const scoredItems = section.items.map((item) => ({
+        item,
+        searchScore: scoreSearchIndex(
+          buildSearchIndex([
+            item.name,
+            item.description,
+            section.label,
+            section.description,
+            section.group.label,
+            section.group.description,
+          ]),
+          normalizedSearchTerm,
+          searchQueryVariants
+        ),
+      }));
+
+      return {
+        section,
+        sectionSearchScore,
+        scoredItems,
+      };
+    });
+
+    const directSections = scoredSections
+      .map(({ section, sectionSearchScore, scoredItems }) => {
+        if (isDirectSearchMatch(sectionSearchScore, searchTerms.length)) {
+          return section;
+        }
+
+        const directItems = scoredItems
+          .filter(({ searchScore }) =>
+            isDirectSearchMatch(searchScore, searchTerms.length)
+          )
+          .sort(
+            (left, right) =>
+              right.searchScore.score - left.searchScore.score ||
+              left.item.name.localeCompare(right.item.name, "fr-FR")
+          )
+          .map(({ item }) => item);
+
+        if (!directItems.length) return null;
+
+        return {
+          ...section,
+          items: directItems,
+        };
+      })
+      .filter((section): section is SectionVM => section !== null);
+
+    if (directSections.length > 0) {
+      return { mode: "direct" as const, sections: directSections };
+    }
+
+    const approximateEntries = scoredSections
+      .flatMap(({ section, scoredItems }) =>
+        scoredItems.map(({ item, searchScore }) => ({
+          section,
+          item,
+          searchScore,
+        }))
+      )
+      .filter(({ searchScore }) =>
+        isApproximateSearchMatch(searchScore, searchTerms.length)
+      )
+      .sort(
+        (left, right) =>
+          right.searchScore.score - left.searchScore.score ||
+          left.item.name.localeCompare(right.item.name, "fr-FR")
+      )
+      .slice(0, 12);
+
+    if (!approximateEntries.length) {
+      return { mode: "none" as const, sections: [] as SectionVM[] };
+    }
+
+    const approximateSectionsMap = new Map<string, SectionVM>();
+    for (const { section, item } of approximateEntries) {
+      const existingSection = approximateSectionsMap.get(section.id);
+      if (existingSection) {
+        existingSection.items.push(item);
       } else {
-        groups.set(section.group.slug, {
-          ...section.group,
-          sections: [section],
+        approximateSectionsMap.set(section.id, {
+          ...section,
+          items: [item],
         });
       }
     }
 
-    return Array.from(groups.values());
-  }, [displaySections]);
+    const approximateSections = displaySections
+      .map((section) => approximateSectionsMap.get(section.id) || null)
+      .filter((section): section is SectionVM => section !== null);
+
+    return { mode: "approximate" as const, sections: approximateSections };
+  }, [displaySections, normalizedSearchTerm, searchQueryVariants, searchTerms.length]);
+  const semanticSections = useMemo(
+    () => buildRankedSections(displaySections, semanticSearchState.itemIds),
+    [displaySections, semanticSearchState.itemIds]
+  );
+  const activeItem = useMemo(
+    () => allItems.find((item) => item.id === activeItemId) ?? null,
+    [activeItemId, allItems]
+  );
+  const semanticResultsActive =
+    hasSearchQuery &&
+    semanticSearchState.query === normalizedSearchTerm &&
+    ((semanticSearchState.status === "ready" &&
+      semanticSearchState.mode !== "unavailable") ||
+      (semanticSearchState.status === "loading" &&
+        semanticSearchState.itemIds.length > 0));
+  const semanticLoading =
+    hasSearchQuery &&
+    semanticSearchState.query === normalizedSearchTerm &&
+    semanticSearchState.status === "loading";
+  const semanticUnavailable =
+    hasSearchQuery &&
+    semanticSearchState.query === normalizedSearchTerm &&
+    (semanticSearchState.status === "unavailable" ||
+      semanticSearchState.status === "error");
+  const visibleSections = semanticResultsActive
+    ? semanticSections
+    : fallbackSearchState.sections;
+  const searchMode = semanticResultsActive
+    ? semanticSearchState.mode
+    : semanticUnavailable
+      ? "unavailable"
+      : fallbackSearchState.mode;
+  const sectionGroups = useMemo(() => groupSections(visibleSections), [visibleSections]);
+  const totalCatalogItems = useMemo(
+    () => displaySections.reduce((sum, section) => sum + section.items.length, 0),
+    [displaySections]
+  );
+  const visibleCatalogItems = useMemo(
+    () => visibleSections.reduce((sum, section) => sum + section.items.length, 0),
+    [visibleSections]
+  );
+
+  useEffect(() => {
+    if (!hasSearchQuery) return;
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(async () => {
+      startTransition(() => {
+        setSemanticSearchState({
+          itemIds: [],
+          mode: "none",
+          query: normalizedSearchTerm,
+          status: "loading",
+        });
+      });
+
+      try {
+        const response = await fetch(
+          `/api/catalogue/search?q=${encodeURIComponent(deferredSearchTerm)}&limit=18`,
+          {
+            signal: controller.signal,
+            cache: "no-store",
+          }
+        );
+        const payload = (await response.json()) as {
+          itemIds?: string[];
+          mode?: SemanticSearchMode;
+        };
+
+        if (controller.signal.aborted) return;
+
+        startTransition(() => {
+          setSemanticSearchState({
+            itemIds: Array.isArray(payload.itemIds) ? payload.itemIds : [],
+            mode: payload.mode || "none",
+            query: normalizedSearchTerm,
+            status:
+              response.ok && payload.mode !== "unavailable"
+                ? "ready"
+                : payload.mode === "unavailable"
+                  ? "unavailable"
+                  : "error",
+          });
+        });
+      } catch (error) {
+        if (controller.signal.aborted) return;
+
+        console.error("Semantic catalogue search request failed", error);
+        startTransition(() => {
+          setSemanticSearchState({
+            itemIds: [],
+            mode: "unavailable",
+            query: normalizedSearchTerm,
+            status: "error",
+          });
+        });
+      }
+    }, 260);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeoutId);
+    };
+  }, [deferredSearchTerm, hasSearchQuery, normalizedSearchTerm]);
 
   useEffect(() => {
     if (!mobileSummaryOpen) return;
@@ -341,12 +880,12 @@ export default function CataloguePageClient({
   const summaryContent = (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <a
+        <Link
           href="/"
           className="inline-flex rounded-full bg-[color:var(--accent)] px-4 py-2 text-xs font-semibold text-white shadow-[0_10px_22px_rgba(217,119,55,0.35)] transition hover:-translate-y-0.5 hover:brightness-95"
         >
-          Retour à l'accueil
-        </a>
+          Retour a l&apos;accueil
+        </Link>
         <button
           type="button"
           onClick={clearSelection}
@@ -427,13 +966,13 @@ export default function CataloguePageClient({
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(216,111,63,0.12),transparent_20%),radial-gradient(circle_at_top_right,rgba(203,182,160,0.18),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.92),rgba(247,240,233,0.98))] px-3 pb-28 pt-4 sm:px-5 sm:pb-32 lg:px-8 lg:pt-8">
-      <a
+      <Link
         href="/"
         className="fixed left-4 top-4 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full border border-black/10 bg-white/92 text-xl font-semibold text-[color:var(--ink)] shadow-[0_16px_34px_rgba(30,25,20,0.16)] backdrop-blur transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white sm:left-5 sm:top-5"
         aria-label="Revenir à l'accueil"
       >
         ←
-      </a>
+      </Link>
 
       <div className="mx-auto w-full max-w-[1680px] space-y-6 xl:space-y-8">
         <header
@@ -457,19 +996,90 @@ export default function CataloguePageClient({
                 un devis adapté à votre événement.
               </p>
 
+              <div className="mt-6 rounded-[28px] border border-black/8 bg-white/85 p-4 shadow-[0_18px_36px_rgba(30,25,20,0.05)]">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <label
+                      htmlFor="catalogue-search"
+                      className="text-[11px] uppercase tracking-[0.26em] text-[color:var(--muted)]"
+                    >
+                      Recherche rapide
+                    </label>
+                    <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+                      <input
+                        id="catalogue-search"
+                        type="search"
+                        value={searchTerm}
+                        onChange={(event) => setSearchTerm(event.target.value)}
+                        placeholder="Rechercher un article, une categorie ou une famille"
+                        className="min-w-0 flex-1 rounded-full border border-black/10 bg-[color:var(--surface)]/65 px-5 py-3 text-sm text-[color:var(--ink)] outline-none transition placeholder:text-[color:var(--muted)] focus:border-[color:var(--accent)] focus:bg-white"
+                      />
+                      {searchTerm.trim() ? (
+                        <button
+                          type="button"
+                          onClick={() => setSearchTerm("")}
+                          className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20"
+                        >
+                          Effacer
+                        </button>
+                      ) : null}
+                    </div>
+                    <p className="mt-3 text-xs leading-5 text-[color:var(--muted)]">
+                      La recherche semantique locale rapproche l&apos;intention et le sens, pas seulement les mots exacts.
+                    </p>
+                    {semanticLoading ? (
+                      <p className="mt-2 text-xs font-semibold leading-5 text-[color:var(--accent)]">
+                        Analyse semantique locale en cours...
+                      </p>
+                    ) : null}
+                    {semanticResultsActive && searchMode === "semantic" ? (
+                      <p className="mt-2 text-xs font-semibold leading-5 text-[color:var(--accent)]">
+                        Recherche semantique locale active : classement par proximite de sens.
+                      </p>
+                    ) : null}
+                    {semanticResultsActive && searchMode === "approximate" ? (
+                      <p className="mt-2 text-xs font-semibold leading-5 text-[color:var(--accent)]">
+                        Recherche semantique locale elargie : affichage des articles les plus proches.
+                      </p>
+                    ) : null}
+                    {semanticUnavailable ? (
+                      <p className="mt-2 text-xs font-semibold leading-5 text-[color:var(--accent)]">
+                        Recherche semantique locale indisponible : filtre local de secours actif.
+                      </p>
+                    ) : null}
+                    {hasSearchQuery && !semanticLoading && !semanticResultsActive && !semanticUnavailable && searchMode === "none" ? (
+                      <p className="mt-2 text-xs font-semibold leading-5 text-[color:var(--accent)]">
+                        Aucun article proche trouve pour cette recherche.
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="rounded-full border border-black/8 bg-[color:var(--surface)]/72 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]">
+                    {hasSearchQuery
+                      ? semanticResultsActive
+                        ? searchMode === "approximate"
+                          ? `${visibleCatalogItems} resultat(s) semantiques proches`
+                          : `${visibleCatalogItems} resultat(s) semantiques`
+                        : semanticUnavailable
+                          ? `${visibleCatalogItems} resultat(s) locaux`
+                          : `${visibleCatalogItems} resultat(s) sur ${totalCatalogItems} article(s)`
+                      : `${totalCatalogItems} article(s) disponibles`}
+                  </div>
+                </div>
+              </div>
+
               <div className="mt-6 flex flex-wrap gap-3">
-                <a
+                <Link
                   href="/"
                   className="rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(217,119,55,0.35)] transition hover:-translate-y-0.5 hover:brightness-95"
                 >
-                  Retour à l'accueil
-                </a>
-                <a
+                  Retour a l&apos;accueil
+                </Link>
+                <Link
                   href="/#contact"
                   className="rounded-full border border-black/10 bg-white/90 px-5 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20"
                 >
                   Demander un devis
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -485,12 +1095,12 @@ export default function CataloguePageClient({
                   Nous préparons le devis avec vous, selon les quantités et les dates.
                 </p>
                 <div className="mt-4 flex flex-col gap-2">
-                  <a
+                  <Link
                     className="rounded-full bg-[color:var(--accent)] px-4 py-2.5 text-center text-xs font-semibold text-white shadow-[0_10px_22px_rgba(217,119,55,0.35)] transition hover:-translate-y-0.5 hover:brightness-95"
                     href="/#contact"
                   >
                     Remplir le formulaire
-                  </a>
+                  </Link>
                   <div className="flex flex-col gap-2 sm:flex-row xl:flex-col">
                     <a
                       className="rounded-full border border-black/10 px-4 py-2.5 text-center text-xs font-semibold text-[color:var(--muted)] transition hover:-translate-y-0.5 hover:border-black/30 hover:bg-white"
@@ -519,104 +1129,159 @@ export default function CataloguePageClient({
                   Navigation
                 </p>
                 <div className="mt-4 space-y-2">
-                  {sectionGroups.map((group) => (
-                    <div key={group.slug} className="space-y-2">
-                      <a
-                        href={`#group-${group.slug}`}
-                        className="block rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:border-black/10"
-                      >
-                        {group.label}
-                      </a>
-                      <div className="space-y-1 pl-2">
-                        {group.sections.map((section) => (
-                          <a
-                            key={section.id}
-                            href={`#${section.id}`}
-                            className="block rounded-2xl border border-transparent bg-[color:var(--surface)]/65 px-4 py-2 text-xs font-semibold text-[color:var(--muted)] transition hover:border-black/10 hover:bg-white hover:text-[color:var(--ink)]"
-                          >
-                            {section.label}
-                          </a>
-                        ))}
+                  {sectionGroups.length > 0 ? (
+                    sectionGroups.map((group) => (
+                      <div key={group.slug} className="space-y-2">
+                        <a
+                          href={`#group-${group.slug}`}
+                          className="block rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:border-black/10"
+                        >
+                          {group.label}
+                        </a>
+                        <div className="space-y-1 pl-2">
+                          {group.sections.map((section) => (
+                            <a
+                              key={section.id}
+                              href={`#${section.id}`}
+                              className="block rounded-2xl border border-transparent bg-[color:var(--surface)]/65 px-4 py-2 text-xs font-semibold text-[color:var(--muted)] transition hover:border-black/10 hover:bg-white hover:text-[color:var(--ink)]"
+                            >
+                              {section.label}
+                            </a>
+                          ))}
+                        </div>
                       </div>
+                    ))
+                  ) : semanticLoading ? (
+                    <div className="rounded-[22px] border border-dashed border-black/10 bg-[color:var(--surface)]/75 px-4 py-4 text-sm leading-6 text-[color:var(--muted)]">
+                      Recherche semantique locale en cours...
                     </div>
-                  ))}
-                  <a
+                  ) : (
+                    <div className="rounded-[22px] border border-dashed border-black/10 bg-[color:var(--surface)]/75 px-4 py-4 text-sm leading-6 text-[color:var(--muted)]">
+                      Aucun resultat pour cette recherche.
+                    </div>
+                  )}
+                  <Link
                     href="#contact"
                     className="block rounded-2xl border border-transparent bg-[color:var(--surface)]/65 px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:border-black/10 hover:bg-white"
                   >
                     Nous contacter
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
           </aside>
 
           <main className="space-y-6 sm:space-y-8 xl:space-y-10">
-            {sectionGroups.map((group) => (
-              <section key={group.slug} id={`group-${group.slug}`} className="scroll-mt-24 space-y-5">
-                <div className="rounded-[34px] border border-black/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(247,240,233,0.88))] p-5 shadow-[0_18px_40px_rgba(30,25,20,0.06)] sm:p-7">
-                  <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--accent-2)]">
-                    Famille
-                  </p>
-                  <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
-                    <div>
-                      <h2 className="text-2xl font-semibold text-[color:var(--ink)] sm:text-3xl">
-                        {group.label}
-                      </h2>
-                      <p className="mt-2 max-w-3xl text-sm leading-6 text-[color:var(--muted)]">
-                        {group.description}
-                      </p>
-                    </div>
-                    <div className="rounded-full border border-black/8 bg-white/80 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]">
-                      {group.sections.reduce((sum, section) => sum + section.items.length, 0)} article(s)
+            {sectionGroups.length === 0 && semanticLoading ? (
+              <section className="rounded-[34px] border border-dashed border-black/10 bg-white/88 p-6 shadow-[0_18px_40px_rgba(30,25,20,0.05)] sm:p-8">
+                <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
+                  Recherche
+                </p>
+                <h2 className="mt-3 text-2xl font-semibold text-[color:var(--ink)]">
+                  Recherche semantique locale en cours.
+                </h2>
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
+                  Nous analysons le sens de votre recherche pour remonter les articles les plus pertinents.
+                </p>
+              </section>
+            ) : sectionGroups.length === 0 ? (
+              <section className="rounded-[34px] border border-dashed border-black/10 bg-white/88 p-6 shadow-[0_18px_40px_rgba(30,25,20,0.05)] sm:p-8">
+                <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
+                  Aucun resultat
+                </p>
+                <h2 className="mt-3 text-2xl font-semibold text-[color:var(--ink)]">
+                  {semanticUnavailable
+                    ? "Aucun resultat avec le filtre local de secours."
+                    : "Rien ne correspond, meme avec la recherche semantique locale."}
+                </h2>
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
+                  {semanticUnavailable
+                    ? "La recherche semantique locale est indisponible pour le moment. Essayez un autre mot ou reinitialisez le filtre."
+                    : "Essayez un autre mot, une famille du catalogue, ou reinitialisez le filtre pour revoir l&apos;ensemble des produits."}
+                </p>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setSearchTerm("")}
+                    className="rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(217,119,55,0.35)] transition hover:-translate-y-0.5 hover:brightness-95"
+                  >
+                    Reinitialiser la recherche
+                  </button>
+                  <Link
+                    href="/#contact"
+                    className="rounded-full border border-black/10 bg-white/90 px-5 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20"
+                  >
+                    Demander un devis
+                  </Link>
+                </div>
+              </section>
+            ) : (
+              sectionGroups.map((group) => (
+                <section key={group.slug} id={`group-${group.slug}`} className="scroll-mt-24 space-y-5">
+                  <div className="rounded-[34px] border border-black/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(247,240,233,0.88))] p-5 shadow-[0_18px_40px_rgba(30,25,20,0.06)] sm:p-7">
+                    <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--accent-2)]">
+                      Famille
+                    </p>
+                    <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+                      <div>
+                        <h2 className="text-2xl font-semibold text-[color:var(--ink)] sm:text-3xl">
+                          {group.label}
+                        </h2>
+                        <p className="mt-2 max-w-3xl text-sm leading-6 text-[color:var(--muted)]">
+                          {group.description}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-black/8 bg-white/80 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]">
+                        {group.sections.reduce((sum, section) => sum + section.items.length, 0)} article(s)
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {group.sections.map((section) => (
-                  <section
-                    key={section.id}
-                    id={section.id}
-                    className="scroll-mt-24 rounded-[34px] border border-black/5 bg-white/88 p-5 shadow-[0_18px_40px_rgba(30,25,20,0.06)] sm:p-7"
-                  >
-                    <div className="flex flex-wrap items-end justify-between gap-4 border-b border-black/6 pb-5">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
-                          {section.label}
-                        </p>
-                        {section.description && (
-                          <p className="mt-2 max-w-3xl text-sm leading-6 text-[color:var(--muted)]">
-                            {section.description}
+                  {group.sections.map((section) => (
+                    <section
+                      key={section.id}
+                      id={section.id}
+                      className="scroll-mt-24 rounded-[34px] border border-black/5 bg-white/88 p-5 shadow-[0_18px_40px_rgba(30,25,20,0.06)] sm:p-7"
+                    >
+                      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-black/6 pb-5">
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
+                            {section.label}
                           </p>
-                        )}
+                          {section.description && (
+                            <p className="mt-2 max-w-3xl text-sm leading-6 text-[color:var(--muted)]">
+                              {section.description}
+                            </p>
+                          )}
+                        </div>
+                        <div className="rounded-full border border-black/8 bg-[color:var(--surface)]/70 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]">
+                          {section.items.length} article(s)
+                        </div>
                       </div>
-                      <div className="rounded-full border border-black/8 bg-[color:var(--surface)]/70 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]">
-                        {section.items.length} article(s)
-                      </div>
-                    </div>
 
-                    {section.items.length === 0 ? (
-                      <div className="mt-5 rounded-[24px] border border-dashed border-black/10 bg-[color:var(--surface)] p-6 text-sm text-[color:var(--muted)]">
-                        Aucun article pour le moment.
-                      </div>
-                    ) : (
-                      <div className="mt-6 grid gap-4 md:grid-cols-2 2xl:grid-cols-3 2xl:gap-6">
-                        {section.items.map((item) => (
-                          <ItemCard
-                            key={item.id}
-                            item={item}
-                            quantity={selected[item.id]?.quantity || 0}
-                            onAdd={addItem}
-                            onRemove={removeItem}
-                            onOpenDetails={(selectedItem) => setActiveItemId(selectedItem.id)}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </section>
-                ))}
-              </section>
-            ))}
+                      {section.items.length === 0 ? (
+                        <div className="mt-5 rounded-[24px] border border-dashed border-black/10 bg-[color:var(--surface)] p-6 text-sm text-[color:var(--muted)]">
+                          Aucun article pour le moment.
+                        </div>
+                      ) : (
+                        <div className="mt-6 grid gap-4 md:grid-cols-2 2xl:grid-cols-3 2xl:gap-6">
+                          {section.items.map((item) => (
+                            <ItemCard
+                              key={item.id}
+                              item={item}
+                              quantity={selected[item.id]?.quantity || 0}
+                              onAdd={addItem}
+                              onRemove={removeItem}
+                              onOpenDetails={(selectedItem) => setActiveItemId(selectedItem.id)}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </section>
+                  ))}
+                </section>
+              ))
+            )}
           </main>
 
           <aside className="mt-10 hidden xl:block xl:mt-0">
@@ -682,6 +1347,7 @@ export default function CataloguePageClient({
 
       {activeItem ? (
         <CatalogueItemModal
+          key={activeItem.id}
           item={activeItem}
           quantity={selected[activeItem.id]?.quantity || 0}
           onClose={() => setActiveItemId(null)}

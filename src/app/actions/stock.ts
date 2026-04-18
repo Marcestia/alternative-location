@@ -2,8 +2,8 @@
 
 import type { CategoryGroup } from "@/generated/prisma";
 import { prisma } from "@/lib/prisma";
+import { syncItemSemanticEmbedding } from "@/lib/catalogSemanticSearch";
 import { redirect } from "next/navigation";
-import { siteConfig } from "@/lib/site";
 import { uploadImageDataToR2 } from "@/lib/r2";
 
 const parseEuroToCents = (value: FormDataEntryValue | null) => {
@@ -49,7 +49,7 @@ export async function addItem(formData: FormData) {
     )
   ).filter((value): value is string => Boolean(value));
 
-  await prisma.item.create({
+  const item = await prisma.item.create({
     data: {
       name,
       totalQty: Number.isFinite(totalQty) ? totalQty : 0,
@@ -66,6 +66,12 @@ export async function addItem(formData: FormData) {
         : undefined,
     },
   });
+
+  try {
+    await syncItemSemanticEmbedding(item.id);
+  } catch (error) {
+    console.error("Failed to sync semantic embedding for new item", error);
+  }
 
   redirect("/admin/stock?saved=1");
 }
@@ -112,6 +118,12 @@ export async function updateItem(formData: FormData) {
         sortOrder: existingCount + index,
       })),
     });
+  }
+
+  try {
+    await syncItemSemanticEmbedding(id);
+  } catch (error) {
+    console.error("Failed to sync semantic embedding for updated item", error);
   }
 
   redirect("/admin/stock");
