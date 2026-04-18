@@ -10,6 +10,7 @@ export const maxDuration = 60;
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const query = String(searchParams.get("q") || "").trim();
+  const debug = searchParams.get("debug") === "1";
   const limitParam = Number(searchParams.get("limit") || 18);
   const limit = Number.isFinite(limitParam)
     ? Math.max(1, Math.min(limitParam, 36))
@@ -28,11 +29,20 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("Semantic catalogue search failed", error);
+    const reason =
+      error instanceof Error ? error.message.slice(0, 240) : "Unknown error";
+
     return NextResponse.json(
-      {
-        mode: "unavailable",
-        itemIds: [],
-      },
+      debug
+        ? {
+            mode: "unavailable",
+            itemIds: [],
+            reason,
+          }
+        : {
+          mode: "unavailable",
+          itemIds: [],
+        },
       {
         status: 500,
         headers: {

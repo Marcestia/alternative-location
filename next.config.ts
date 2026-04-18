@@ -7,7 +7,13 @@ const nextConfig: NextConfig = {
     },
   },
   allowedDevOrigins: ["http://100.70.61.15:3001"],
-  serverExternalPackages: ["@huggingface/transformers"],
+  serverExternalPackages: [
+    "@huggingface/tokenizers",
+    "@huggingface/transformers",
+    "onnxruntime-node",
+    "onnxruntime-web",
+    "sharp",
+  ],
 };
 
 export default nextConfig;
