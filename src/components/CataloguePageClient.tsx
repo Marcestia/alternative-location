@@ -390,6 +390,18 @@ function buildRankedSections(sections: SectionVM[], rankedItemIds: string[]) {
     });
 }
 
+function isExactSectionSearchHit(section: SectionVM, normalizedQuery: string) {
+  if (!normalizedQuery) return false;
+
+  const normalizedSectionLabel = normalizeSearchValue(section.label);
+  const normalizedGroupLabel = normalizeSearchValue(section.group.label);
+
+  return (
+    normalizedQuery === normalizedSectionLabel ||
+    normalizedQuery === normalizedGroupLabel
+  );
+}
+
 function CatalogueItemModal({
   item,
   quantity,
@@ -648,10 +660,6 @@ export default function CataloguePageClient({
           buildSearchIndex([
             item.name,
             item.description,
-            section.label,
-            section.description,
-            section.group.label,
-            section.group.description,
           ]),
           normalizedSearchTerm,
           searchQueryVariants
@@ -666,11 +674,7 @@ export default function CataloguePageClient({
     });
 
     const directSections = scoredSections
-      .map(({ section, sectionSearchScore, scoredItems }) => {
-        if (isDirectSearchMatch(sectionSearchScore, searchTerms.length)) {
-          return section;
-        }
-
+      .map(({ section, scoredItems }) => {
         const directItems = scoredItems
           .filter(({ searchScore }) =>
             isDirectSearchMatch(searchScore, searchTerms.length)
@@ -691,8 +695,37 @@ export default function CataloguePageClient({
       })
       .filter((section): section is SectionVM => section !== null);
 
-    if (directSections.length > 0) {
-      return { mode: "direct" as const, sections: directSections };
+    const directSectionHits = scoredSections
+      .map(({ section, sectionSearchScore }) => {
+        if (
+          isExactSectionSearchHit(section, normalizedSearchTerm) ||
+          (searchTerms.length > 1 &&
+            isDirectSearchMatch(sectionSearchScore, searchTerms.length))
+        ) {
+          return section;
+        }
+
+        return null;
+      })
+      .filter((section): section is SectionVM => section !== null);
+
+    if (directSections.length > 0 || directSectionHits.length > 0) {
+      const mergedDirectSections = new Map<string, SectionVM>();
+
+      directSections.forEach((section) => {
+        mergedDirectSections.set(section.id, section);
+      });
+
+      directSectionHits.forEach((section) => {
+        mergedDirectSections.set(section.id, section);
+      });
+
+      return {
+        mode: "direct" as const,
+        sections: displaySections.filter((section) =>
+          mergedDirectSections.has(section.id)
+        ).map((section) => mergedDirectSections.get(section.id) || section),
+      };
     }
 
     const approximateEntries = scoredSections
