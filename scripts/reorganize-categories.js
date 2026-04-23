@@ -16,6 +16,7 @@ const targetCategories = [
   { name: "Arches", group: "DECORATION", sortOrder: 110 },
   { name: "Divers déco", group: "DECORATION", sortOrder: 120 },
   { name: "Décoration vintage", group: "DECORATION", sortOrder: 130 },
+  { name: "Petit mobilier", group: "DECORATION", sortOrder: 140 },
 ];
 
 const categoryAliasMap = {
