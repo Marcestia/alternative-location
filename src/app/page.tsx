@@ -1,6 +1,5 @@
 ﻿import Script from "next/script";
 import GalleryPreviewSection from "@/components/GalleryPreviewSection";
-import DateRangePicker from "@/components/DateRangePicker";
 import ReviewsSection from "@/components/ReviewsSection";
 import ContactSubmitButton from "@/components/ContactSubmitButton";
 import { createContactRequest } from "@/app/actions/contact";
@@ -571,7 +570,7 @@ export default async function Home({
                 )}
                 {sentStatus === "0" && (
                   <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                    Merci de remplir le nom, l'email, les dates et le message.
+                    Merci de remplir le nom, l'email, le jour de la fête et le message.
                   </div>
                 )}
                 {sentStatus === "2" && (
@@ -602,6 +601,11 @@ export default async function Home({
                     />
                     <input
                       className="rounded-2xl border border-black/10 bg-white px-4 py-3"
+                      name="address"
+                      placeholder="Adresse postale"
+                    />
+                    <input
+                      className="rounded-2xl border border-black/10 bg-white px-4 py-3"
                       name="eventType"
                       placeholder="Type d'événement"
                     />
@@ -622,7 +626,17 @@ export default async function Home({
                       name="budget"
                       placeholder="Budget estimé (EUR)"
                     />
-                    <DateRangePicker startName="startDate" endName="endDate" />
+                    <div className="md:col-span-2">
+                      <label className="mb-2 block text-sm font-medium text-[color:var(--ink)]">
+                        Jour de la fête
+                      </label>
+                      <input
+                        className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3"
+                        name="eventDate"
+                        type="date"
+                        required
+                      />
+                    </div>
                   </div>
 
                   <textarea

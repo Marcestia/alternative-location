@@ -41,16 +41,15 @@ export async function createContactRequest(formData: FormData) {
   const name = String(formData.get("name") || "").trim();
   const email = String(formData.get("email") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
+  const address = String(formData.get("address") || "").trim();
   const eventLocation = String(formData.get("eventLocation") || "").trim();
   const guestCountValue = String(formData.get("guestCount") || "").trim();
   const budgetValue = String(formData.get("budget") || "").trim();
-  const startDateValue = String(formData.get("startDate") || "").trim();
-  const endDateValue = String(formData.get("endDate") || "").trim();
   const eventDateValue = String(formData.get("eventDate") || "").trim();
   const eventType = String(formData.get("eventType") || "").trim();
   const message = String(formData.get("message") || "").trim();
 
-  if (!name || !email || !message || !startDateValue || !endDateValue) {
+  if (!name || !email || !message || !eventDateValue) {
     redirect("/?sent=0#contact");
   }
 
@@ -76,12 +75,16 @@ export async function createContactRequest(formData: FormData) {
     }
   }
 
-  const startDate = startDateValue ? toDate(startDateValue) : null;
-  const endDate = endDateValue ? toDate(endDateValue) : null;
   const eventDate = eventDateValue ? toDate(eventDateValue) : null;
+  const startDate = eventDate;
+  const endDate = eventDate;
   const guestCount = guestCountValue ? Number.parseInt(guestCountValue, 10) : null;
   const budget = budgetValue ? parseNumber(budgetValue) : null;
   const budgetCents = budget != null ? Math.round(budget * 100) : null;
+
+  if (!eventDate) {
+    redirect("/?sent=0#contact");
+  }
 
   let client = await prisma.client.findFirst({
     where: { email },
@@ -93,6 +96,7 @@ export async function createContactRequest(formData: FormData) {
       data: {
         name,
         phone: phone || client.phone,
+        address: address || client.address,
       },
     });
   } else {
@@ -101,6 +105,7 @@ export async function createContactRequest(formData: FormData) {
         name,
         email,
         phone: phone || null,
+        address: address || null,
       },
     });
   }
