@@ -1,4 +1,4 @@
-export const CG_VERSION = "2026-03-19";
+export const CG_VERSION = "2026-04-23";
 
 type ConditionSection = {
   title: string;
@@ -60,6 +60,7 @@ export const CONDITIONS_SECTIONS: ConditionSection[] = [
       "Pour les nappes et textiles loués, l'usage de cierges magiques, bougies, chandelles et de toute source de chaleur directe est fortement déconseillé.",
       "La cire de bougie, les brûlures, les trous, les taches tenaces ou toute dégradation irréversible sur les nappes et textiles loués peuvent entraîner une retenue partielle ou totale de la caution.",
       "Les feutres, stylos, marqueurs et tout autre produit d'écriture ne doivent pas être utilisés directement sur les nappes ou autres textiles loués, y compris les produits dits lavables.",
+      "La caution spécifique aux nappes est restituée séparément, après vérification de l'état des nappes et textiles loués.",
       "Tout emballage ou caisse détérioré(e) ou cassé(e) sera facturé(e).",
       "Tout matériel cassé, manquant ou endommagé sera facturé au tarif perte ou casse.",
       "En cas d'abus constatés, une pénalité pourra être appliquée.",
