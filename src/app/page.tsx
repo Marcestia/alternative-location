@@ -2,6 +2,7 @@
 import GalleryPreviewSection from "@/components/GalleryPreviewSection";
 import ReviewsSection from "@/components/ReviewsSection";
 import ContactSubmitButton from "@/components/ContactSubmitButton";
+import EventDatePicker from "@/components/EventDatePicker";
 import { createContactRequest } from "@/app/actions/contact";
 import { submitReviewPublic } from "@/app/actions/reviews";
 import { CATEGORY_GROUP_META, CATEGORY_GROUP_ORDER } from "@/lib/catalog";
@@ -627,14 +628,9 @@ export default async function Home({
                       placeholder="Budget estimé (EUR)"
                     />
                     <div className="md:col-span-2">
-                      <label className="mb-2 block text-sm font-medium text-[color:var(--ink)]">
-                        Jour de la fête
-                      </label>
-                      <input
-                        className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3"
+                      <EventDatePicker
                         name="eventDate"
-                        type="date"
-                        required
+                        label="Jour de la fête"
                       />
                     </div>
                   </div>
