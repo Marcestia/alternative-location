@@ -248,6 +248,7 @@ const getDiceCoefficient = (left: string, right: string) => {
 const scoreSearchVariant = (searchIndex: SearchIndex, variant: string) => {
   const normalizedVariant = normalizeSearchToken(variant);
   if (!normalizedVariant) return 0;
+  const isShortVariant = normalizedVariant.length <= 3;
 
   const phoneticVariant = normalizedVariant
     .replace(/eau/g, "o")
@@ -279,6 +280,13 @@ const scoreSearchVariant = (searchIndex: SearchIndex, variant: string) => {
       normalizedVariant.includes(token)
     ) {
       bestScore = Math.max(bestScore, 0.84);
+    }
+
+    if (isShortVariant) {
+      if (searchIndex.phoneticTokens[index] === phoneticVariant) {
+        bestScore = Math.max(bestScore, 0.76);
+      }
+      continue;
     }
 
     const maxDistance = getTypoTolerance(Math.max(normalizedVariant.length, token.length));
