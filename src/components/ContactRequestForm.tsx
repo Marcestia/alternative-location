@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { createContactRequest } from "@/app/actions/contact";
@@ -29,6 +29,22 @@ const emptyDraft: ContactRequestDraft = {
   message: "",
 };
 
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        element: HTMLElement,
+        options: {
+          sitekey: string;
+          theme?: "light" | "dark" | "auto";
+        }
+      ) => string;
+      remove?: (widgetId: string) => void;
+      reset?: (widgetId?: string) => void;
+    };
+  }
+}
 type ContactRequestFormProps = {
   sentStatus?: string;
   catalogRequestEnabled: boolean;
@@ -42,6 +58,8 @@ export default function ContactRequestForm({
   const [draft, setDraft] = useState<ContactRequestDraft>(emptyDraft);
   const [selectedItemsJson, setSelectedItemsJson] = useState("[]");
   const [selectionError, setSelectionError] = useState("");
+  const turnstileContainerRef = useRef<HTMLDivElement | null>(null);
+  const turnstileWidgetIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -104,6 +122,46 @@ export default function ContactRequestForm({
       window.sessionStorage.removeItem(CONTACT_REQUEST_SELECTION_STORAGE_KEY);
     }
   }, [selectedItemsJson]);
+
+  useEffect(() => {
+    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    if (!siteKey || typeof window === "undefined") return;
+
+    let cancelled = false;
+    let timer: number | null = null;
+
+    const renderWidget = () => {
+      if (cancelled) return;
+      if (!window.turnstile || !turnstileContainerRef.current) {
+        timer = window.setTimeout(renderWidget, 250);
+        return;
+      }
+
+      if (turnstileWidgetIdRef.current && window.turnstile.remove) {
+        window.turnstile.remove(turnstileWidgetIdRef.current);
+        turnstileWidgetIdRef.current = null;
+      }
+
+      turnstileContainerRef.current.innerHTML = "";
+      turnstileWidgetIdRef.current = window.turnstile.render(turnstileContainerRef.current, {
+        sitekey: siteKey,
+        theme: "light",
+      });
+    };
+
+    renderWidget();
+
+    return () => {
+      cancelled = true;
+      if (timer) {
+        window.clearTimeout(timer);
+      }
+      if (turnstileWidgetIdRef.current && window.turnstile?.remove) {
+        window.turnstile.remove(turnstileWidgetIdRef.current);
+        turnstileWidgetIdRef.current = null;
+      }
+    };
+  }, []);
 
   const selectedItems = useMemo(
     () => parseRequestedSelection(selectedItemsJson),
@@ -296,10 +354,7 @@ export default function ContactRequestForm({
 
         {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ? (
           <div className="flex items-center justify-start">
-            <div
-              className="cf-turnstile"
-              data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-            />
+            <div ref={turnstileContainerRef} />
           </div>
         ) : null}
 
@@ -315,3 +370,4 @@ export default function ContactRequestForm({
     </>
   );
 }
+
