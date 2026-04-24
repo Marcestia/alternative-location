@@ -409,6 +409,22 @@ export default async function Page({
             placeholder="BIC (optionnel)"
             defaultValue={settings?.bankBic || ""}
           />
+          <label className="md:col-span-2 flex items-start gap-3 rounded-2xl border border-black/10 bg-[color:var(--surface)]/70 px-4 py-3 text-sm text-[color:var(--muted)]">
+            <input
+              type="checkbox"
+              name="catalogRequestEnabled"
+              defaultChecked={settings?.catalogRequestEnabled || false}
+              className="mt-1"
+            />
+            <span>
+              <span className="block font-semibold text-[color:var(--ink)]">
+                Activer la selection d&apos;articles depuis le formulaire
+              </span>
+              <span className="mt-1 block text-xs leading-5">
+                Le client peut ouvrir le catalogue, choisir ses articles puis renvoyer sa demande avec un panier pre-rempli pour faciliter la creation du devis.
+              </span>
+            </span>
+          </label>
         </div>
         {ribUrl && (
           <div className="mt-4 rounded-2xl border border-black/5 bg-[color:var(--surface)] p-4 text-sm text-[color:var(--muted)]">

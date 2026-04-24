@@ -260,6 +260,7 @@ model CompanySetting {
   spotlightDescription String?
   spotlightImageUrl String?
   spotlightActive Boolean @default(false)
+  catalogRequestEnabled Boolean @default(false)
   updatedAt   DateTime @updatedAt
 }
 
@@ -355,6 +356,7 @@ model ContactRequest {
   eventDate   DateTime?
   eventType   String?
   message     String
+  selectedItemsJson String?
   status      ContactStatus @default(NEW)
   clientId    String?
   client      Client?       @relation(fields: [clientId], references: [id])

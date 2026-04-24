@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { sendMail } from "@/lib/mailer";
+import { parseRequestedSelection, stringifyRequestedSelection } from "@/lib/requestSelection";
 
 function toDate(value: string) {
   const date = new Date(value);
@@ -48,6 +49,9 @@ export async function createContactRequest(formData: FormData) {
   const eventDateValue = String(formData.get("eventDate") || "").trim();
   const eventType = String(formData.get("eventType") || "").trim();
   const message = String(formData.get("message") || "").trim();
+  const requestedSelection = parseRequestedSelection(
+    String(formData.get("selectedItems") || "").trim()
+  );
 
   if (!name || !email || !message || !eventDateValue) {
     redirect("/?sent=0#contact");
@@ -123,6 +127,10 @@ export async function createContactRequest(formData: FormData) {
       eventDate,
       eventType: eventType || null,
       message,
+      selectedItemsJson:
+        requestedSelection.length > 0
+          ? stringifyRequestedSelection(requestedSelection)
+          : null,
       clientId: client.id,
     },
   });

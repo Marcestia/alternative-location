@@ -24,6 +24,8 @@ export async function saveCompanySettings(formData: FormData) {
   }
 
   const vatApplicable = String(formData.get("vatApplicable") || "") === "on";
+  const catalogRequestEnabled =
+    String(formData.get("catalogRequestEnabled") || "") === "on";
   const vatRateBps = parsePercentToBps(formData.get("vatRate"));
   const recoveryFeeCents = parseEuroToCents(formData.get("recoveryFee"));
 
@@ -50,6 +52,7 @@ export async function saveCompanySettings(formData: FormData) {
       recoveryFeeCents: recoveryFeeCents > 0 ? recoveryFeeCents : 4000,
       bankIban: String(formData.get("bankIban") || "").trim() || null,
       bankBic: String(formData.get("bankBic") || "").trim() || null,
+      catalogRequestEnabled,
     },
     create: {
       id: "company",
@@ -73,6 +76,7 @@ export async function saveCompanySettings(formData: FormData) {
       recoveryFeeCents: recoveryFeeCents > 0 ? recoveryFeeCents : 4000,
       bankIban: String(formData.get("bankIban") || "").trim() || null,
       bankBic: String(formData.get("bankBic") || "").trim() || null,
+      catalogRequestEnabled,
     },
   });
 

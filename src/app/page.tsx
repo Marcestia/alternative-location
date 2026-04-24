@@ -1,9 +1,6 @@
-﻿import Script from "next/script";
-import GalleryPreviewSection from "@/components/GalleryPreviewSection";
+﻿import GalleryPreviewSection from "@/components/GalleryPreviewSection";
 import ReviewsSection from "@/components/ReviewsSection";
-import ContactSubmitButton from "@/components/ContactSubmitButton";
-import EventDatePicker from "@/components/EventDatePicker";
-import { createContactRequest } from "@/app/actions/contact";
+import ContactRequestForm from "@/components/ContactRequestForm";
 import { submitReviewPublic } from "@/app/actions/reviews";
 import { CATEGORY_GROUP_META, CATEGORY_GROUP_ORDER } from "@/lib/catalog";
 import { prisma } from "@/lib/prisma";
@@ -256,7 +253,11 @@ export default async function Home({
   const sentStatus = resolvedParams?.sent;
   const reviewStatus = resolvedParams?.review;
 
-  const [categories, reviews, galleryMedia] = await Promise.all([
+  const [settings, categories, reviews, galleryMedia] = await Promise.all([
+    prisma.companySetting.findUnique({
+      where: { id: "company" },
+      select: { catalogRequestEnabled: true },
+    }),
     prisma.itemCategory.findMany({
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     }),
@@ -563,103 +564,10 @@ export default async function Home({
                   versement d'un acompte de 30% sous 7 jours.
                 </p>
 
-                {sentStatus === "1" && (
-                  <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                    Merci. Votre demande a bien été envoyée. Nous revenons vers
-                    vous rapidement.
-                  </div>
-                )}
-                {sentStatus === "0" && (
-                  <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                    Merci de remplir le nom, l'email, le jour de la fête et le message.
-                  </div>
-                )}
-                {sentStatus === "2" && (
-                  <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                    Merci de valider le captcha avant d'envoyer.
-                  </div>
-                )}
-
-                <form action={createContactRequest} className="mt-6 grid gap-4 text-sm">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-4 py-3"
-                      name="name"
-                      placeholder="Nom et prénom"
-                      required
-                    />
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-4 py-3"
-                      name="email"
-                      type="email"
-                      placeholder="Email"
-                      required
-                    />
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-4 py-3"
-                      name="phone"
-                      placeholder="Téléphone"
-                    />
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-4 py-3"
-                      name="address"
-                      placeholder="Adresse postale"
-                    />
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-4 py-3"
-                      name="eventType"
-                      placeholder="Type d'événement"
-                    />
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-4 py-3"
-                      name="eventLocation"
-                      placeholder="Lieu de l'événement"
-                    />
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-4 py-3"
-                      name="guestCount"
-                      type="number"
-                      min="1"
-                      placeholder="Nombre d'invités"
-                    />
-                    <input
-                      className="rounded-2xl border border-black/10 bg-white px-4 py-3"
-                      name="budget"
-                      placeholder="Budget estimé (EUR)"
-                    />
-                    <div className="md:col-span-2">
-                      <EventDatePicker
-                        name="eventDate"
-                        label="Jour de la fête"
-                      />
-                    </div>
-                  </div>
-
-                  <textarea
-                    className="min-h-[140px] rounded-2xl border border-black/10 bg-white px-4 py-3"
-                    name="message"
-                    placeholder="Expliquez votre demande, les quantités et le style souhaité."
-                    required
-                  />
-
-                  {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-                    <div className="flex items-center justify-start">
-                      <div
-                        className="cf-turnstile"
-                        data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-                      />
-                    </div>
-                  )}
-
-                  <ContactSubmitButton />
-                </form>
-
-                {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-                  <Script
-                    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-                    strategy="afterInteractive"
-                  />
-                )}
+                                <ContactRequestForm
+                  sentStatus={sentStatus}
+                  catalogRequestEnabled={settings?.catalogRequestEnabled ?? false}
+                />
 
                 <div className="mt-6 space-y-3 text-sm text-[color:var(--muted)]">
                   <p>

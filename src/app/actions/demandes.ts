@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { sendMail } from "@/lib/mailer";
 import { downloadBufferFromR2, getSignedUrlForKey } from "@/lib/r2";
+import { parseRequestedSelection } from "@/lib/requestSelection";
 import path from "path";
 import fs from "fs/promises";
 import crypto from "crypto";
@@ -36,6 +37,39 @@ export async function createQuoteLink(formData: FormData) {
   });
 
   if (!existing) {
+    const requestedSelection = parseRequestedSelection(request.selectedItemsJson);
+    const requestedItemIds = requestedSelection.map((item) => item.itemId);
+    const catalogueItems = requestedItemIds.length
+      ? await prisma.item.findMany({
+          where: { id: { in: requestedItemIds } },
+          select: {
+            id: true,
+            rentalPriceCents: true,
+          },
+        })
+      : [];
+    const catalogueItemsById = new Map(catalogueItems.map((item) => [item.id, item]));
+    const quoteItems = requestedSelection
+      .map((item) => {
+        const catalogueItem = catalogueItemsById.get(item.itemId);
+        if (!catalogueItem) return null;
+        return {
+          itemId: item.itemId,
+          quantity: item.quantity,
+          unitPriceCents: catalogueItem.rentalPriceCents,
+        };
+      })
+      .filter(
+        (
+          item
+        ): item is { itemId: string; quantity: number; unitPriceCents: number } =>
+          Boolean(item)
+      );
+    const totalAmountCents = quoteItems.reduce(
+      (sum, item) => sum + item.quantity * item.unitPriceCents,
+      0
+    );
+
     await prisma.quote.create({
       data: {
         token: crypto.randomBytes(24).toString("hex"),
@@ -45,6 +79,12 @@ export async function createQuoteLink(formData: FormData) {
         eventDate: request.eventDate,
         clientId: request.clientId,
         contactRequestId: request.id,
+        totalAmountCents,
+        items: quoteItems.length
+          ? {
+              create: quoteItems,
+            }
+          : undefined,
       },
     });
   }

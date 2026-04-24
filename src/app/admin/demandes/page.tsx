@@ -1,6 +1,7 @@
 ﻿import { createQuoteLink, markQuoteSent, refuseContact, markContacted, reopenQuote } from "@/app/actions/demandes";
 import { approveQuote, rejectQuote, updateQuoteAdmin, generateQuotePdf } from "@/app/actions/quotes";
 import { prisma } from "@/lib/prisma";
+import { parseRequestedSelection } from "@/lib/requestSelection";
 import { ContactStatus, QuoteStatus } from "@/generated/prisma";
 import { headers } from "next/headers";
 import Script from "next/script";
@@ -99,6 +100,7 @@ export default async function DemandesPage({
     const periodEnd = quote?.endDate ?? demande.endDate;
     const listId = `items-datalist-${demande.id}`;
     const selectedItemIds = new Set((quote?.items ?? []).map((entry) => entry.itemId));
+    const requestedSelection = parseRequestedSelection(demande.selectedItemsJson);
     const reservedByItem: Record<string, number> = {};
     if (periodStart && periodEnd) {
       reservations.forEach((reservation) => {
@@ -174,6 +176,32 @@ export default async function DemandesPage({
           <p className="mt-2 text-xs text-[color:var(--muted)]">
             Client: {demande.client.name}
           </p>
+        )}
+        {requestedSelection.length > 0 && (
+          <div className="mt-4 rounded-2xl border border-black/5 bg-[color:var(--surface)] p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm font-semibold">Articles demandes</p>
+              <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[color:var(--muted)]">
+                {requestedSelection.reduce((sum, item) => sum + item.quantity, 0)} article(s)
+              </span>
+            </div>
+            <div className="mt-3 space-y-2">
+              {requestedSelection.map((item) => (
+                <div
+                  key={`${demande.id}-${item.itemId}`}
+                  className="flex items-center justify-between gap-3 text-sm text-[color:var(--muted)]"
+                >
+                  <span className="truncate">{item.name}</span>
+                  <span className="shrink-0 font-semibold text-[color:var(--ink)]">x{item.quantity}</span>
+                </div>
+              ))}
+            </div>
+            {!quote && (
+              <p className="mt-3 text-xs text-[color:var(--muted)]">
+                Ces articles seront repris automatiquement dans le devis lors de sa creation.
+              </p>
+            )}
+          </div>
         )}
 
         <div className="mt-4 flex flex-wrap gap-2">

@@ -1,10 +1,13 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type EventDatePickerProps = {
   name: string;
   label: string;
+  defaultValue?: string;
+  onChange?: (value: string) => void;
+  required?: boolean;
 };
 
 const monthFormatter = new Intl.DateTimeFormat("fr-FR", {
@@ -44,16 +47,28 @@ const toIso = (date: Date | null) => {
   return `${year}-${month}-${day}`;
 };
 
+const parseDate = (value: string) => {
+  if (!value) return null;
+  const parsed = startOfDay(new Date(value));
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
 export default function EventDatePicker({
   name,
   label,
+  defaultValue = "",
+  onChange,
+  required = true,
 }: EventDatePickerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const today = useMemo(() => startOfDay(new Date()), []);
   const currentMonth = useMemo(() => startOfMonth(today), [today]);
   const [open, setOpen] = useState(false);
-  const [monthCursor, setMonthCursor] = useState(currentMonth);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [monthCursor, setMonthCursor] = useState(() => {
+    const initialDate = parseDate(defaultValue);
+    return initialDate ? startOfMonth(initialDate) : currentMonth;
+  });
+  const [selectedDate, setSelectedDate] = useState<Date | null>(() => parseDate(defaultValue));
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
@@ -68,6 +83,12 @@ export default function EventDatePicker({
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, []);
+
+  useEffect(() => {
+    const parsed = parseDate(defaultValue);
+    setSelectedDate(parsed);
+    setMonthCursor(parsed ? startOfMonth(parsed) : currentMonth);
+  }, [currentMonth, defaultValue]);
 
   const days = useMemo(() => {
     const start = startOfMonth(monthCursor);
@@ -115,10 +136,10 @@ export default function EventDatePicker({
           <p className="mt-1 text-base font-medium text-[color:var(--ink)]">
             {selectedDate
               ? longDateFormatter.format(selectedDate)
-              : "Choisir le jour de la fête"}
+              : "Choisir le jour de la fete"}
           </p>
           <p className="mt-1 text-xs text-[color:var(--muted)]">
-            Sélectionnez la date de votre événement.
+            Selectionnez la date de votre evenement.
           </p>
         </div>
         <span className="ml-4 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color:var(--surface)] text-[color:var(--accent)] transition group-hover:bg-[color:var(--accent)] group-hover:text-white">
@@ -134,7 +155,7 @@ export default function EventDatePicker({
         </span>
       </button>
 
-      <input type="hidden" name={name} value={toIso(selectedDate)} required />
+      <input type="hidden" name={name} value={toIso(selectedDate)} required={required} />
 
       {open && (
         <div className="absolute left-0 right-0 z-30 mt-3 rounded-[30px] border border-black/10 bg-white/98 p-4 shadow-[0_28px_60px_rgba(18,14,10,0.14)] backdrop-blur sm:p-5">
@@ -148,7 +169,7 @@ export default function EventDatePicker({
               }}
               disabled={!canGoBack}
               className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-black/10 text-[color:var(--muted)] transition hover:border-black/20 hover:bg-[color:var(--surface)] disabled:cursor-not-allowed disabled:opacity-35"
-              aria-label="Mois précédent"
+              aria-label="Mois precedent"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
                 <path
@@ -211,6 +232,7 @@ export default function EventDatePicker({
                   disabled={isPast}
                   onClick={() => {
                     setSelectedDate(date);
+                    onChange?.(toIso(date));
                     setOpen(false);
                   }}
                   className={`h-11 rounded-2xl text-sm font-medium transition duration-200 ${
@@ -230,7 +252,7 @@ export default function EventDatePicker({
           </div>
 
           <div className="mt-4 flex items-center justify-between gap-3 text-xs text-[color:var(--muted)]">
-            <span>Les dates passées ne sont pas disponibles.</span>
+            <span>Les dates passees ne sont pas disponibles.</span>
             <button
               type="button"
               onClick={() => setOpen(false)}
