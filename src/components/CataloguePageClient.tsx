@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import {
@@ -44,15 +44,6 @@ type CataloguePageClientProps = {
   eventDateValue?: string;
   sections: SectionVM[];
   uncategorized: ItemVM[];
-};
-
-type SemanticSearchMode = "semantic" | "approximate" | "none" | "unavailable";
-
-type SemanticSearchState = {
-  itemIds: string[];
-  mode: SemanticSearchMode;
-  query: string;
-  status: "idle" | "loading" | "ready" | "unavailable" | "error";
 };
 
 const euroFormatter = new Intl.NumberFormat("fr-FR", {
@@ -605,14 +596,6 @@ export default function CataloguePageClient({
   const [selected, setSelected] = useState<Record<string, SelectedItemVM>>({});
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [semanticSearchState, setSemanticSearchState] = useState<SemanticSearchState>({
-    itemIds: [],
-    mode: "none",
-    query: "",
-    status: "idle",
-  });
-  const deferredSearchTerm = useDeferredValue(searchTerm);
 
   useEffect(() => {
     if (typeof window === "undefined" || !requestMode) return;
@@ -679,190 +662,14 @@ export default function CataloguePageClient({
     () => displaySections.flatMap((section) => section.items),
     [displaySections]
   );
-  const normalizedSearchTerm = useMemo(
-    () => normalizeSearchValue(deferredSearchTerm),
-    [deferredSearchTerm]
-  );
-  const hasSearchQuery = normalizedSearchTerm.length > 0;
-  const searchTerms = useMemo(
-    () => buildSearchTerms(deferredSearchTerm),
-    [deferredSearchTerm]
-  );
-  const searchQueryVariants = useMemo(
-    () => searchTerms.map((term) => expandSearchTerm(term)),
-    [searchTerms]
-  );
-  const fallbackSearchState = useMemo(() => {
-    if (!searchQueryVariants.length) {
-      return { mode: "default" as const, sections: displaySections };
-    }
-
-    const scoredSections = displaySections.map((section) => {
-      const sectionSearchScore = scoreSearchIndex(
-        buildSearchIndex([
-          section.label,
-          section.description,
-          section.group.label,
-          section.group.description,
-        ]),
-        normalizedSearchTerm,
-        searchQueryVariants
-      );
-      const scoredItems = section.items.map((item) => ({
-        item,
-        searchScore: scoreSearchIndex(
-          buildSearchIndex([
-            item.name,
-            item.description,
-          ]),
-          normalizedSearchTerm,
-          searchQueryVariants
-        ),
-      }));
-
-      return {
-        section,
-        sectionSearchScore,
-        scoredItems,
-      };
-    });
-
-    const directSections = scoredSections
-      .map(({ section, scoredItems }) => {
-        const directItems = scoredItems
-          .filter(({ searchScore }) =>
-            isDirectSearchMatch(searchScore, searchTerms.length)
-          )
-          .sort(
-            (left, right) =>
-              right.searchScore.score - left.searchScore.score ||
-              left.item.name.localeCompare(right.item.name, "fr-FR")
-          )
-          .map(({ item }) => item);
-
-        if (!directItems.length) return null;
-
-        return {
-          ...section,
-          items: directItems,
-        };
-      })
-      .filter((section): section is SectionVM => section !== null);
-
-    const directSectionHits = scoredSections
-      .map(({ section, sectionSearchScore }) => {
-        if (
-          isExactSectionSearchHit(section, normalizedSearchTerm) ||
-          (searchTerms.length > 1 &&
-            isDirectSearchMatch(sectionSearchScore, searchTerms.length))
-        ) {
-          return section;
-        }
-
-        return null;
-      })
-      .filter((section): section is SectionVM => section !== null);
-
-    if (directSections.length > 0 || directSectionHits.length > 0) {
-      const mergedDirectSections = new Map<string, SectionVM>();
-
-      directSections.forEach((section) => {
-        mergedDirectSections.set(section.id, section);
-      });
-
-      directSectionHits.forEach((section) => {
-        mergedDirectSections.set(section.id, section);
-      });
-
-      return {
-        mode: "direct" as const,
-        sections: displaySections.filter((section) =>
-          mergedDirectSections.has(section.id)
-        ).map((section) => mergedDirectSections.get(section.id) || section),
-      };
-    }
-
-    const approximateEntries = scoredSections
-      .flatMap(({ section, scoredItems }) =>
-        scoredItems.map(({ item, searchScore }) => ({
-          section,
-          item,
-          searchScore,
-        }))
-      )
-      .filter(({ searchScore }) =>
-        isApproximateSearchMatch(searchScore, searchTerms.length)
-      )
-      .sort(
-        (left, right) =>
-          right.searchScore.score - left.searchScore.score ||
-          left.item.name.localeCompare(right.item.name, "fr-FR")
-      )
-      .slice(0, 12);
-
-    if (!approximateEntries.length) {
-      return { mode: "none" as const, sections: [] as SectionVM[] };
-    }
-
-    const approximateSectionsMap = new Map<string, SectionVM>();
-    for (const { section, item } of approximateEntries) {
-      const existingSection = approximateSectionsMap.get(section.id);
-      if (existingSection) {
-        existingSection.items.push(item);
-      } else {
-        approximateSectionsMap.set(section.id, {
-          ...section,
-          items: [item],
-        });
-      }
-    }
-
-    const approximateSections = displaySections
-      .map((section) => approximateSectionsMap.get(section.id) || null)
-      .filter((section): section is SectionVM => section !== null);
-
-    return { mode: "approximate" as const, sections: approximateSections };
-  }, [displaySections, normalizedSearchTerm, searchQueryVariants, searchTerms.length]);
-  const semanticSections = useMemo(
-    () => buildRankedSections(displaySections, semanticSearchState.itemIds),
-    [displaySections, semanticSearchState.itemIds]
-  );
   const activeItem = useMemo(
     () => allItems.find((item) => item.id === activeItemId) ?? null,
     [activeItemId, allItems]
   );
-  const semanticResultsActive =
-    hasSearchQuery &&
-    semanticSearchState.query === normalizedSearchTerm &&
-    ((semanticSearchState.status === "ready" &&
-      semanticSearchState.mode !== "unavailable") ||
-      (semanticSearchState.status === "loading" &&
-        semanticSearchState.itemIds.length > 0));
-  const semanticLoading =
-    hasSearchQuery &&
-    semanticSearchState.query === normalizedSearchTerm &&
-    semanticSearchState.status === "loading";
-  const semanticUnavailable =
-    hasSearchQuery &&
-    semanticSearchState.query === normalizedSearchTerm &&
-    (semanticSearchState.status === "unavailable" ||
-      semanticSearchState.status === "error");
-  const visibleSections = semanticResultsActive
-    ? semanticSections
-    : fallbackSearchState.sections;
-  const searchMode = semanticResultsActive
-    ? semanticSearchState.mode
-    : semanticUnavailable
-      ? "unavailable"
-      : fallbackSearchState.mode;
-  const sectionGroups = useMemo(() => groupSections(visibleSections), [visibleSections]);
+  const sectionGroups = useMemo(() => groupSections(displaySections), [displaySections]);
   const totalCatalogItems = useMemo(
     () => displaySections.reduce((sum, section) => sum + section.items.length, 0),
     [displaySections]
-  );
-  const visibleCatalogItems = useMemo(
-    () => visibleSections.reduce((sum, section) => sum + section.items.length, 0),
-    [visibleSections]
   );
   const requestSelection = useMemo<RequestedSelectionItem[]>(
     () =>
@@ -875,69 +682,6 @@ export default function CataloguePageClient({
       })),
     [selectedItems]
   );
-
-  useEffect(() => {
-    if (!hasSearchQuery) return;
-
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(async () => {
-      startTransition(() => {
-        setSemanticSearchState({
-          itemIds: [],
-          mode: "none",
-          query: normalizedSearchTerm,
-          status: "loading",
-        });
-      });
-
-      try {
-        const response = await fetch(
-          `/api/catalogue/search?q=${encodeURIComponent(deferredSearchTerm)}&limit=18`,
-          {
-            signal: controller.signal,
-            cache: "no-store",
-          }
-        );
-        const payload = (await response.json()) as {
-          itemIds?: string[];
-          mode?: SemanticSearchMode;
-        };
-
-        if (controller.signal.aborted) return;
-
-        startTransition(() => {
-          setSemanticSearchState({
-            itemIds: Array.isArray(payload.itemIds) ? payload.itemIds : [],
-            mode: payload.mode || "none",
-            query: normalizedSearchTerm,
-            status:
-              response.ok && payload.mode !== "unavailable"
-                ? "ready"
-                : payload.mode === "unavailable"
-                  ? "unavailable"
-                  : "error",
-          });
-        });
-      } catch (error) {
-        if (controller.signal.aborted) return;
-
-        console.error("Semantic catalogue search request failed", error);
-        startTransition(() => {
-          setSemanticSearchState({
-            itemIds: [],
-            mode: "unavailable",
-            query: normalizedSearchTerm,
-            status: "error",
-          });
-        });
-      }
-    }, 260);
-
-    return () => {
-      controller.abort();
-      window.clearTimeout(timeoutId);
-    };
-  }, [deferredSearchTerm, hasSearchQuery, normalizedSearchTerm]);
 
   useEffect(() => {
     if (!mobileSummaryOpen) return;
@@ -1132,73 +876,18 @@ export default function CataloguePageClient({
                 un devis adapté à votre événement.
               </p>
 
-              <div className="mt-6 rounded-[28px] border border-black/8 bg-white/85 p-4 shadow-[0_18px_36px_rgba(30,25,20,0.05)]">
+              <div className="mt-6 rounded-[28px] border border-black/8 bg-white/85 p-5 shadow-[0_18px_36px_rgba(30,25,20,0.05)]">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                   <div className="min-w-0 flex-1">
-                    <label
-                      htmlFor="catalogue-search"
-                      className="text-[11px] uppercase tracking-[0.26em] text-[color:var(--muted)]"
-                    >
-                      Recherche rapide
-                    </label>
-                    <div className="mt-3 flex flex-col gap-3 sm:flex-row">
-                      <input
-                        id="catalogue-search"
-                        type="search"
-                        value={searchTerm}
-                        onChange={(event) => setSearchTerm(event.target.value)}
-                        placeholder="Rechercher un article, une categorie ou une famille"
-                        className="min-w-0 flex-1 rounded-full border border-black/10 bg-[color:var(--surface)]/65 px-5 py-3 text-sm text-[color:var(--ink)] outline-none transition placeholder:text-[color:var(--muted)] focus:border-[color:var(--accent)] focus:bg-white"
-                      />
-                      {searchTerm.trim() ? (
-                        <button
-                          type="button"
-                          onClick={() => setSearchTerm("")}
-                          className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20"
-                        >
-                          Effacer
-                        </button>
-                      ) : null}
-                    </div>
-                    <p className="mt-3 text-xs leading-5 text-[color:var(--muted)]">
-                      La recherche semantique locale rapproche l&apos;intention et le sens, pas seulement les mots exacts.
+                    <p className="text-[11px] uppercase tracking-[0.26em] text-[color:var(--muted)]">
+                      Organisation
                     </p>
-                    {semanticLoading ? (
-                      <p className="mt-2 text-xs font-semibold leading-5 text-[color:var(--accent)]">
-                        Analyse semantique locale en cours...
-                      </p>
-                    ) : null}
-                    {semanticResultsActive && searchMode === "semantic" ? (
-                      <p className="mt-2 text-xs font-semibold leading-5 text-[color:var(--accent)]">
-                        Recherche semantique locale active : classement par proximite de sens.
-                      </p>
-                    ) : null}
-                    {semanticResultsActive && searchMode === "approximate" ? (
-                      <p className="mt-2 text-xs font-semibold leading-5 text-[color:var(--accent)]">
-                        Recherche semantique locale elargie : affichage des articles les plus proches.
-                      </p>
-                    ) : null}
-                    {semanticUnavailable ? (
-                      <p className="mt-2 text-xs font-semibold leading-5 text-[color:var(--accent)]">
-                        Recherche semantique locale indisponible : filtre local de secours actif.
-                      </p>
-                    ) : null}
-                    {hasSearchQuery && !semanticLoading && !semanticResultsActive && !semanticUnavailable && searchMode === "none" ? (
-                      <p className="mt-2 text-xs font-semibold leading-5 text-[color:var(--accent)]">
-                        Aucun article proche trouve pour cette recherche.
-                      </p>
-                    ) : null}
+                    <p className="mt-3 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
+                      Parcourez les familles, ouvrez les fiches produits pour voir toutes les photos et ajoutez directement les quantités dans votre estimation.
+                    </p>
                   </div>
                   <div className="rounded-full border border-black/8 bg-[color:var(--surface)]/72 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]">
-                    {hasSearchQuery
-                      ? semanticResultsActive
-                        ? searchMode === "approximate"
-                          ? `${visibleCatalogItems} resultat(s) semantiques proches`
-                          : `${visibleCatalogItems} resultat(s) semantiques`
-                        : semanticUnavailable
-                          ? `${visibleCatalogItems} resultat(s) locaux`
-                          : `${visibleCatalogItems} resultat(s) sur ${totalCatalogItems} article(s)`
-                      : `${totalCatalogItems} article(s) disponibles`}
+                    {totalCatalogItems} article(s) disponibles
                   </div>
                 </div>
               </div>
@@ -1265,37 +954,27 @@ export default function CataloguePageClient({
                   Navigation
                 </p>
                 <div className="mt-4 space-y-2">
-                  {sectionGroups.length > 0 ? (
-                    sectionGroups.map((group) => (
-                      <div key={group.slug} className="space-y-2">
-                        <a
-                          href={`#group-${group.slug}`}
-                          className="block rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:border-black/10"
-                        >
-                          {group.label}
-                        </a>
-                        <div className="space-y-1 pl-2">
-                          {group.sections.map((section) => (
-                            <a
-                              key={section.id}
-                              href={`#${section.id}`}
-                              className="block rounded-2xl border border-transparent bg-[color:var(--surface)]/65 px-4 py-2 text-xs font-semibold text-[color:var(--muted)] transition hover:border-black/10 hover:bg-white hover:text-[color:var(--ink)]"
-                            >
-                              {section.label}
-                            </a>
-                          ))}
-                        </div>
+                  {sectionGroups.map((group) => (
+                    <div key={group.slug} className="space-y-2">
+                      <a
+                        href={`#group-${group.slug}`}
+                        className="block rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:border-black/10"
+                      >
+                        {group.label}
+                      </a>
+                      <div className="space-y-1 pl-2">
+                        {group.sections.map((section) => (
+                          <a
+                            key={section.id}
+                            href={`#${section.id}`}
+                            className="block rounded-2xl border border-transparent bg-[color:var(--surface)]/65 px-4 py-2 text-xs font-semibold text-[color:var(--muted)] transition hover:border-black/10 hover:bg-white hover:text-[color:var(--ink)]"
+                          >
+                            {section.label}
+                          </a>
+                        ))}
                       </div>
-                    ))
-                  ) : semanticLoading ? (
-                    <div className="rounded-[22px] border border-dashed border-black/10 bg-[color:var(--surface)]/75 px-4 py-4 text-sm leading-6 text-[color:var(--muted)]">
-                      Recherche semantique locale en cours...
                     </div>
-                  ) : (
-                    <div className="rounded-[22px] border border-dashed border-black/10 bg-[color:var(--surface)]/75 px-4 py-4 text-sm leading-6 text-[color:var(--muted)]">
-                      Aucun resultat pour cette recherche.
-                    </div>
-                  )}
+                  ))}
                   <Link
                     href="#contact"
                     className="block rounded-2xl border border-transparent bg-[color:var(--surface)]/65 px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:border-black/10 hover:bg-white"
@@ -1308,44 +987,21 @@ export default function CataloguePageClient({
           </aside>
 
           <main className="space-y-6 sm:space-y-8 xl:space-y-10">
-            {sectionGroups.length === 0 && semanticLoading ? (
+            {sectionGroups.length === 0 ? (
               <section className="rounded-[34px] border border-dashed border-black/10 bg-white/88 p-6 shadow-[0_18px_40px_rgba(30,25,20,0.05)] sm:p-8">
                 <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
-                  Recherche
+                  Catalogue
                 </p>
                 <h2 className="mt-3 text-2xl font-semibold text-[color:var(--ink)]">
-                  Recherche semantique locale en cours.
+                  Aucun article disponible pour le moment.
                 </h2>
                 <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
-                  Nous analysons le sens de votre recherche pour remonter les articles les plus pertinents.
-                </p>
-              </section>
-            ) : sectionGroups.length === 0 ? (
-              <section className="rounded-[34px] border border-dashed border-black/10 bg-white/88 p-6 shadow-[0_18px_40px_rgba(30,25,20,0.05)] sm:p-8">
-                <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
-                  Aucun resultat
-                </p>
-                <h2 className="mt-3 text-2xl font-semibold text-[color:var(--ink)]">
-                  {semanticUnavailable
-                    ? "Aucun resultat avec le filtre local de secours."
-                    : "Rien ne correspond, meme avec la recherche semantique locale."}
-                </h2>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
-                  {semanticUnavailable
-                    ? "La recherche semantique locale est indisponible pour le moment. Essayez un autre mot ou reinitialisez le filtre."
-                    : "Essayez un autre mot, une famille du catalogue, ou reinitialisez le filtre pour revoir l&apos;ensemble des produits."}
+                  Revenez un peu plus tard ou contactez-nous directement pour preparer votre demande.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setSearchTerm("")}
-                    className="rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(217,119,55,0.35)] transition hover:-translate-y-0.5 hover:brightness-95"
-                  >
-                    Reinitialiser la recherche
-                  </button>
                   <Link
                     href="/#contact"
-                    className="rounded-full border border-black/10 bg-white/90 px-5 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20"
+                    className="rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(217,119,55,0.35)] transition hover:-translate-y-0.5 hover:brightness-95"
                   >
                     Demander un devis
                   </Link>
