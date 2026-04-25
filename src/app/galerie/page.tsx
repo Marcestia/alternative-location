@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import GalleryMasonry from "@/components/GalleryMasonry";
 import { prisma } from "@/lib/prisma";
 import {
@@ -14,7 +14,7 @@ export const revalidate = 0;
 export const metadata: Metadata = {
   title: "Galerie | Alternative Location",
   description:
-    "Galerie d'ambiances, de mises en scene et d'inspirations pour mariages, receptions et evenements.",
+    "Galerie d'ambiances, de mises en scène et d'inspirations pour mariages, réceptions et événements.",
   alternates: {
     canonical: "/galerie",
   },
@@ -124,7 +124,7 @@ export default async function GaleriePage() {
                       />
                     ) : (
                       <div className="flex h-full min-h-[160px] items-center justify-center text-sm text-[color:var(--muted)]">
-                        Apercu indisponible
+                        Aperçu indisponible
                       </div>
                     )}
                   </div>

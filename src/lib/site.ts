@@ -1,4 +1,4 @@
-export const siteConfig = {
+﻿export const siteConfig = {
   name: "Alternative Location",
   alternateName: "Alternative",
   location: "Galgon (33)",

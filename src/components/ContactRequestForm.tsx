@@ -29,7 +29,6 @@ const emptyDraft: ContactRequestDraft = {
   message: "",
 };
 
-
 declare global {
   interface Window {
     turnstile?: {
@@ -178,7 +177,9 @@ export default function ContactRequestForm({
 
   const openCatalogueSelection = () => {
     if (!draft.eventDate) {
-      setSelectionError("Choisissez d'abord le jour de la fete pour verifier les disponibilites.");
+      setSelectionError(
+        "Choisissez d'abord le jour de la fête pour vérifier les disponibilités."
+      );
       return;
     }
 
@@ -192,12 +193,12 @@ export default function ContactRequestForm({
     <>
       {sentStatus === "1" ? (
         <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          Merci. Votre demande a bien ete envoyee. Nous revenons vers vous rapidement.
+          Merci. Votre demande a bien été envoyée. Nous revenons vers vous rapidement.
         </div>
       ) : null}
       {sentStatus === "0" ? (
         <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          Merci de remplir le nom, l&apos;email, le jour de la fete et le message.
+          Merci de remplir le nom, l&apos;email, le jour de la fête et le message.
         </div>
       ) : null}
       {sentStatus === "2" ? (
@@ -206,12 +207,12 @@ export default function ContactRequestForm({
         </div>
       ) : null}
 
-      <form action={createContactRequest} className="mt-6 grid gap-4 text-sm">
+      <form action={createContactRequest} className="mt-6 grid gap-4 text-sm sm:gap-5">
         <div className="grid gap-4 md:grid-cols-2">
           <input
             className="rounded-2xl border border-black/10 bg-white px-4 py-3"
             name="name"
-            placeholder="Nom et prenom"
+            placeholder="Nom et prénom"
             value={draft.name}
             onChange={(event) => updateDraft("name", event.target.value)}
             required
@@ -228,7 +229,7 @@ export default function ContactRequestForm({
           <input
             className="rounded-2xl border border-black/10 bg-white px-4 py-3"
             name="phone"
-            placeholder="Telephone"
+            placeholder="Téléphone"
             value={draft.phone}
             onChange={(event) => updateDraft("phone", event.target.value)}
           />
@@ -242,14 +243,14 @@ export default function ContactRequestForm({
           <input
             className="rounded-2xl border border-black/10 bg-white px-4 py-3"
             name="eventType"
-            placeholder="Type d'evenement"
+            placeholder="Type d'événement"
             value={draft.eventType}
             onChange={(event) => updateDraft("eventType", event.target.value)}
           />
           <input
             className="rounded-2xl border border-black/10 bg-white px-4 py-3"
             name="eventLocation"
-            placeholder="Lieu de l'evenement"
+            placeholder="Lieu de l'événement"
             value={draft.eventLocation}
             onChange={(event) => updateDraft("eventLocation", event.target.value)}
           />
@@ -258,7 +259,7 @@ export default function ContactRequestForm({
             name="guestCount"
             type="number"
             min="1"
-            placeholder="Nombre d'invites"
+            placeholder="Nombre d'invités"
             value={draft.guestCount}
             onChange={(event) => updateDraft("guestCount", event.target.value)}
           />
@@ -287,10 +288,10 @@ export default function ContactRequestForm({
                   Catalogue
                 </p>
                 <p className="mt-1 text-sm font-semibold text-[color:var(--ink)]">
-                  Selectionnez vos articles avant d&apos;envoyer votre demande.
+                  Sélectionnez vos articles avant d&apos;envoyer votre demande.
                 </p>
                 <p className="mt-1 text-xs text-[color:var(--muted)]">
-                  Votre panier sera automatiquement repris dans l&apos;admin pour pre-remplir le devis.
+                  Votre panier sera automatiquement repris dans l&apos;admin pour pré-remplir le devis.
                 </p>
               </div>
               <button
@@ -298,7 +299,7 @@ export default function ContactRequestForm({
                 onClick={openCatalogueSelection}
                 className="rounded-full bg-[color:var(--ink)] px-4 py-2 text-xs font-semibold text-white"
               >
-                {selectedItems.length > 0 ? "Modifier mes articles" : "Reserver mes articles"}
+                {selectedItems.length > 0 ? "Modifier mes articles" : "Réserver mes articles"}
               </button>
             </div>
 
@@ -310,14 +311,14 @@ export default function ContactRequestForm({
               <div className="mt-4 rounded-2xl border border-emerald-200 bg-white/90 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="text-sm font-semibold text-[color:var(--ink)]">
-                    {selectedItemCount} article(s) selectionne(s)
+                    {selectedItemCount} article(s) sélectionné(s)
                   </p>
                   <button
                     type="button"
                     onClick={() => setSelectedItemsJson("[]")}
                     className="rounded-full border border-black/10 px-3 py-1.5 text-[11px] font-semibold text-[color:var(--muted)]"
                   >
-                    Vider la selection
+                    Vider la sélection
                   </button>
                 </div>
                 <div className="mt-3 space-y-2">
@@ -344,7 +345,7 @@ export default function ContactRequestForm({
         <textarea
           className="min-h-[140px] rounded-2xl border border-black/10 bg-white px-4 py-3"
           name="message"
-          placeholder="Expliquez votre demande, les quantites et le style souhaite."
+          placeholder="Expliquez votre demande, les quantités et le style souhaité."
           value={draft.message}
           onChange={(event) => updateDraft("message", event.target.value)}
           required

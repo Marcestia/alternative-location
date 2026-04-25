@@ -1,4 +1,4 @@
-import type { CategoryGroup } from "@/generated/prisma";
+﻿import type { CategoryGroup } from "@/generated/prisma";
 
 export const CATEGORY_GROUP_ORDER: CategoryGroup[] = [
   "AMBIANCE_SON",

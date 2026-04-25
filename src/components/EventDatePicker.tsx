@@ -136,10 +136,10 @@ export default function EventDatePicker({
           <p className="mt-1 text-base font-medium text-[color:var(--ink)]">
             {selectedDate
               ? longDateFormatter.format(selectedDate)
-              : "Choisir le jour de la fete"}
+              : "Choisir le jour de la fête"}
           </p>
           <p className="mt-1 text-xs text-[color:var(--muted)]">
-            Selectionnez la date de votre evenement.
+            Sélectionnez la date de votre événement.
           </p>
         </div>
         <span className="ml-4 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color:var(--surface)] text-[color:var(--accent)] transition group-hover:bg-[color:var(--accent)] group-hover:text-white">
@@ -169,7 +169,7 @@ export default function EventDatePicker({
               }}
               disabled={!canGoBack}
               className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-black/10 text-[color:var(--muted)] transition hover:border-black/20 hover:bg-[color:var(--surface)] disabled:cursor-not-allowed disabled:opacity-35"
-              aria-label="Mois precedent"
+              aria-label="Mois précédent"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
                 <path
@@ -252,7 +252,7 @@ export default function EventDatePicker({
           </div>
 
           <div className="mt-4 flex items-center justify-between gap-3 text-xs text-[color:var(--muted)]">
-            <span>Les dates passees ne sont pas disponibles.</span>
+            <span>Les dates passées ne sont pas disponibles.</span>
             <button
               type="button"
               onClick={() => setOpen(false)}

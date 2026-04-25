@@ -1,4 +1,4 @@
-export type GallerySectionView = {
+﻿export type GallerySectionView = {
   id: string;
   name: string;
   description: string | null;

@@ -1,4 +1,4 @@
-import {
+﻿import {
   getGalleryPreviewUrl,
   getGalleryLabel,
   type GalleryMediaView,
@@ -58,16 +58,58 @@ export default function GalleryPreviewSection({
   return (
     <section className="mx-auto mt-8 w-full max-w-6xl px-4 sm:px-6 lg:mt-12 lg:px-12">
       <div className="overflow-hidden rounded-[34px] border border-black/5 bg-white/92 shadow-[0_30px_70px_rgba(30,25,20,0.1)]">
-        <div className="grid gap-0 lg:grid-cols-[0.78fr_1.22fr]">
-          <div className="flex flex-col justify-between border-b border-black/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(249,242,235,0.94))] p-6 sm:p-8 lg:border-b-0 lg:border-r">
+        <div className="lg:hidden">
+          <div className="border-b border-black/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(249,242,235,0.94))] p-5 sm:p-6">
+            <p className="text-xs uppercase tracking-[0.34em] text-[color:var(--accent-2)]">
+              Galerie
+            </p>
+            <h2 className="mt-3 max-w-[11ch] text-4xl font-semibold leading-[0.95] sm:max-w-none sm:text-5xl">
+              Un aperçu des ambiances
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
+              Quelques mises en scène, compositions de table et inspirations pour
+              découvrir l&apos;univers avant d&apos;entrer dans le catalogue.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.22em] text-[color:var(--muted)]">
+              {[...new Set(previewItems.map((item) => getGalleryLabel(item)))].map((label) => (
+                <span
+                  key={label}
+                  className="rounded-full border border-black/8 bg-white/80 px-3 py-1.5"
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4 bg-[linear-gradient(180deg,rgba(244,238,231,0.82),rgba(255,255,255,0.96))] p-4 sm:p-5">
+            <GalleryCard item={featuredItem} className="h-[390px] sm:h-[480px]" />
+            {secondaryItems.length > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {secondaryItems.map((item) => (
+                  <GalleryCard key={item.id} item={item} className="h-[240px] sm:h-[280px]" />
+                ))}
+              </div>
+            ) : null}
+            <a
+              href="/galerie"
+              className="inline-flex w-full items-center justify-center rounded-full bg-[color:var(--ink)] px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5"
+            >
+              Voir la galerie
+            </a>
+          </div>
+        </div>
+
+        <div className="hidden lg:grid lg:grid-cols-[0.78fr_1.22fr]">
+          <div className="flex flex-col justify-between border-r border-black/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(249,242,235,0.94))] p-8">
             <div>
               <p className="text-xs uppercase tracking-[0.34em] text-[color:var(--accent-2)]">
                 Galerie
               </p>
-              <h2 className="mt-4 text-3xl font-semibold leading-tight sm:text-4xl">
+              <h2 className="mt-4 text-4xl font-semibold leading-tight xl:text-5xl">
                 Un aperçu des ambiances
               </h2>
-              <p className="mt-4 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
+              <p className="mt-4 text-base leading-8 text-[color:var(--muted)]">
                 Quelques mises en scène, compositions de table et inspirations
                 pour découvrir l&apos;univers avant d&apos;entrer dans le catalogue.
               </p>
@@ -81,31 +123,24 @@ export default function GalleryPreviewSection({
                 Voir la galerie
               </a>
               <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.22em] text-[color:var(--muted)]">
-                {[...new Set(previewItems.map((item) => getGalleryLabel(item)))].map(
-                  (label) => (
-                    <span
-                      key={label}
-                      className="rounded-full border border-black/8 bg-white/80 px-3 py-1.5"
-                    >
-                      {label}
-                    </span>
-                  )
-                )}
+                {[...new Set(previewItems.map((item) => getGalleryLabel(item)))].map((label) => (
+                  <span
+                    key={label}
+                    className="rounded-full border border-black/8 bg-white/80 px-3 py-1.5"
+                  >
+                    {label}
+                  </span>
+                ))}
               </div>
             </div>
           </div>
 
-          <div className="grid gap-4 bg-[linear-gradient(180deg,rgba(244,238,231,0.82),rgba(255,255,255,0.96))] p-4 sm:p-5 lg:grid-cols-[1.15fr_0.85fr]">
-            <GalleryCard item={featuredItem} className="min-h-[360px] lg:min-h-[460px]" />
-
+          <div className="grid gap-4 bg-[linear-gradient(180deg,rgba(244,238,231,0.82),rgba(255,255,255,0.96))] p-5 lg:grid-cols-[1.15fr_0.85fr]">
+            <GalleryCard item={featuredItem} className="min-h-[460px]" />
             {secondaryItems.length > 0 ? (
               <div className="grid gap-4">
                 {secondaryItems.map((item) => (
-                  <GalleryCard
-                    key={item.id}
-                    item={item}
-                    className="min-h-[220px] lg:min-h-[220px]"
-                  />
+                  <GalleryCard key={item.id} item={item} className="min-h-[220px]" />
                 ))}
               </div>
             ) : (

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import AdminImageInput from "@/components/AdminImageInput";
@@ -82,12 +82,12 @@ export default function ReviewsSection({
               <p className="text-sm uppercase tracking-[0.3em] text-[color:var(--accent-2)]">
                 Avis
               </p>
-              <h2 className="text-2xl font-semibold sm:text-3xl md:text-4xl">
+              <h2 className="text-3xl font-semibold leading-tight sm:text-4xl">
                 Ils nous ont fait confiance.
               </h2>
             </div>
             <button
-              className="w-full rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)] sm:w-auto sm:px-5 sm:py-2 sm:text-xs"
+              className="w-full rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)] sm:w-auto sm:py-2 sm:text-xs"
               onClick={() => setOpen((value) => !value)}
               type="button"
             >
@@ -104,18 +104,18 @@ export default function ReviewsSection({
             </span>
           </div>
 
-          <p className="mt-3 text-xs leading-5 text-[color:var(--muted)]">
-            Avis certifies: publication reservee aux clients avec facture payee.
+          <p className="mt-3 max-w-2xl text-xs leading-5 text-[color:var(--muted)] sm:text-sm">
+            Avis certifiés : publication réservée aux clients ayant une facture payée.
           </p>
 
           {reviewStatus === "1" && (
             <div className="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-              Merci. Votre avis a bien ete envoye.
+              Merci. Votre avis a bien été envoyé.
             </div>
           )}
           {reviewStatus === "0" && (
             <div className="mt-6 rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              Merci d'indiquer votre nom, une note et un message.
+              Merci d&apos;indiquer votre nom, une note et un message.
             </div>
           )}
 
@@ -148,7 +148,7 @@ export default function ReviewsSection({
                             <p className="text-sm font-semibold">{review.name}</p>
                             {review.verifiedPurchase && (
                               <span className="mt-2 inline-flex rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-700">
-                                Avis certifie
+                                Avis certifié
                               </span>
                             )}
                           </div>
@@ -185,7 +185,7 @@ export default function ReviewsSection({
             <div className="mt-8 rounded-[28px] border border-black/5 bg-white/80 p-5 shadow-[0_24px_40px_rgba(30,25,20,0.08)] sm:p-6">
               <h3 className="text-xl font-semibold">Laisser un avis</h3>
               <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
-                Avis reserve aux clients avec facture payee. Entrez votre email
+                Avis réservé aux clients avec facture payée. Entrez votre email
                 de commande pour activer le formulaire.
               </p>
 
@@ -207,23 +207,23 @@ export default function ReviewsSection({
                   onClick={checkEligibility}
                   className="rounded-full border border-black/10 px-4 py-3 text-xs font-semibold text-[color:var(--muted)] sm:py-2"
                 >
-                  {checkState === "checking" ? "Verification..." : "Verifier mon acces"}
+                  {checkState === "checking" ? "Vérification..." : "Vérifier mon accès"}
                 </button>
               </div>
 
               {checkState === "eligible" && (
                 <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
-                  Acces confirme. Vous pouvez publier un avis certifie.
+                  Accès confirmé. Vous pouvez publier un avis certifié.
                 </div>
               )}
               {checkState === "ineligible" && (
                 <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
-                  Aucun paiement valide trouve pour cet email.
+                  Aucun paiement valide trouvé pour cet email.
                 </div>
               )}
               {reviewStatus === "not-eligible" && (
                 <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
-                  Avis non autorise: email non lie a une facture payee.
+                  Avis non autorisé : email non lié à une facture payée.
                 </div>
               )}
 
@@ -245,7 +245,7 @@ export default function ReviewsSection({
                     <input
                       className="rounded-2xl border border-black/10 bg-white px-4 py-3"
                       name="name"
-                      placeholder="Nom et prenom"
+                      placeholder="Nom et prénom"
                       required
                     />
                     <input
@@ -274,7 +274,7 @@ export default function ReviewsSection({
                     className="rounded-full bg-[color:var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)]"
                     type="submit"
                   >
-                    Envoyer l'avis certifie
+                    Envoyer l&apos;avis certifié
                   </button>
                 </fieldset>
               </form>

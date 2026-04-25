@@ -38,6 +38,12 @@ const steps = [
   },
 ];
 
+const heroHighlights = [
+  "Devis rapide et clair",
+  "Retrait sur place ou livraison",
+  "Acompte de 30 % après validation",
+];
+
 function UniverseIcon({ slug }: { slug: string }) {
   const iconClass = "h-11 w-11 text-[color:var(--accent-2)]/90";
   const normalizedSlug = slug.toLowerCase();
@@ -191,6 +197,38 @@ function UniverseIcon({ slug }: { slug: string }) {
   );
 }
 
+function UniverseCard({
+  category,
+  className = "",
+}: {
+  category: {
+    id: string;
+    name: string;
+    description: string;
+    slug?: string;
+  };
+  className?: string;
+}) {
+  const categorySlug = category.slug ?? slugify(category.name);
+
+  return (
+    <a
+      href={`/catalogue#group-${categorySlug}`}
+      className={`group flex min-h-[220px] flex-col items-center rounded-[28px] border border-[#f1e4da] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(249,242,235,0.92))] px-5 py-6 text-center shadow-[0_20px_40px_rgba(30,25,20,0.06)] transition duration-300 hover:-translate-y-1 hover:border-[color:var(--accent-2)]/30 hover:shadow-[0_28px_50px_rgba(30,25,20,0.1)] ${className}`}
+    >
+      <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[#ead9cb] bg-white/92 shadow-[0_12px_24px_rgba(30,25,20,0.06)] transition duration-300 group-hover:scale-105">
+        <UniverseIcon slug={categorySlug} />
+      </div>
+      <p className="mt-5 text-xl font-semibold leading-tight text-[color:var(--ink)]">
+        {category.name}
+      </p>
+      <p className="mt-3 text-sm leading-6 text-[color:var(--muted)]">
+        {category.description || "Découvrez la sélection disponible."}
+      </p>
+    </a>
+  );
+}
+
 export default async function Home({
   searchParams,
 }: {
@@ -275,19 +313,12 @@ export default async function Home({
     }),
   ]);
 
-  const categoryImages: Record<string, string> = {
-    "ambiance-son": "/vitrine/ambiance.jpg",
-    "materiel-service": "/vitrine/electromenager.jpg",
-    decoration: "/vitrine/mobilier.jpg",
-  };
-
   const displayCategories = CATEGORY_GROUP_ORDER.filter((group) =>
     categories.some((category) => category.group === group)
   ).map((group) => ({
     id: group,
     name: CATEGORY_GROUP_META[group].label,
     description: CATEGORY_GROUP_META[group].description,
-    heroImageUrl: categoryImages[CATEGORY_GROUP_META[group].slug],
     slug: CATEGORY_GROUP_META[group].slug,
   }));
 
@@ -364,30 +395,32 @@ export default async function Home({
           </div>
 
           <div className="mt-4 grid grid-cols-4 gap-2 text-sm font-medium text-[color:var(--muted)] md:hidden">
-            <a
-              className="rounded-full border border-black/10 bg-white px-3 py-2 text-center transition active:scale-[0.98]"
-              href="#univers"
-            >
-              Univers
-            </a>
-            <a
-              className="rounded-full border border-black/10 bg-white px-3 py-2 text-center transition active:scale-[0.98]"
-              href="/catalogue"
-            >
-              Catalogue
-            </a>
-            <a
-              className="rounded-full border border-black/10 bg-white px-3 py-2 text-center transition active:scale-[0.98]"
-              href="/galerie"
-            >
-              Galerie
-            </a>
-            <a
-              className="rounded-full bg-[color:var(--ink)] px-3 py-2 text-center text-white transition active:scale-[0.98]"
-              href="#contact"
-            >
-              Contact
-            </a>
+            <div className="col-span-4 -mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1">
+              <a
+                className="min-w-fit snap-start rounded-full border border-black/10 bg-white px-4 py-2 text-center transition active:scale-[0.98]"
+                href="#univers"
+              >
+                Univers
+              </a>
+              <a
+                className="min-w-fit snap-start rounded-full border border-black/10 bg-white px-4 py-2 text-center transition active:scale-[0.98]"
+                href="/catalogue"
+              >
+                Catalogue
+              </a>
+              <a
+                className="min-w-fit snap-start rounded-full border border-black/10 bg-white px-4 py-2 text-center transition active:scale-[0.98]"
+                href="/galerie"
+              >
+                Galerie
+              </a>
+              <a
+                className="min-w-fit snap-start rounded-full bg-[color:var(--ink)] px-4 py-2 text-center text-white transition active:scale-[0.98]"
+                href="#contact"
+              >
+                Contact
+              </a>
+            </div>
           </div>
         </div>
       </header>
@@ -395,63 +428,53 @@ export default async function Home({
       <main className="pb-14 pt-4 sm:pt-6 lg:pt-0">
         <section className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:max-w-none lg:px-0">
           <div className="lg:hidden">
-            <div className="relative overflow-hidden rounded-[34px] border border-white/70 bg-white/88 px-5 py-6 shadow-[0_28px_60px_rgba(30,25,20,0.12)]">
-              <div className="pointer-events-none absolute -right-12 -top-10 h-28 w-28 rounded-full bg-[color:var(--accent-2)]/25 blur-3xl" />
-              <div className="pointer-events-none absolute -left-10 bottom-8 h-36 w-36 rounded-full bg-[color:var(--accent)]/18 blur-3xl" />
-              <div className="relative space-y-5">
-                <div className="inline-flex items-center gap-2 rounded-full bg-[color:var(--surface)] px-4 py-2 text-[11px] uppercase tracking-[0.28em] text-[color:var(--accent)]">
+            <div className="relative overflow-hidden rounded-[34px] border border-white/70 bg-white/88 shadow-[0_28px_60px_rgba(30,25,20,0.12)]">
+              <img
+                src={heroImage.src}
+                alt="Alternative Location"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-white/35 via-white/50 to-[#f7efe7]/95" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,125,106,0.18),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(216,111,63,0.18),transparent_40%)]" />
+              <div className="relative flex min-h-[78svh] flex-col justify-between px-5 py-6 sm:px-6 sm:py-7">
+                <div className="inline-flex items-center gap-2 self-start rounded-full bg-white/78 px-4 py-2 text-[11px] uppercase tracking-[0.28em] text-[color:var(--accent)] shadow-[0_12px_24px_rgba(30,25,20,0.06)] backdrop-blur">
                   Location événementielle
                 </div>
-                <h1 className="max-w-[12ch] text-5xl font-semibold leading-[0.92] sm:max-w-none sm:text-6xl">
-                  Une scénographie complète pour vos événements.
-                </h1>
-                <p className="max-w-xl text-sm text-[color:var(--muted)] sm:text-base">
-                  {siteConfig.description}
-                </p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <a
-                    className="rounded-full bg-[color:var(--accent)] px-6 py-3 text-center text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)]"
-                    href="/catalogue"
-                  >
-                    Consulter le catalogue
-                  </a>
-                  <a
-                    className="rounded-full border border-[color:var(--ink)]/20 bg-white/80 px-6 py-3 text-center text-sm font-semibold text-[color:var(--ink)]"
-                    href="#contact"
-                  >
-                    Nous contacter
-                  </a>
-                </div>
 
-                <div className="overflow-hidden rounded-[28px] border border-white/70 bg-white/90 shadow-[0_20px_50px_rgba(30,25,20,0.12)]">
-                  <img
-                    src={heroImage.src}
-                    alt="Alternative Location"
-                    className="h-[320px] w-full object-cover sm:h-[380px]"
-                  />
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-[26px] bg-[color:var(--surface-2)] p-5">
-                    <p className="text-xs uppercase tracking-[0.28em] text-[color:var(--muted)]">
-                      Nos atouts
+                <div className="space-y-5">
+                  <div className="space-y-3">
+                    <h1 className="max-w-[11ch] text-5xl font-semibold leading-[0.9] sm:max-w-[12ch] sm:text-6xl">
+                      Une scénographie complète pour vos événements.
+                    </h1>
+                    <p className="max-w-xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
+                      {siteConfig.description}
                     </p>
-                    <ul className="mt-3 space-y-2 text-sm text-[color:var(--muted)]">
-                      <li>Devis clair et rapide</li>
-                      <li>Retrait ou livraison</li>
-                      <li>Caution et paiements gérés hors ligne</li>
-                    </ul>
                   </div>
-                  <div className="rounded-[26px] bg-white/88 p-5">
-                    <p className="text-xs uppercase tracking-[0.28em] text-[color:var(--muted)]">
-                      Comment ça se passe ?
-                    </p>
-                    <ol className="mt-3 space-y-2 text-sm text-[color:var(--muted)]">
-                      <li>1. Formulaire rempli avec vos dates et besoins</li>
-                      <li>2. Devis personnalisé envoyé avec les conditions générales</li>
-                      <li>3. Signature du devis et acompte de 30 % sous 7 jours</li>
-                      <li>4. Retrait sur place ou livraison selon votre besoin</li>
-                    </ol>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <a
+                      className="rounded-full bg-[color:var(--accent)] px-6 py-3 text-center text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)]"
+                      href="/catalogue"
+                    >
+                      Consulter le catalogue
+                    </a>
+                    <a
+                      className="rounded-full border border-[color:var(--ink)]/20 bg-white/82 px-6 py-3 text-center text-sm font-semibold text-[color:var(--ink)] backdrop-blur"
+                      href="#contact"
+                    >
+                      Nous contacter
+                    </a>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {heroHighlights.map((highlight) => (
+                      <span
+                        key={highlight}
+                        className="rounded-full border border-white/65 bg-white/78 px-3 py-2 text-[11px] font-medium text-[color:var(--muted)] shadow-[0_10px_20px_rgba(30,25,20,0.06)] backdrop-blur"
+                      >
+                        {highlight}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -517,28 +540,21 @@ export default async function Home({
                   section du catalogue.
                 </p>
               </div>
-              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-                {displayCategories.map((category) => {
-                  const categorySlug = category.slug ?? slugify(category.name);
-
-                  return (
-                    <a
+              <div className="mt-8 md:hidden">
+                <div className="-mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto px-1 pb-2">
+                  {displayCategories.map((category) => (
+                    <UniverseCard
                       key={category.id}
-                      href={`/catalogue#group-${categorySlug}`}
-                      className="group flex min-h-[220px] flex-col items-center rounded-[28px] border border-[#f1e4da] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(249,242,235,0.92))] px-5 py-6 text-center shadow-[0_20px_40px_rgba(30,25,20,0.06)] transition duration-300 hover:-translate-y-1 hover:border-[color:var(--accent-2)]/30 hover:shadow-[0_28px_50px_rgba(30,25,20,0.1)]"
-                    >
-                      <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[#ead9cb] bg-white/92 shadow-[0_12px_24px_rgba(30,25,20,0.06)] transition duration-300 group-hover:scale-105">
-                        <UniverseIcon slug={categorySlug} />
-                      </div>
-                      <p className="mt-5 text-xl font-semibold leading-tight text-[color:var(--ink)]">
-                        {category.name}
-                      </p>
-                      <p className="mt-3 text-sm leading-6 text-[color:var(--muted)]">
-                        {category.description || "Découvrez la sélection disponible."}
-                      </p>
-                    </a>
-                  );
-                })}
+                      category={category}
+                      className="min-w-[82vw] snap-start"
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="mt-8 hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+                {displayCategories.map((category) => (
+                  <UniverseCard key={category.id} category={category} />
+                ))}
               </div>
             </div>
           </div>
@@ -557,14 +573,14 @@ export default async function Home({
                   Nous contacter
                 </h2>
                 <p className="mt-3 text-sm text-[color:var(--muted)]">
-                  Décrivez votre besoin.
+                  Décrivez votre besoin, vos dates et les articles souhaités.
                 </p>
                 <p className="mt-2 text-xs text-[color:var(--muted)]">
                   La réservation est confirmée après validation du devis et
-                  versement d'un acompte de 30% sous 7 jours.
+                  versement d&apos;un acompte de 30 % sous 7 jours.
                 </p>
 
-                                <ContactRequestForm
+                <ContactRequestForm
                   sentStatus={sentStatus}
                   catalogRequestEnabled={settings?.catalogRequestEnabled ?? false}
                 />
@@ -596,23 +612,31 @@ export default async function Home({
                 </div>
               </div>
 
-              <div className="h-full space-y-5 rounded-[28px] border border-black/5 bg-[color:var(--surface-2)] p-5 sm:rounded-[32px] sm:space-y-6 sm:p-8">
-                <div>
+              <div className="h-full rounded-[28px] border border-black/5 bg-[color:var(--surface-2)] p-5 sm:rounded-[32px] sm:p-8">
+                <div className="grid gap-4 sm:gap-5">
+                  <div className="rounded-[24px] bg-white/72 p-4 sm:p-5">
                   <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
                     Comment ça se passe ?
                   </p>
-                  <ol className="mt-3 space-y-2 text-sm leading-6 text-[color:var(--muted)]">
+                  <ol className="mt-4 grid gap-3">
                     {steps.map((step, index) => (
-                      <li key={step.title}>
-                        {index + 1}. {step.title}: {step.text}
+                      <li
+                        key={step.title}
+                        className="rounded-[20px] border border-black/6 bg-white/80 p-4 text-sm leading-6 text-[color:var(--muted)]"
+                      >
+                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--accent)]">
+                          Étape {index + 1}
+                        </p>
+                        <p className="mt-2 font-semibold text-[color:var(--ink)]">
+                          {step.title}
+                        </p>
+                        <p className="mt-2">{step.text}</p>
                       </li>
                     ))}
                   </ol>
                 </div>
 
-                <div className="h-px w-full bg-black/15" />
-
-                <div>
+                <div className="rounded-[24px] bg-white/72 p-4 sm:p-5">
                   <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
                     Horaires
                   </p>
@@ -648,7 +672,7 @@ export default async function Home({
                   </div>
                 </div>
 
-                <div>
+                <div className="rounded-[24px] bg-white/72 p-4 sm:p-5">
                   <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
                     Services
                   </p>
@@ -665,9 +689,8 @@ export default async function Home({
                   </div>
                 </div>
 
-                <div className="rounded-3xl bg-white/80 p-4 text-sm text-[color:var(--muted)]">
+                <div className="rounded-[24px] bg-white/80 p-4 text-sm text-[color:var(--muted)] sm:p-5">
                   <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                   
                     <a
                       className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-3 py-2 text-xs font-semibold transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white sm:justify-start"
                       href="https://www.facebook.com/p/Alternative-location-100063656164530/"
@@ -700,9 +723,10 @@ export default async function Home({
                     <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[color:var(--surface)] text-[11px] font-bold text-[color:var(--accent)]">
                       M
                     </span>
-                    <span>Voir l'adresse sur Google Maps</span>
+                    <span>Voir l&apos;adresse sur Google Maps</span>
                   </a>
                 </div>
+              </div>
               </div>
             </div>
           </div>

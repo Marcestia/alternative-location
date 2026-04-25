@@ -99,8 +99,8 @@ function GalleryModal({
                 </p>
               ) : (
                 <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-                  Une ambiance pensee pour mettre en valeur la table, la matiere
-                  et la mise en scene de l&apos;evenement.
+                  Une ambiance pensée pour mettre en valeur la table, la matière
+                  et la mise en scène de l&apos;événement.
                 </p>
               )}
             </div>
@@ -201,14 +201,14 @@ export default function GalleryMasonry({ items }: GalleryMasonryProps) {
                     />
                   ) : (
                     <div className="flex min-h-[320px] items-center justify-center text-sm text-[color:var(--muted)]">
-                      Apercu indisponible
+                      Aperçu indisponible
                     </div>
                   )}
 
                   <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,11,10,0.82)] via-[rgba(13,11,10,0.28)] to-transparent opacity-70 transition duration-300 md:opacity-0 md:group-hover:opacity-100" />
 
                   <div className="absolute left-4 top-4 rounded-full border border-white/25 bg-white/12 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-white backdrop-blur-md">
-                    {isVideo ? (isEmbed ? "Film" : "Video") : label}
+                    {isVideo ? (isEmbed ? "Film" : "Vidéo") : label}
                   </div>
 
                   <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
