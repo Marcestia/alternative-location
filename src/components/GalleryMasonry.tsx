@@ -1,9 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
-  getGalleryLabel,
   getGalleryPreviewUrl,
   isDirectVideoUrl,
   toVideoEmbedUrl,
@@ -58,7 +57,7 @@ function GalleryModal({
         >
           Fermer
         </button>
-        <div className="grid gap-0 lg:grid-cols-[1.3fr_0.7fr]">
+        <div className="grid gap-0 lg:grid-cols-[1.35fr_0.65fr]">
           <div className="min-h-[48vh] bg-black">
             {item.type === "IMAGE" && previewUrl ? (
               <img
@@ -88,7 +87,7 @@ function GalleryModal({
           <div className="flex flex-col justify-between gap-6 bg-[linear-gradient(180deg,#f7f2ec_0%,#fdfbf8_100%)] p-6 sm:p-8">
             <div>
               <p className="text-xs uppercase tracking-[0.34em] text-[color:var(--accent-2)]">
-                {getGalleryLabel(item)}
+                Galerie
               </p>
               <h2 className="mt-4 text-3xl font-semibold leading-tight text-[color:var(--ink)]">
                 {item.title}
@@ -99,8 +98,7 @@ function GalleryModal({
                 </p>
               ) : (
                 <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-                  Une ambiance pensée pour mettre en valeur la table, la matière
-                  et la mise en scène de l&apos;événement.
+                  Une image de galerie pour montrer l&apos;ambiance, les détails et le rendu réel d&apos;une mise en scène.
                 </p>
               )}
             </div>
@@ -152,8 +150,8 @@ export default function GalleryMasonry({ items }: GalleryMasonryProps) {
         });
       },
       {
-        threshold: 0.18,
-        rootMargin: "0px 0px -8% 0px",
+        threshold: 0.12,
+        rootMargin: "0px 0px -6% 0px",
       }
     );
 
@@ -163,11 +161,10 @@ export default function GalleryMasonry({ items }: GalleryMasonryProps) {
 
   return (
     <>
-      <div className="columns-1 gap-5 md:columns-2 xl:columns-3 2xl:columns-4">
+      <div className="columns-2 gap-3 sm:columns-3 lg:columns-4 lg:gap-4">
         {items.map((item, index) => {
           const previewUrl = getGalleryPreviewUrl(item);
           const isVisible = Boolean(visibleIds[item.id]);
-          const label = getGalleryLabel(item);
           const isVideo = item.type === "VIDEO";
           const isEmbed = isVideo && !isDirectVideoUrl(item.mediaUrl);
 
@@ -176,52 +173,40 @@ export default function GalleryMasonry({ items }: GalleryMasonryProps) {
               key={item.id}
               data-gallery-card
               data-gallery-id={item.id}
-              className="mb-5 break-inside-avoid"
+              className="mb-3 break-inside-avoid lg:mb-4"
             >
               <button
                 type="button"
                 onClick={() => setActiveId(item.id)}
-                className={`group relative w-full overflow-hidden rounded-[14px] border border-white/70 bg-white text-left shadow-[0_24px_60px_rgba(30,25,20,0.08)] transition duration-300 ${
-                  isVisible
-                    ? "translate-y-0 opacity-100"
-                    : "translate-y-10 opacity-0"
+                className={`group relative w-full overflow-hidden rounded-[18px] border border-white/75 bg-white text-left shadow-[0_20px_45px_rgba(30,25,20,0.08)] transition duration-300 ${
+                  isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
                 }`}
                 style={{
-                  transitionDelay: `${Math.min(index * 55, 260)}ms`,
+                  transitionDelay: `${Math.min(index * 45, 220)}ms`,
                 }}
-                aria-label={`Voir l'ambiance ${item.title}`}
+                aria-label={`Ouvrir ${item.title}`}
               >
                 <div className="relative overflow-hidden bg-[color:var(--surface)]">
                   {previewUrl ? (
                     <img
                       src={previewUrl}
                       alt={item.title}
-                      className="h-auto w-full object-cover transition duration-300 ease-out group-hover:scale-[1.05]"
+                      className="h-auto w-full object-cover transition duration-500 ease-out group-hover:scale-[1.03]"
                       draggable={false}
                     />
                   ) : (
-                    <div className="flex min-h-[320px] items-center justify-center text-sm text-[color:var(--muted)]">
+                    <div className="flex min-h-[260px] items-center justify-center text-sm text-[color:var(--muted)]">
                       Aperçu indisponible
                     </div>
                   )}
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,11,10,0.82)] via-[rgba(13,11,10,0.28)] to-transparent opacity-70 transition duration-300 md:opacity-0 md:group-hover:opacity-100" />
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,0.18))] opacity-0 transition duration-300 group-hover:opacity-100" />
 
-                  <div className="absolute left-4 top-4 rounded-full border border-white/25 bg-white/12 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-white backdrop-blur-md">
-                    {isVideo ? (isEmbed ? "Film" : "Vidéo") : label}
-                  </div>
-
-                  <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-                    <div className="translate-y-0 transition duration-300 md:translate-y-5 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
-                      <p className="max-w-[18ch] text-xl font-semibold leading-tight text-white sm:text-2xl">
-                        {item.title}
-                      </p>
-                      <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/12 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md">
-                        <span>Voir l&apos;ambiance</span>
-                        <span aria-hidden="true">+</span>
-                      </div>
+                  {isVideo ? (
+                    <div className="absolute right-3 top-3 rounded-full border border-white/25 bg-black/38 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-white backdrop-blur-md">
+                      {isEmbed ? "Film" : "Vidéo"}
                     </div>
-                  </div>
+                  ) : null}
                 </div>
               </button>
             </article>
