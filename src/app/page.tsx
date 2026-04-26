@@ -38,12 +38,6 @@ const steps = [
   },
 ];
 
-const heroHighlights = [
-  "Devis rapide et clair",
-  "Retrait sur place ou livraison",
-  "Acompte de 30 % après validation",
-];
-
 function UniverseIcon({ slug }: { slug: string }) {
   const iconClass = "h-11 w-11 text-[color:var(--accent-2)]/90";
   const normalizedSlug = slug.toLowerCase();
@@ -434,49 +428,40 @@ export default async function Home({
                 alt="Alternative Location"
                 className="absolute inset-0 h-full w-full object-cover"
               />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(250,245,240,0.08),rgba(248,241,234,0.78)_52%,rgba(247,239,231,0.96))]" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,125,106,0.16),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(216,111,63,0.16),transparent_40%)]" />
-              <div className="relative flex min-h-[78svh] flex-col justify-end px-5 py-5 sm:px-6 sm:py-6">
-                <div className="rounded-[30px] border border-white/75 bg-white/72 p-5 shadow-[0_22px_45px_rgba(30,25,20,0.14)] backdrop-blur-md sm:p-6">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/75 bg-white/84 px-4 py-2 text-[11px] uppercase tracking-[0.28em] text-[color:var(--accent)] shadow-[0_10px_22px_rgba(30,25,20,0.06)]">
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(250,245,240,0.06),rgba(248,241,234,0.26)_30%,rgba(244,236,228,0.88)_74%,rgba(244,236,228,0.98)_100%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,125,106,0.14),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(216,111,63,0.18),transparent_42%)]" />
+              <div className="relative flex min-h-[74svh] flex-col justify-end px-4 py-4 sm:px-5 sm:py-5">
+                <div className="rounded-[28px] border border-white/80 bg-white/68 p-5 shadow-[0_24px_48px_rgba(30,25,20,0.12)] backdrop-blur-lg sm:p-6">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/88 px-4 py-2 text-[11px] uppercase tracking-[0.28em] text-[color:var(--accent)] shadow-[0_10px_22px_rgba(30,25,20,0.05)]">
                     Location événementielle
                   </div>
 
-                  <div className="mt-5 space-y-4">
+                  <div className="mt-5 space-y-5">
                     <div className="space-y-3">
-                      <h1 className="max-w-[11ch] text-[3.35rem] font-semibold leading-[0.9] sm:max-w-[12ch] sm:text-[4.25rem]">
+                      <h1 className="max-w-[10ch] text-[3rem] font-semibold leading-[0.9] sm:max-w-[11ch] sm:text-[3.8rem]">
                         Tout pour sublimer vos événements.
                       </h1>
-                      <p className="max-w-xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
+                      <p className="max-w-[30rem] text-sm leading-7 text-[color:var(--muted)] sm:text-base">
                         {siteConfig.description}
                       </p>
                     </div>
 
                     <div className="grid gap-3 sm:grid-cols-2">
                       <a
-                        className="rounded-full bg-[color:var(--accent)] px-6 py-3 text-center text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)] transition hover:scale-[1.01]"
+                        className="rounded-full bg-[color:var(--accent)] px-6 py-3 text-center text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.22)] transition active:scale-[0.99]"
                         href="/catalogue"
                       >
                         Consulter le catalogue
                       </a>
                       <a
-                        className="rounded-full border border-[color:var(--ink)]/15 bg-white/88 px-6 py-3 text-center text-sm font-semibold text-[color:var(--ink)] shadow-[0_12px_24px_rgba(30,25,20,0.05)] backdrop-blur transition hover:scale-[1.01]"
+                        className="rounded-full border border-[color:var(--ink)]/10 bg-white/90 px-6 py-3 text-center text-sm font-semibold text-[color:var(--ink)] shadow-[0_12px_24px_rgba(30,25,20,0.05)] backdrop-blur transition active:scale-[0.99]"
                         href="#contact"
                       >
                         Nous contacter
                       </a>
                     </div>
-
-                    <div className="grid gap-2">
-                      {heroHighlights.map((highlight) => (
-                        <div
-                          key={highlight}
-                          className="flex items-center gap-3 rounded-2xl border border-white/70 bg-white/70 px-4 py-3 text-sm text-[color:var(--muted)] shadow-[0_10px_20px_rgba(30,25,20,0.05)]"
-                        >
-                          <span className="h-2.5 w-2.5 rounded-full bg-[color:var(--accent)]" />
-                          <span>{highlight}</span>
-                        </div>
-                      ))}
+                    <div className="rounded-2xl border border-white/75 bg-white/72 px-4 py-3 text-sm leading-6 text-[color:var(--muted)] shadow-[0_10px_22px_rgba(30,25,20,0.05)]">
+                      À Galgon et alentours. Retrait sur place ou livraison selon vos besoins.
                     </div>
                   </div>
                 </div>
@@ -517,17 +502,6 @@ export default async function Home({
                     >
                       Parler du projet
                     </a>
-                  </div>
-                  <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                    {heroHighlights.map((highlight) => (
-                      <div
-                        key={highlight}
-                        className="flex items-center gap-3 rounded-[20px] border border-white/75 bg-white/68 px-4 py-3 text-sm text-[color:var(--muted)] shadow-[0_10px_24px_rgba(30,25,20,0.05)]"
-                      >
-                        <span className="h-2.5 w-2.5 rounded-full bg-[color:var(--accent)]" />
-                        <span>{highlight}</span>
-                      </div>
-                    ))}
                   </div>
                 </div>
               </div>
