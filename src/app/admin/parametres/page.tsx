@@ -3,11 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { saveCompanySettings } from "@/app/actions/settings";
 import {
   addGalleryMedia,
-  addGallerySection,
   deleteGalleryMedia,
-  deleteGallerySection,
   updateGalleryMedia,
-  updateGallerySection,
 } from "@/app/actions/gallery";
 import {
   addCategory,
@@ -27,7 +24,6 @@ export const revalidate = 0;
 type SearchParams = {
   saved?: string;
   gallery?: string;
-  gallerySection?: string;
   category?: string;
 };
 
@@ -127,7 +123,7 @@ export default async function Page({
   searchParams?: Promise<SearchParams>;
 }) {
   const resolvedParams = searchParams ? await searchParams : undefined;
-  const [settings, categories, spotlights, galleryMedia, gallerySections] = await Promise.all([
+  const [settings, categories, spotlights, galleryMedia] = await Promise.all([
     prisma.companySetting.findUnique({ where: { id: "company" } }),
     prisma.itemCategory.findMany({
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
@@ -136,9 +132,6 @@ export default async function Page({
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     }),
     prisma.galleryMedia.findMany({
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    }),
-    prisma.gallerySection.findMany({
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     }),
   ]);
@@ -188,18 +181,6 @@ export default async function Page({
           text: "Verifiez les informations de la galerie avant d'enregistrer.",
         }
       : null,
-    resolvedParams?.gallerySection === "1"
-      ? { tone: "success" as const, text: "Section galerie enregistree." }
-      : null,
-    resolvedParams?.gallerySection === "deleted"
-      ? { tone: "success" as const, text: "Section galerie supprimee." }
-      : null,
-    resolvedParams?.gallerySection === "0"
-      ? {
-          tone: "warning" as const,
-          text: "Verifiez le nom de la section avant d'enregistrer.",
-        }
-      : null,
   ].filter(Boolean) as Array<{ tone: "success" | "warning"; text: string }>;
 
   const navItems = [
@@ -209,7 +190,7 @@ export default async function Page({
     {
       href: "#galerie",
       label: "Galerie",
-      meta: `${gallerySections.length} sections / ${galleryMedia.length} medias`,
+      meta: `${galleryMedia.length} medias`,
     },
     { href: "#export", label: "Export", meta: "sauvegarde" },
   ];
@@ -764,127 +745,25 @@ export default async function Page({
       <SectionShell
         id="galerie"
         eyebrow="Galerie"
-        title="Sections et medias"
-        description="Creez des sections, ajoutez vos photos ou videos, puis retirez les blocs ou medias que vous ne voulez plus afficher."
+        title="Photos et videos"
+        description="Ajoutez simplement vos photos et videos pour alimenter la galerie du site. Les medias s'affichent ensuite a la suite, sans categories."
         helpContent={
           <HelpContent
-            purpose="Cette section alimente la galerie du site. Vous pouvez y creer des themes, ajouter des photos ou des videos, puis les ordonner selon le rendu souhaite."
+            purpose="Cette section sert uniquement a gerer la galerie publique. Le principe est simple : vous ajoutez un media, il apparait dans la galerie du site."
             steps={[
-              "Commencez par creer une section pour regrouper vos contenus par ambiance.",
-              "Ajoutez ensuite les medias et rattachez-les a la bonne section ou laissez-les sans section.",
-              "Utilisez Actif, l'ordre et Supprimer pour garder une galerie propre et coherente.",
+              "Ajoutez une photo ou une video depuis le bloc d'ajout.",
+              "Utilisez Actif et l'ordre pour choisir ce qui apparait et dans quel ordre.",
+              "Supprimez les medias inutiles pour garder une galerie propre.",
             ]}
           />
         }
       >
           <div className="rounded-2xl border border-black/5 bg-[color:var(--surface)]/50 p-5">
-
-            <div className="mt-6">
-              <h4 className="text-sm font-semibold">Sections galerie</h4>
-              <div className="mt-4 grid gap-4 md:grid-cols-2">
-                {gallerySections.map((section) => (
-                  <form
-                    key={section.id}
-                    action={updateGallerySection}
-                    encType="multipart/form-data"
-                    className="rounded-2xl border border-black/5 bg-white p-4"
-                  >
-                    <input type="hidden" name="id" value={section.id} />
-                    <input type="hidden" name="coverImageUrl" value={section.coverImageUrl ?? ""} />
-                    <div className="grid gap-3">
-                      <label className="flex items-center gap-2 text-xs text-[color:var(--muted)]">
-                        <input type="checkbox" name="active" defaultChecked={section.active} />
-                        Actif
-                      </label>
-                      <input
-                        className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                        name="name"
-                        defaultValue={section.name}
-                        placeholder="Nom de la section"
-                        required
-                      />
-                      <textarea
-                        className="min-h-[90px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                        name="description"
-                        placeholder="Description courte"
-                        defaultValue={section.description ?? ""}
-                      />
-                      <AdminImageInput
-                        name="coverImageData"
-                        label="Image de couverture"
-                        initialUrl={section.coverImageUrl ?? undefined}
-                      />
-                      <label className="flex items-center gap-2 text-xs text-[color:var(--muted)]">
-                        <input type="checkbox" name="clearCoverImage" />
-                        Retirer l'image actuelle
-                      </label>
-                      <input
-                        className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                        name="sortOrder"
-                        type="number"
-                        defaultValue={section.sortOrder}
-                      />
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[color:var(--muted)] hover:border-black/20"
-                          type="submit"
-                        >
-                          Enregistrer
-                        </button>
-                        <button
-                          className="rounded-full border border-rose-200 px-4 py-2 text-xs font-semibold text-rose-700"
-                          type="submit"
-                          formAction={deleteGallerySection}
-                        >
-                          Supprimer
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-                ))}
-              </div>
-
-              <form
-                action={addGallerySection}
-                encType="multipart/form-data"
-                className="mt-6 grid gap-3 rounded-2xl border border-dashed border-black/10 bg-white p-5 md:max-w-2xl"
-              >
-                <h5 className="text-sm font-semibold">Ajouter une section</h5>
-                <label className="flex items-center gap-2 text-xs text-[color:var(--muted)]">
-                  <input type="checkbox" name="active" defaultChecked />
-                  Actif
-                </label>
-                <input
-                  className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                  name="name"
-                  placeholder="Nom de la section"
-                  required
-                />
-                <textarea
-                  className="min-h-[90px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                  name="description"
-                  placeholder="Description courte"
-                />
-                <AdminImageInput
-                  name="coverImageData"
-                  label="Image de couverture"
-                />
-                <input
-                  className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                  name="sortOrder"
-                  type="number"
-                  defaultValue="0"
-                />
-                <button
-                  className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[color:var(--muted)] hover:border-black/20"
-                  type="submit"
-                >
-                  Ajouter la section
-                </button>
-              </form>
+            <div className="rounded-2xl border border-black/5 bg-white/80 px-4 py-3 text-sm text-[color:var(--muted)]">
+              Ajoutez vos photos et vidéos ici. La galerie publique affichera ensuite les médias les uns à la suite des autres, sans thèmes ni catégories visibles.
             </div>
 
-            <div className="mt-8 grid gap-4 md:grid-cols-2">
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
               {galleryMedia.map((media) => (
                 <form
                   key={media.id}
@@ -911,31 +790,18 @@ export default async function Page({
                         <option value="IMAGE">Photo</option>
                         <option value="VIDEO">Video</option>
                       </select>
-                      <select
-                        name="sectionId"
-                        defaultValue={media.sectionId ?? ""}
-                        className="rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-semibold text-[color:var(--muted)]"
-                      >
-                        <option value="">Sans section</option>
-                        {gallerySections.map((section) => (
-                          <option key={section.id} value={section.id}>
-                            {section.name}
-                          </option>
-                        ))}
-                      </select>
                     </div>
 
                     <input
                       className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
                       name="title"
-                      placeholder="Titre"
+                      placeholder="Nom interne (optionnel)"
                       defaultValue={media.title}
-                      required
                     />
                     <textarea
                       className="min-h-[90px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
                       name="subtitle"
-                      placeholder="Sous-titre"
+                      placeholder="Note interne (optionnel)"
                       defaultValue={media.subtitle ?? ""}
                     />
 
@@ -1028,7 +894,7 @@ export default async function Page({
               encType="multipart/form-data"
               className="mt-6 grid gap-3 rounded-2xl border border-dashed border-black/10 bg-white p-5 md:max-w-3xl"
             >
-              <h4 className="text-sm font-semibold">Ajouter un element galerie</h4>
+              <h4 className="text-sm font-semibold">Ajouter un media</h4>
               <div className="flex flex-wrap items-center gap-3">
                 <label className="flex items-center gap-2 text-xs text-[color:var(--muted)]">
                   <input type="checkbox" name="active" defaultChecked />
@@ -1042,29 +908,16 @@ export default async function Page({
                   <option value="IMAGE">Photo</option>
                   <option value="VIDEO">Video</option>
                 </select>
-                <select
-                  name="sectionId"
-                  defaultValue=""
-                  className="rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-semibold text-[color:var(--muted)]"
-                >
-                  <option value="">Sans section</option>
-                  {gallerySections.map((section) => (
-                    <option key={section.id} value={section.id}>
-                      {section.name}
-                    </option>
-                  ))}
-                </select>
               </div>
               <input
                 className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
                 name="title"
-                placeholder="Titre"
-                required
+                placeholder="Nom interne (optionnel)"
               />
               <textarea
                 className="min-h-[90px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
                 name="subtitle"
-                placeholder="Sous-titre"
+                placeholder="Note interne (optionnel)"
               />
               <AdminImageInput
                 name="imageData"

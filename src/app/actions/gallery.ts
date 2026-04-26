@@ -29,6 +29,8 @@ const getGalleryType = (value: FormDataEntryValue | null) =>
     ? GalleryMediaType.VIDEO
     : GalleryMediaType.IMAGE;
 
+const getFallbackTitle = () => `Media ${new Date().toISOString().slice(0, 10)}`;
+
 const getPublicBaseUrl = () => {
   const value = process.env.R2_PUBLIC_BASE_URL;
   if (!value) {
@@ -126,15 +128,11 @@ async function resolveMediaUrls(
 }
 
 export async function addGalleryMedia(formData: FormData) {
-  const title = getText(formData.get("title"));
+  const title = getText(formData.get("title")) || getFallbackTitle();
   const subtitle = getText(formData.get("subtitle"));
   const active = getActive(formData.get("active"));
   const sortOrder = getSortOrder(formData.get("sortOrder"));
   const sectionId = getText(formData.get("sectionId")) || null;
-
-  if (!title) {
-    redirect("/admin/parametres?gallery=0");
-  }
 
   const resolved = await resolveMediaUrls(formData, title);
 
@@ -160,19 +158,20 @@ export async function addGalleryMedia(formData: FormData) {
 
 export async function updateGalleryMedia(formData: FormData) {
   const id = getText(formData.get("id"));
-  const title = getText(formData.get("title"));
+  const rawTitle = getText(formData.get("title"));
   const subtitle = getText(formData.get("subtitle"));
   const active = getActive(formData.get("active"));
   const sortOrder = getSortOrder(formData.get("sortOrder"));
   const sectionId = getText(formData.get("sectionId")) || null;
 
-  if (!id || !title) {
+  if (!id) {
     redirect("/admin/parametres?gallery=0");
   }
 
   const existing = await prisma.galleryMedia.findUnique({
     where: { id },
     select: {
+      title: true,
       type: true,
       mediaUrl: true,
       posterUrl: true,
@@ -182,6 +181,8 @@ export async function updateGalleryMedia(formData: FormData) {
   if (!existing) {
     redirect("/admin/parametres?gallery=0");
   }
+
+  const title = rawTitle || existing.title || getFallbackTitle();
 
   const resolved = await resolveMediaUrls(formData, title, existing);
 
