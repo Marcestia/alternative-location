@@ -434,47 +434,50 @@ export default async function Home({
                 alt="Alternative Location"
                 className="absolute inset-0 h-full w-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-white/35 via-white/50 to-[#f7efe7]/95" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,125,106,0.18),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(216,111,63,0.18),transparent_40%)]" />
-              <div className="relative flex min-h-[78svh] flex-col justify-between px-5 py-6 sm:px-6 sm:py-7">
-                <div className="inline-flex items-center gap-2 self-start rounded-full bg-white/78 px-4 py-2 text-[11px] uppercase tracking-[0.28em] text-[color:var(--accent)] shadow-[0_12px_24px_rgba(30,25,20,0.06)] backdrop-blur">
-                  Location événementielle
-                </div>
-
-                <div className="space-y-5">
-                  <div className="space-y-3">
-                    <h1 className="max-w-[11ch] text-5xl font-semibold leading-[0.9] sm:max-w-[12ch] sm:text-6xl">
-                      Une scénographie complète pour vos événements.
-                    </h1>
-                    <p className="max-w-xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-                      {siteConfig.description}
-                    </p>
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(250,245,240,0.08),rgba(248,241,234,0.78)_52%,rgba(247,239,231,0.96))]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,125,106,0.16),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(216,111,63,0.16),transparent_40%)]" />
+              <div className="relative flex min-h-[78svh] flex-col justify-end px-5 py-5 sm:px-6 sm:py-6">
+                <div className="rounded-[30px] border border-white/75 bg-white/72 p-5 shadow-[0_22px_45px_rgba(30,25,20,0.14)] backdrop-blur-md sm:p-6">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/75 bg-white/84 px-4 py-2 text-[11px] uppercase tracking-[0.28em] text-[color:var(--accent)] shadow-[0_10px_22px_rgba(30,25,20,0.06)]">
+                    Location événementielle
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <a
-                      className="rounded-full bg-[color:var(--accent)] px-6 py-3 text-center text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)]"
-                      href="/catalogue"
-                    >
-                      Consulter le catalogue
-                    </a>
-                    <a
-                      className="rounded-full border border-[color:var(--ink)]/20 bg-white/82 px-6 py-3 text-center text-sm font-semibold text-[color:var(--ink)] backdrop-blur"
-                      href="#contact"
-                    >
-                      Nous contacter
-                    </a>
-                  </div>
+                  <div className="mt-5 space-y-4">
+                    <div className="space-y-3">
+                      <h1 className="max-w-[11ch] text-[3.35rem] font-semibold leading-[0.9] sm:max-w-[12ch] sm:text-[4.25rem]">
+                        Tout pour sublimer vos événements.
+                      </h1>
+                      <p className="max-w-xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
+                        {siteConfig.description}
+                      </p>
+                    </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    {heroHighlights.map((highlight) => (
-                      <span
-                        key={highlight}
-                        className="rounded-full border border-white/65 bg-white/78 px-3 py-2 text-[11px] font-medium text-[color:var(--muted)] shadow-[0_10px_20px_rgba(30,25,20,0.06)] backdrop-blur"
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <a
+                        className="rounded-full bg-[color:var(--accent)] px-6 py-3 text-center text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)] transition hover:scale-[1.01]"
+                        href="/catalogue"
                       >
-                        {highlight}
-                      </span>
-                    ))}
+                        Consulter le catalogue
+                      </a>
+                      <a
+                        className="rounded-full border border-[color:var(--ink)]/15 bg-white/88 px-6 py-3 text-center text-sm font-semibold text-[color:var(--ink)] shadow-[0_12px_24px_rgba(30,25,20,0.05)] backdrop-blur transition hover:scale-[1.01]"
+                        href="#contact"
+                      >
+                        Nous contacter
+                      </a>
+                    </div>
+
+                    <div className="grid gap-2">
+                      {heroHighlights.map((highlight) => (
+                        <div
+                          key={highlight}
+                          className="flex items-center gap-3 rounded-2xl border border-white/70 bg-white/70 px-4 py-3 text-sm text-[color:var(--muted)] shadow-[0_10px_20px_rgba(30,25,20,0.05)]"
+                        >
+                          <span className="h-2.5 w-2.5 rounded-full bg-[color:var(--accent)]" />
+                          <span>{highlight}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -488,20 +491,20 @@ export default async function Home({
                 alt="Alternative Location"
                 className="absolute inset-0 h-full w-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/65 to-white/25" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(216,111,63,0.18),transparent_45%)]" />
-              <div className="relative z-10 flex h-full items-end px-12 pb-16 xl:px-16 xl:pb-20">
-                <div className="max-w-4xl space-y-6">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-xs uppercase tracking-[0.3em] text-[color:var(--accent)] shadow-[0_12px_30px_rgba(30,25,20,0.08)]">
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(250,245,240,0.96)_0%,rgba(250,245,240,0.72)_42%,rgba(250,245,240,0.08)_100%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(216,111,63,0.16),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(46,125,106,0.14),transparent_35%)]" />
+              <div className="relative z-10 flex h-full items-center px-12 pt-20 xl:px-16">
+                <div className="max-w-[720px] rounded-[36px] border border-white/75 bg-white/58 p-10 shadow-[0_28px_70px_rgba(30,25,20,0.14)] backdrop-blur-md xl:p-12">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/75 bg-white/82 px-4 py-2 text-xs uppercase tracking-[0.3em] text-[color:var(--accent)] shadow-[0_12px_30px_rgba(30,25,20,0.06)]">
                     Location événementielle
                   </div>
-                  <h1 className="text-6xl font-semibold leading-[1.02] xl:text-7xl">
-                    Une scénographie complète pour vos événements
+                  <h1 className="mt-6 text-7xl font-semibold leading-[0.96] xl:text-[5.6rem]">
+                    Tout pour sublimer vos événements.
                   </h1>
-                  <p className="max-w-3xl text-xl text-[color:var(--muted)]">
+                  <p className="mt-5 max-w-3xl text-xl leading-8 text-[color:var(--muted)]">
                     {siteConfig.description}
                   </p>
-                  <div className="flex flex-wrap gap-4">
+                  <div className="mt-8 flex flex-wrap gap-4">
                     <a
                       className="rounded-full bg-[color:var(--accent)] px-8 py-4 text-center text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)] transition hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-[0_24px_40px_rgba(216,111,63,0.25)]"
                       href="/catalogue"
@@ -509,11 +512,22 @@ export default async function Home({
                       Voir le catalogue
                     </a>
                     <a
-                      className="rounded-full border border-[color:var(--ink)]/20 bg-white/80 px-8 py-4 text-center text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:scale-[1.02] hover:border-[color:var(--ink)]/40"
+                      className="rounded-full border border-[color:var(--ink)]/15 bg-white/88 px-8 py-4 text-center text-sm font-semibold text-[color:var(--ink)] shadow-[0_14px_28px_rgba(30,25,20,0.06)] transition hover:-translate-y-0.5 hover:scale-[1.02] hover:border-[color:var(--ink)]/30"
                       href="#contact"
                     >
                       Parler du projet
                     </a>
+                  </div>
+                  <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                    {heroHighlights.map((highlight) => (
+                      <div
+                        key={highlight}
+                        className="flex items-center gap-3 rounded-[20px] border border-white/75 bg-white/68 px-4 py-3 text-sm text-[color:var(--muted)] shadow-[0_10px_24px_rgba(30,25,20,0.05)]"
+                      >
+                        <span className="h-2.5 w-2.5 rounded-full bg-[color:var(--accent)]" />
+                        <span>{highlight}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>

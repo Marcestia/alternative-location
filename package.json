@@ -6,9 +6,9 @@
         "node": "24.x"
     },
     "scripts": {
-        "dev": "next dev --webpack",
-        "build": "next build",
-        "start": "next start",
+        "dev": "node scripts/run-next-with-project-env.js dev --webpack",
+        "build": "node scripts/run-next-with-project-env.js build",
+        "start": "node scripts/run-next-with-project-env.js start",
         "lint": "eslint",
         "catalog:reindex": "tsx scripts/reindexCatalogEmbeddings.ts"
     },
