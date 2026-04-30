@@ -11,6 +11,15 @@ import path from "path";
 import fs from "fs/promises";
 import crypto from "crypto";
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export async function createQuoteLink(formData: FormData) {
   const id = String(formData.get("id") || "").trim();
   if (!id) {
@@ -251,6 +260,7 @@ export async function createManualDemand(formData: FormData) {
 
 export async function markQuoteSent(formData: FormData) {
   const id = String(formData.get("id") || "").trim();
+  const customMessage = String(formData.get("customMessage") || "").trim();
   if (!id) {
     redirect("/admin/demandes");
   }
@@ -306,12 +316,17 @@ export async function markQuoteSent(formData: FormData) {
       : request.quote.pdfUrl
         ? `${baseUrl}${request.quote.pdfUrl}`
         : "";
-  const text = `Bonjour ${request.name},\n\nAlternative Location vous contacte pour votre devis.\nPour valider votre devis, merci de cliquer ici :\n${acceptLink}\n${pdfLink ? `\nDevis (PDF) :\n${pdfLink}\n` : ""}\nMerci de bien vouloir prendre connaissance des conditions generales. La signature du devis vaut acceptation des conditions generales.\n\nEn signant, vous vous engagez a verser l'acompte de 30% sous 7 jours.\n\nBien a vous,\nAlternative Location`;
+  const customMessageText = customMessage ? `\nMessage personnel :\n${customMessage}\n` : "";
+  const text = `Bonjour ${request.name},\n\nAlternative Location vous contacte pour votre devis.\nPour valider votre devis, merci de cliquer ici :\n${acceptLink}\n${pdfLink ? `\nDevis (PDF) :\n${pdfLink}\n` : ""}${customMessageText}\nMerci de bien vouloir prendre connaissance des conditions generales. La signature du devis vaut acceptation des conditions generales.\n\nEn signant, vous vous engagez a verser l'acompte de 30% sous 7 jours.\n\nBien a vous,\nAlternative Location`;
+  const customMessageHtml = customMessage
+    ? `<p><strong>Message personnel</strong><br/>${escapeHtml(customMessage).replace(/\n/g, "<br/>")}</p>`
+    : "";
   const html = `
     <p>Bonjour ${request.name},</p>
     <p>Alternative Location vous contacte pour votre devis.</p>
     <p><strong>Valider votre devis</strong> : <a href="${acceptLink}">Voir et signer le devis</a></p>
     ${pdfLink ? `<p><strong>Devis (PDF)</strong> : <a href="${pdfLink}">Télécharger le devis</a></p>` : ""}
+    ${customMessageHtml}
     <p>Merci de bien vouloir prendre connaissance des conditions generales. La signature du devis vaut acceptation des conditions generales.</p>
     <p>En signant, vous vous engagez a verser l'acompte de 30% sous 7 jours.</p>
     <p>Bien a vous,<br/>Alternative Location</p>

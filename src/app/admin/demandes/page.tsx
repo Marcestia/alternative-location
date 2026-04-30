@@ -567,21 +567,69 @@ export default async function DemandesPage({
                 </a>
               )}
               {quote.pdfUrl && acceptLink && (
-                <form action={markQuoteSent}>
-                  <input type="hidden" name="id" value={demande.id} />
+                <>
                   <button
                     className={`rounded-full px-4 py-2 text-xs font-semibold text-white shadow-[0_12px_24px_rgba(30,25,20,0.16)] transition hover:-translate-y-0.5 ${
                       demande.status === ContactStatus.PENDING
                         ? "bg-emerald-600 shadow-[0_12px_24px_rgba(5,150,105,0.25)]"
                         : "bg-sky-600 shadow-[0_12px_24px_rgba(2,132,199,0.25)]"
                     }`}
-                    type="submit"
+                    type="button"
+                    data-action="open-dialog"
+                    data-dialog-id={`send-quote-${quote.id}`}
                   >
                     {demande.status === ContactStatus.PENDING
                       ? "Devis envoye"
                       : "Envoyer le devis"}
                   </button>
-                </form>
+                  <dialog
+                    id={`send-quote-${quote.id}`}
+                    className="w-full max-w-lg rounded-3xl border border-black/10 bg-white p-0 text-left shadow-[0_30px_80px_rgba(20,18,14,0.18)] backdrop:bg-black/30"
+                  >
+                    <div className="p-6">
+                      <p className="text-lg font-semibold text-[color:var(--ink)]">
+                        Envoyer le devis
+                      </p>
+                      <p className="mt-3 text-sm text-[color:var(--muted)]">
+                        Vous pouvez ajouter un message personnel qui sera joint au mail du devis.
+                      </p>
+                      <form action={markQuoteSent} className="mt-5 space-y-4">
+                        <input type="hidden" name="id" value={demande.id} />
+                        <div className="space-y-2">
+                          <label
+                            htmlFor={`quote-message-${quote.id}`}
+                            className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--muted)]"
+                          >
+                            Message personnel
+                          </label>
+                          <textarea
+                            id={`quote-message-${quote.id}`}
+                            name="customMessage"
+                            rows={6}
+                            placeholder="Ajoutez ici un message complémentaire pour le client."
+                            className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-[color:var(--ink)] outline-none transition focus:border-[color:var(--accent)]"
+                          />
+                        </div>
+                        <div className="flex flex-wrap justify-end gap-3">
+                          <button
+                            className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]"
+                            type="button"
+                            data-action="close-dialog"
+                            data-dialog-id={`send-quote-${quote.id}`}
+                          >
+                            Annuler
+                          </button>
+                          <button
+                            className="rounded-full bg-sky-600 px-4 py-2 text-xs font-semibold text-white shadow-[0_12px_24px_rgba(2,132,199,0.25)] transition hover:-translate-y-0.5"
+                            type="submit"
+                          >
+                            Envoyer le devis
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </dialog>
+                </>
               )}
               {demande.status === ContactStatus.PENDING && (
                 <form action={reopenQuote}>
@@ -868,13 +916,24 @@ export default async function DemandesPage({
           document.addEventListener('click', (event) => {
             const target = event.target;
             if (!(target instanceof HTMLElement)) return;
-            const trigger = target.closest('[data-action="open-approve-quote-dialog"]');
-            if (!(trigger instanceof HTMLElement)) return;
-            const dialogId = trigger.getAttribute('data-dialog-id');
+
+            const openTrigger = target.closest('[data-action="open-dialog"], [data-action="open-approve-quote-dialog"]');
+            if (openTrigger instanceof HTMLElement) {
+              const dialogId = openTrigger.getAttribute('data-dialog-id');
+              if (!dialogId) return;
+              const dialog = document.getElementById(dialogId);
+              if (!(dialog instanceof HTMLDialogElement)) return;
+              dialog.showModal();
+              return;
+            }
+
+            const closeTrigger = target.closest('[data-action="close-dialog"]');
+            if (!(closeTrigger instanceof HTMLElement)) return;
+            const dialogId = closeTrigger.getAttribute('data-dialog-id');
             if (!dialogId) return;
             const dialog = document.getElementById(dialogId);
             if (!(dialog instanceof HTMLDialogElement)) return;
-            dialog.showModal();
+            dialog.close();
           });
 
           document.addEventListener('submit', (event) => {
