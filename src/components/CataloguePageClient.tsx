@@ -1026,12 +1026,12 @@ export default function CataloguePageClient({
 
         <div className="xl:grid xl:grid-cols-[230px_minmax(0,1fr)_360px] xl:gap-8">
           <aside className="hidden xl:block">
-            <div className="sticky top-6 space-y-4">
-              <div className="rounded-[30px] border border-black/8 bg-white/95 p-5 shadow-[0_22px_45px_rgba(30,25,20,0.08)]">
+            <div className="sticky top-6 max-h-[calc(100vh-3rem)]">
+              <div className="flex max-h-[calc(100vh-3rem)] flex-col overflow-hidden rounded-[30px] border border-black/8 bg-white/95 p-5 shadow-[0_22px_45px_rgba(30,25,20,0.08)]">
                 <p className="text-[11px] uppercase tracking-[0.28em] text-[color:var(--muted)]">
                   Navigation
                 </p>
-                <div className="mt-4 space-y-2">
+                <div className="mt-4 flex-1 space-y-2 overflow-y-auto overscroll-contain pr-1">
                   {sectionGroups.map((group) => (
                     <div key={group.slug} className="space-y-2">
                       <a
