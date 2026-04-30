@@ -596,6 +596,8 @@ export default function CataloguePageClient({
   const [selected, setSelected] = useState<Record<string, SelectedItemVM>>({});
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (typeof window === "undefined" || !requestMode) return;
@@ -704,6 +706,82 @@ export default function CataloguePageClient({
       window.sessionStorage.removeItem(CONTACT_REQUEST_SELECTION_STORAGE_KEY);
     }
   }, [requestMode, requestSelection]);
+
+  useEffect(() => {
+    if (!sectionGroups.length) return;
+
+    setExpandedGroups((prev) => {
+      const next = { ...prev };
+      let changed = false;
+
+      for (const group of sectionGroups) {
+        if (!(group.slug in next)) {
+          next[group.slug] = true;
+          changed = true;
+        }
+      }
+
+      return changed ? next : prev;
+    });
+
+    setExpandedSections((prev) => {
+      const next = { ...prev };
+      let changed = false;
+
+      for (const group of sectionGroups) {
+        for (const [index, section] of group.sections.entries()) {
+          if (!(section.id in next)) {
+            next[section.id] = index === 0;
+            changed = true;
+          }
+        }
+      }
+
+      return changed ? next : prev;
+    });
+  }, [sectionGroups]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const syncFromHash = () => {
+      const currentHash = window.location.hash.replace(/^#/, "");
+      if (!currentHash) return;
+
+      if (currentHash.startsWith("group-")) {
+        const groupSlug = currentHash.replace(/^group-/, "");
+        setExpandedGroups((prev) => ({ ...prev, [groupSlug]: true }));
+        return;
+      }
+
+      const matchingSection = displaySections.find((section) => section.id === currentHash);
+      if (!matchingSection) return;
+
+      setExpandedGroups((prev) => ({ ...prev, [matchingSection.group.slug]: true }));
+      setExpandedSections((prev) => ({ ...prev, [matchingSection.id]: true }));
+    };
+
+    syncFromHash();
+    window.addEventListener("hashchange", syncFromHash);
+    return () => window.removeEventListener("hashchange", syncFromHash);
+  }, [displaySections]);
+
+  const toggleGroup = (groupSlug: string) => {
+    setExpandedGroups((prev) => ({ ...prev, [groupSlug]: !prev[groupSlug] }));
+  };
+
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections((prev) => ({ ...prev, [sectionId]: !prev[sectionId] }));
+  };
+
+  const openGroup = (groupSlug: string) => {
+    setExpandedGroups((prev) => ({ ...prev, [groupSlug]: true }));
+  };
+
+  const openSection = (sectionId: string, groupSlug: string) => {
+    setExpandedGroups((prev) => ({ ...prev, [groupSlug]: true }));
+    setExpandedSections((prev) => ({ ...prev, [sectionId]: true }));
+  };
 
   const addItem = (item: ItemVM) => {
     const stockLimit = Math.max(requestMode ? item.availableQty : item.totalQty, 0);
@@ -958,6 +1036,7 @@ export default function CataloguePageClient({
                     <div key={group.slug} className="space-y-2">
                       <a
                         href={`#group-${group.slug}`}
+                        onClick={() => openGroup(group.slug)}
                         className="block rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:border-black/10"
                       >
                         {group.label}
@@ -967,6 +1046,7 @@ export default function CataloguePageClient({
                           <a
                             key={section.id}
                             href={`#${section.id}`}
+                            onClick={() => openSection(section.id, group.slug)}
                             className="block rounded-2xl border border-transparent bg-[color:var(--surface)]/65 px-4 py-2 text-xs font-semibold text-[color:var(--muted)] transition hover:border-black/10 hover:bg-white hover:text-[color:var(--ink)]"
                           >
                             {section.label}
@@ -1010,32 +1090,53 @@ export default function CataloguePageClient({
             ) : (
               sectionGroups.map((group) => (
                 <section key={group.slug} id={`group-${group.slug}`} className="scroll-mt-24 space-y-5">
-                  <div className="rounded-[34px] border border-black/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(247,240,233,0.88))] p-5 shadow-[0_18px_40px_rgba(30,25,20,0.06)] sm:p-7">
-                    <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--accent-2)]">
-                      Famille
-                    </p>
-                    <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+                  <div className="overflow-hidden rounded-[34px] border border-black/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(247,240,233,0.88))] shadow-[0_18px_40px_rgba(30,25,20,0.06)]">
+                    <button
+                      type="button"
+                      onClick={() => toggleGroup(group.slug)}
+                      className="flex w-full flex-wrap items-center justify-between gap-4 p-5 text-left transition hover:bg-white/40 sm:p-7"
+                      aria-expanded={expandedGroups[group.slug] ? "true" : "false"}
+                    >
                       <div>
-                        <h2 className="text-2xl font-semibold text-[color:var(--ink)] sm:text-3xl">
+                        <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--accent-2)]">
+                          Famille
+                        </p>
+                        <h2 className="mt-3 text-2xl font-semibold text-[color:var(--ink)] sm:text-3xl">
                           {group.label}
                         </h2>
                         <p className="mt-2 max-w-3xl text-sm leading-6 text-[color:var(--muted)]">
                           {group.description}
                         </p>
                       </div>
-                      <div className="rounded-full border border-black/8 bg-white/80 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]">
-                        {group.sections.reduce((sum, section) => sum + section.items.length, 0)} article(s)
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-full border border-black/8 bg-white/80 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]">
+                          {group.sections.reduce((sum, section) => sum + section.items.length, 0)} article(s)
+                        </div>
+                        <span
+                          className={`inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/8 bg-white/80 text-lg text-[color:var(--ink)] transition ${
+                            expandedGroups[group.slug] ? "rotate-180" : ""
+                          }`}
+                          aria-hidden="true"
+                        >
+                          ˅
+                        </span>
                       </div>
-                    </div>
+                    </button>
                   </div>
 
-                  {group.sections.map((section) => (
+                  {expandedGroups[group.slug] &&
+                    group.sections.map((section) => (
                     <section
                       key={section.id}
                       id={section.id}
-                      className="scroll-mt-24 rounded-[34px] border border-black/5 bg-white/88 p-5 shadow-[0_18px_40px_rgba(30,25,20,0.06)] sm:p-7"
+                      className="scroll-mt-24 overflow-hidden rounded-[34px] border border-black/5 bg-white/88 shadow-[0_18px_40px_rgba(30,25,20,0.06)]"
                     >
-                      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-black/6 pb-5">
+                      <button
+                        type="button"
+                        onClick={() => toggleSection(section.id)}
+                        className="flex w-full flex-wrap items-end justify-between gap-4 p-5 text-left transition hover:bg-[color:var(--surface)]/35 sm:p-7"
+                        aria-expanded={expandedSections[section.id] ? "true" : "false"}
+                      >
                         <div>
                           <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
                             {section.label}
@@ -1046,17 +1147,28 @@ export default function CataloguePageClient({
                             </p>
                           )}
                         </div>
-                        <div className="rounded-full border border-black/8 bg-[color:var(--surface)]/70 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]">
-                          {section.items.length} article(s)
+                        <div className="flex items-center gap-3">
+                          <div className="rounded-full border border-black/8 bg-[color:var(--surface)]/70 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]">
+                            {section.items.length} article(s)
+                          </div>
+                          <span
+                            className={`inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/8 bg-white text-lg text-[color:var(--ink)] transition ${
+                              expandedSections[section.id] ? "rotate-180" : ""
+                            }`}
+                            aria-hidden="true"
+                          >
+                            ˅
+                          </span>
                         </div>
-                      </div>
+                      </button>
 
-                      {section.items.length === 0 ? (
+                      {expandedSections[section.id] && (section.items.length === 0 ? (
                         <div className="mt-5 rounded-[24px] border border-dashed border-black/10 bg-[color:var(--surface)] p-6 text-sm text-[color:var(--muted)]">
                           Aucun article pour le moment.
                         </div>
                       ) : (
-                        <div className="mt-6 grid gap-4 md:grid-cols-2 2xl:grid-cols-3 2xl:gap-6">
+                        <div className="border-t border-black/6 p-5 pt-6 sm:p-7 sm:pt-6">
+                          <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3 2xl:gap-6">
                           {section.items.map((item) => (
                             <ItemCard
                               key={item.id}
@@ -1068,8 +1180,9 @@ export default function CataloguePageClient({
                               onOpenDetails={(selectedItem) => setActiveItemId(selectedItem.id)}
                             />
                           ))}
+                          </div>
                         </div>
-                      )}
+                      ))}
                     </section>
                   ))}
                 </section>
