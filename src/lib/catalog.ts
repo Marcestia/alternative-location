@@ -24,7 +24,7 @@ export const CATEGORY_GROUP_META: Record<
     label: "Matériel de service",
     slug: "materiel-service",
     description:
-      "Matériel de table, réception et équipements électriques pour le service.",
+      "Formules couvert, matériel de table, réception et équipements électriques pour le service.",
   },
   DECORATION: {
     label: "Décoration",
@@ -39,6 +39,7 @@ export const DEFAULT_CATEGORY_STRUCTURE: Array<{
   group: CategoryGroup;
   sortOrder: number;
 }> = [
+  { name: "Formules couvert", group: "MATERIEL_SERVICE", sortOrder: 5 },
   { name: "Jeux", group: "AMBIANCE_SON", sortOrder: 10 },
   { name: "Sonorisation", group: "AMBIANCE_SON", sortOrder: 20 },
   { name: "Lumières et projecteur", group: "AMBIANCE_SON", sortOrder: 30 },

@@ -3,6 +3,7 @@ const { PrismaClient } = require("../src/generated/prisma");
 const prisma = new PrismaClient();
 
 const targetCategories = [
+  { name: "Formules couvert", group: "MATERIEL_SERVICE", sortOrder: 5 },
   { name: "Jeux", group: "AMBIANCE_SON", sortOrder: 10 },
   { name: "Sonorisation", group: "AMBIANCE_SON", sortOrder: 20 },
   { name: "Lumières et projecteur", group: "AMBIANCE_SON", sortOrder: 30 },
