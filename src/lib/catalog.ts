@@ -1,8 +1,8 @@
 ﻿import type { CategoryGroup } from "@/generated/prisma";
 
 export const CATEGORY_GROUP_ORDER: CategoryGroup[] = [
-  "AMBIANCE_SON",
   "MATERIEL_SERVICE",
+  "AMBIANCE_SON",
   "DECORATION",
 ];
 
