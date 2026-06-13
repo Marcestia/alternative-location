@@ -20,6 +20,7 @@ type ItemVM = {
   imageUrl: string | null;
   images: { url: string; alt: string | null }[];
   categoryId: string | null;
+  categoryName: string | null;
 };
 
 type SelectedItemVM = ItemVM & {
@@ -410,6 +411,27 @@ function isExactSectionSearchHit(section: SectionVM, normalizedQuery: string) {
   );
 }
 
+function isFormulaCoverItem(item: ItemVM) {
+  return item.categoryName === "Formules couvert";
+}
+
+function getStockLimit(item: ItemVM, requestMode: boolean) {
+  if (isFormulaCoverItem(item) && item.totalQty <= 0) {
+    return 999;
+  }
+
+  return Math.max(requestMode ? item.availableQty : item.totalQty, 0);
+}
+
+function getAvailabilityLabel(item: ItemVM, requestMode: boolean) {
+  if (isFormulaCoverItem(item) && item.totalQty <= 0) {
+    return "Sur demande";
+  }
+
+  const stockLimit = getStockLimit(item, requestMode);
+  return `${stockLimit} disponible${stockLimit > 1 ? "s" : ""}`;
+}
+
 function CatalogueItemModal({
   item,
   quantity,
@@ -429,7 +451,7 @@ function CatalogueItemModal({
   const images = item.images.length
     ? item.images
     : [{ url: item.imageUrl || "/vitrine/hero.jpg", alt: item.name }];
-  const stockLimit = Math.max(requestMode ? item.availableQty : item.totalQty, 0);
+  const stockLimit = getStockLimit(item, requestMode);
   const canIncrease = quantity < stockLimit;
 
   useEffect(() => {
@@ -462,8 +484,8 @@ function CatalogueItemModal({
               <img src={activeImage.url} alt={activeImage.alt || item.name} className="max-h-[68vh] w-full object-contain bg-white" />
               {images.length > 1 ? (
                 <>
-                  <button type="button" onClick={() => setActiveIndex((current) => (current - 1 + images.length) % images.length)} className="absolute left-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg font-semibold text-[color:var(--ink)] shadow-[0_12px_30px_rgba(0,0,0,0.12)] transition hover:bg-white" aria-label="Image precedente">&larr;</button>
-                  <button type="button" onClick={() => setActiveIndex((current) => (current + 1) % images.length)} className="absolute right-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg font-semibold text-[color:var(--ink)] shadow-[0_12px_30px_rgba(0,0,0,0.12)] transition hover:bg-white" aria-label="Image suivante">&rarr;</button>
+                  <button type="button" onClick={() => setActiveIndex((current) => (current - 1 + images.length) % images.length)} className="absolute left-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg font-semibold text-[color:var(--ink)] shadow-[0_12px_30px_rgba(0,0,0,0.12)] transition hover:bg-white" aria-label="Image précédente">{"←"}</button>
+                  <button type="button" onClick={() => setActiveIndex((current) => (current + 1) % images.length)} className="absolute right-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg font-semibold text-[color:var(--ink)] shadow-[0_12px_30px_rgba(0,0,0,0.12)] transition hover:bg-white" aria-label="Image suivante">{"→"}</button>
                 </>
               ) : null}
             </div>
@@ -483,7 +505,7 @@ function CatalogueItemModal({
               <h2 className="mt-3 text-3xl font-semibold leading-tight text-[color:var(--ink)]">{item.name}</h2>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="rounded-full bg-[color:var(--surface)] px-3 py-1 text-xs font-semibold text-[color:var(--ink)]">{formatEuro(item.rentalPriceCents)}</span>
-                <span className="rounded-full bg-[color:var(--ink)]/8 px-3 py-1 text-xs font-semibold text-[color:var(--ink)]">{stockLimit} disponible{stockLimit > 1 ? "s" : ""}</span>
+                <span className="rounded-full bg-[color:var(--ink)]/8 px-3 py-1 text-xs font-semibold text-[color:var(--ink)]">{getAvailabilityLabel(item, requestMode)}</span>
                 <span className="rounded-full bg-[color:var(--accent)]/10 px-3 py-1 text-xs font-semibold text-[color:var(--accent)]">{images.length} photo{images.length > 1 ? "s" : ""}</span>
               </div>
               <p className="mt-5 whitespace-pre-wrap text-sm leading-7 text-[color:var(--muted)]">{item.description || "Consultez toutes les photos de cet article puis ajoutez la quantit\u00e9 souhait\u00e9e \u00e0 votre estimation."}</p>
@@ -491,14 +513,14 @@ function CatalogueItemModal({
             <div className="space-y-4 rounded-[24px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,240,233,0.94))] p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-[color:var(--muted)]">Quantit&eacute; s&eacute;lectionn&eacute;e</p>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-[color:var(--muted)]">{"Quantité sélectionnée"}</p>
                   <p className="mt-1 text-2xl font-semibold text-[color:var(--ink)]">{quantity}</p>
                 </div>
                 <p className="text-right text-sm font-semibold text-[color:var(--ink)]">{formatEuro(item.rentalPriceCents * quantity)}</p>
               </div>
               <div className="flex items-center justify-between rounded-full border border-emerald-200 bg-emerald-50 px-2 py-2">
                 <button type="button" onClick={() => onRemove(item)} disabled={quantity === 0} className="h-10 w-10 rounded-full bg-white text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-40">-</button>
-                <button type="button" onClick={() => onAdd(item)} disabled={!canIncrease} className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40">Ajouter &agrave; l&apos;estimation</button>
+                <button type="button" onClick={() => onAdd(item)} disabled={!canIncrease} className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40">{"Ajouter à l'estimation"}</button>
               </div>
             </div>
           </div>
@@ -525,7 +547,7 @@ function ItemCard({
   onOpenDetails: (item: ItemVM) => void;
 }) {
   const isSelected = quantity > 0;
-  const stockLimit = Math.max(requestMode ? item.availableQty : item.totalQty, 0);
+  const stockLimit = getStockLimit(item, requestMode);
   const canIncrease = quantity < stockLimit;
 
   return (
@@ -559,14 +581,14 @@ function ItemCard({
       <div className="mt-4 flex flex-1 flex-col">
         <div>
           <h3 className="text-base font-semibold leading-tight text-[color:var(--ink)] sm:text-lg">{item.name}</h3>
-          <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">{item.images.length > 1 ? `${item.images.length} photos disponibles. Ouvrez la fiche pour toutes les voir.` : "Location &agrave; l&apos;unit&eacute;. Ouvrez la fiche pour voir le d&eacute;tail."}</p>
+          <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">{item.images.length > 1 ? `${item.images.length} photos disponibles. Ouvrez la fiche pour toutes les voir.` : "Location à l'unité. Ouvrez la fiche pour voir le détail."}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <span className="rounded-full bg-[color:var(--surface)] px-3 py-1 text-[11px] font-semibold text-[color:var(--ink)]">{formatEuro(item.rentalPriceCents)}</span>
-            <span className="rounded-full bg-[color:var(--ink)]/8 px-3 py-1 text-[11px] font-semibold text-[color:var(--ink)]">{stockLimit} disponible{stockLimit > 1 ? "s" : ""}</span>
+            <span className="rounded-full bg-[color:var(--ink)]/8 px-3 py-1 text-[11px] font-semibold text-[color:var(--ink)]">{getAvailabilityLabel(item, requestMode)}</span>
           </div>
         </div>
         <div className="mt-5 pt-1">
-          <button type="button" onClick={() => onOpenDetails(item)} className="mb-3 w-full rounded-full border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20">Voir le d&eacute;tail</button>
+          <button type="button" onClick={() => onOpenDetails(item)} className="mb-3 w-full rounded-full border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20">{"Voir le détail"}</button>
           {!isSelected ? (
             <button type="button" onClick={() => onAdd(item)} className="w-full rounded-full border border-black/10 bg-[color:var(--surface)]/65 px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white">Ajouter au calcul</button>
           ) : (
@@ -574,7 +596,7 @@ function ItemCard({
               <div className="flex items-center justify-between gap-2 rounded-full border border-emerald-200 bg-white/90 px-2 py-1.5">
                 <button type="button" onClick={() => onRemove(item)} className="h-9 w-9 rounded-full bg-emerald-50 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100" aria-label={`Retirer ${item.name}`}>-</button>
                 <div className="text-center">
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-700/75">Quantit&eacute;</p>
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-700/75">{"Quantité"}</p>
                   <p className="text-sm font-semibold text-emerald-800">{quantity}</p>
                 </div>
                 <button type="button" onClick={() => onAdd(item)} disabled={!canIncrease} className="h-9 w-9 rounded-full bg-emerald-600 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40" aria-label={`Ajouter ${item.name}`}>+</button>
@@ -614,7 +636,7 @@ export default function CataloguePageClient({
     for (const savedItem of savedSelection) {
       const item = availableItems.find((entry) => entry.id === savedItem.itemId);
       if (!item) continue;
-      const stockLimit = Math.max(item.availableQty, 0);
+      const stockLimit = getStockLimit(item, true);
       const quantity = Math.min(savedItem.quantity, stockLimit);
       if (quantity <= 0) continue;
       nextState[item.id] = {
@@ -784,7 +806,7 @@ export default function CataloguePageClient({
   };
 
   const addItem = (item: ItemVM) => {
-    const stockLimit = Math.max(requestMode ? item.availableQty : item.totalQty, 0);
+    const stockLimit = getStockLimit(item, requestMode);
     if (stockLimit <= 0) return;
 
     setSelected((prev) => {
@@ -828,7 +850,7 @@ export default function CataloguePageClient({
             href="/"
             className="inline-flex rounded-full bg-[color:var(--accent)] px-4 py-2 text-xs font-semibold text-white shadow-[0_10px_22px_rgba(217,119,55,0.35)] transition hover:-translate-y-0.5 hover:brightness-95"
           >
-            Retour a l&apos;accueil
+            {"Retour à l'accueil"}
           </Link>
         )}
         <button
@@ -895,7 +917,7 @@ export default function CataloguePageClient({
                   <button
                     type="button"
                     onClick={() => addItem(item)}
-                    disabled={item.quantity >= Math.max(requestMode ? item.availableQty : item.totalQty, 0)}
+                    disabled={item.quantity >= getStockLimit(item, requestMode)}
                     className="h-8 w-8 rounded-full bg-white text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
                     aria-label={`Ajouter ${item.name}`}
                   >
@@ -975,7 +997,7 @@ export default function CataloguePageClient({
                   href="/"
                   className="rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(217,119,55,0.35)] transition hover:-translate-y-0.5 hover:brightness-95"
                 >
-                  Retour a l&apos;accueil
+                  {"Retour à l'accueil"}
                 </Link>
                 <Link
                   href="/#contact"

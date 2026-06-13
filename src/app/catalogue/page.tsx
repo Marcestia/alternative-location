@@ -35,7 +35,7 @@ export default async function CataloguePage({
     }),
     prisma.item.findMany({
       where: { active: true },
-      include: { images: true },
+      include: { images: true, category: true },
       orderBy: { name: "asc" },
     }),
     prisma.itemCategory.findMany({
@@ -117,6 +117,7 @@ export default async function CataloguePage({
         alt: image.alt,
       })),
       categoryId: item.categoryId,
+      categoryName: item.category?.name ?? null,
     }));
 
   const sections = CATEGORY_GROUP_ORDER.flatMap((group) =>
