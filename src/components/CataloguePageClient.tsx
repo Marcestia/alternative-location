@@ -486,7 +486,7 @@ function CatalogueItemModal({
                 <span className="rounded-full bg-[color:var(--ink)]/8 px-3 py-1 text-xs font-semibold text-[color:var(--ink)]">{stockLimit} disponible{stockLimit > 1 ? "s" : ""}</span>
                 <span className="rounded-full bg-[color:var(--accent)]/10 px-3 py-1 text-xs font-semibold text-[color:var(--accent)]">{images.length} photo{images.length > 1 ? "s" : ""}</span>
               </div>
-              <p className="mt-5 text-sm leading-7 text-[color:var(--muted)]">{item.description || "Consultez toutes les photos de cet article puis ajoutez la quantite souhaitee a votre estimation."}</p>
+              <p className="mt-5 text-sm leading-7 text-[color:var(--muted)]">{item.description || "Consultez toutes les photos de cet article puis ajoutez la quantit\u00e9 souhait\u00e9e \u00e0 votre estimation."}</p>
             </div>
             <div className="space-y-4 rounded-[24px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,240,233,0.94))] p-4">
               <div className="flex items-center justify-between gap-3">
@@ -654,7 +654,7 @@ export default function CataloguePageClient({
           key: "AUTRES",
           label: "Autres",
           slug: "autres",
-          description: "Articles non rattaches a une sous-categorie.",
+          description: "Articles non rattach\u00e9s \u00e0 une sous-cat\u00e9gorie.",
         },
         items: uncategorized,
       },

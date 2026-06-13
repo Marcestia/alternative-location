@@ -82,6 +82,14 @@ export default async function StockPage({
               />
             </label>
             <label className="grid gap-2 text-xs font-semibold text-[color:var(--muted)]">
+              Descriptif
+              <textarea
+                className="min-h-[120px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                name="description"
+                placeholder="Petit texte visible dans la fiche produit du catalogue."
+              />
+            </label>
+            <label className="grid gap-2 text-xs font-semibold text-[color:var(--muted)]">
               Cat&eacute;gorie
               <select
                 className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
@@ -267,6 +275,15 @@ export default async function StockPage({
                           name="name"
                           defaultValue={item.name}
                           required
+                        />
+                      </label>
+                      <label className="grid gap-2 text-xs font-semibold text-[color:var(--muted)]">
+                        Descriptif
+                        <textarea
+                          className="min-h-[120px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                          name="description"
+                          defaultValue={item.description ?? ""}
+                          placeholder="Petit texte visible dans la fiche produit du catalogue."
                         />
                       </label>
                       <label className="grid gap-2 text-xs font-semibold text-[color:var(--muted)]">

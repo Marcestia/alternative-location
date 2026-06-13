@@ -30,6 +30,7 @@ function parseCategoryGroup(value: FormDataEntryValue | null): CategoryGroup {
 
 export async function addItem(formData: FormData) {
   const name = String(formData.get("name") || "").trim();
+  const description = String(formData.get("description") || "").trim();
   const totalQty = Number(formData.get("totalQty") || 0);
   const rentalPriceCents = parseEuroToCents(formData.get("rentalPriceCents"));
   const depositPriceCents = parseEuroToCents(formData.get("depositPriceCents"));
@@ -52,6 +53,7 @@ export async function addItem(formData: FormData) {
   const item = await prisma.item.create({
     data: {
       name,
+      description: description || null,
       totalQty: Number.isFinite(totalQty) ? totalQty : 0,
       rentalPriceCents,
       depositPriceCents,
@@ -79,6 +81,7 @@ export async function addItem(formData: FormData) {
 export async function updateItem(formData: FormData) {
   const id = String(formData.get("id") || "").trim();
   const name = String(formData.get("name") || "").trim();
+  const description = String(formData.get("description") || "").trim();
   const totalQty = Number(formData.get("totalQty") || 0);
   const rentalPriceCents = parseEuroToCents(formData.get("rentalPriceCents"));
   const depositPriceCents = parseEuroToCents(formData.get("depositPriceCents"));
@@ -102,6 +105,7 @@ export async function updateItem(formData: FormData) {
     where: { id },
     data: {
       name,
+      description: description || null,
       totalQty: Number.isFinite(totalQty) ? totalQty : 0,
       rentalPriceCents,
       depositPriceCents,
