@@ -1,4 +1,4 @@
-export const CG_VERSION = "2026-04-23";
+export const CG_VERSION = "2026-08-25";
 
 type ConditionSection = {
   title: string;
@@ -14,7 +14,7 @@ export const CONDITIONS_SECTIONS: ConditionSection[] = [
     bullets: [
       "Un acompte de 30 % est exigible pour valider la réservation. À défaut, la réservation n'est pas confirmée.",
       "La signature du devis vaut engagement de versement de l'acompte sous 7 jours.",
-      "Le prix de la location correspond au montant indiqué sur le devis, hors frais de livraison à la charge du Locataire.",
+      "Le prix de la location correspond au montant indiqué sur le devis.",
       "Le règlement total et la caution sont exigibles lors de la remise du matériel.",
       "La location est effective contre dépôt de caution (montant indiqué sur le devis).",
       "La caution est restituée après retour et contrôle du matériel, sous réserve d'absence de dégradation, de casse ou de manquant.",
@@ -22,12 +22,11 @@ export const CONDITIONS_SECTIONS: ConditionSection[] = [
     ],
   },
   {
-    title: "2. Retrait, retour et livraison",
+    title: "2. Retrait et retour",
     bullets: [
       "La location est prévue du vendredi au lundi, aux horaires convenus lors de la réservation.",
       "La société est fermée le dimanche (en cas d'impossibilité, un accord préalable est requis).",
       "Le retrait et le retour du matériel s'effectuent exclusivement à l'adresse de la société.",
-      "La livraison est possible dans la limite de 80 km, au tarif de 1 EUR / km ; au-delà, un accord préalable est requis.",
       "Tout retard donne lieu à une pénalité de 25 %.",
     ],
   },

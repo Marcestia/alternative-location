@@ -39,15 +39,15 @@ export default async function GaleriePage() {
 
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#f6f0e9_0%,#faf7f3_18%,#ffffff_100%)] px-4 py-6 text-[color:var(--ink)] sm:px-6 lg:px-10">
+      <Link
+        href="/"
+        className="fixed left-4 top-4 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full border border-black/10 bg-white/92 text-xl font-semibold text-[color:var(--ink)] shadow-[0_16px_34px_rgba(30,25,20,0.16)] backdrop-blur transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white sm:left-5 sm:top-5"
+        aria-label="Revenir à l'accueil"
+      >
+        ←
+      </Link>
       <section className="mx-auto max-w-7xl">
         <div className="overflow-hidden rounded-[26px] border border-black/5 bg-white/92 p-6 shadow-[0_30px_70px_rgba(30,25,20,0.1)] sm:p-8 lg:p-10">
-          <Link
-            href="/"
-            className="mb-7 inline-flex items-center gap-2 rounded-full border border-black/10 bg-[color:var(--surface)] px-4 py-2 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-x-0.5 hover:border-black/20 hover:bg-white"
-          >
-            <span aria-hidden="true">←</span>
-            Retour au menu
-          </Link>
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
               <p className="text-xs uppercase tracking-[0.34em] text-[color:var(--accent-2)]">

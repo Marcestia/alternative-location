@@ -152,13 +152,13 @@ export async function markConfirmationSent(formData: FormData) {
     signedQuote.pdfUrl && !signedQuote.pdfUrl.startsWith("/pdfs/")
       ? await getSignedUrlForKey({ key: signedQuote.pdfUrl, expiresInSeconds: SIGNED_URL_TTL })
       : `${baseUrl}${signedQuote.pdfUrl}`;
-  const text = `Bonjour ${reservation.client.name || "madame/monsieur"},\n\nVotre reservation est confirmee.\n\nDevis signe (PDF) :\n${signedLink}\n\nRIB / IBAN (pour l'acompte) :\n${ribUrl}\n\nNous vous recontacterons pour organiser la livraison ou la recuperation du materiel.\n\nMerci,\nAlternative Location`;
+  const text = `Bonjour ${reservation.client.name || "madame/monsieur"},\n\nVotre reservation est confirmee.\n\nDevis signe (PDF) :\n${signedLink}\n\nRIB / IBAN (pour l'acompte) :\n${ribUrl}\n\nNous vous recontacterons pour convenir du retrait du materiel a Galgon.\n\nMerci,\nAlternative Location`;
   const html = `
     <p>Bonjour ${reservation.client.name || "madame/monsieur"},</p>
     <p>Votre reservation est confirmee.</p>
     <p><strong>Devis signe (PDF)</strong> : <a href="${signedLink}">Devis signe</a></p>
     <p><strong>RIB / IBAN (pour l'acompte)</strong> : <a href="${ribUrl}">RIB / IBAN</a></p>
-    <p>Nous vous recontacterons pour organiser la livraison ou la recuperation du materiel.</p>
+    <p>Nous vous recontacterons pour convenir du retrait du matériel à Galgon.</p>
     <p>Merci,<br/>Alternative Location</p>
   `;
 

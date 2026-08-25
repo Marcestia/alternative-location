@@ -37,8 +37,8 @@ const steps = [
     text: "Vous signez le devis en ligne. La réservation est ensuite confirmée, avec un acompte de 30 % à régler sous 7 jours.",
   },
   {
-    title: "Retrait ou livraison",
-    text: "Nous organisons le retrait sur place ou la livraison selon votre besoin. Le solde et la caution sont demandés avant la remise du matériel.",
+    title: "Retrait sur place",
+    text: "Nous convenons ensemble du créneau de retrait à Galgon. Le solde et la caution sont demandés avant la remise du matériel.",
   },
 ];
 
@@ -252,10 +252,6 @@ export default async function Home({
         "@type": "Place",
         name: "Galgon (33133)",
       },
-      {
-        "@type": "Place",
-        name: "Rayon de 100 km autour de Galgon",
-      },
     ],
     description:
       "Location de vaisselle, décoration, mobilier et sonorisation pour tous vos événements festifs.",
@@ -463,7 +459,7 @@ export default async function Home({
                   </a>
                 </div>
                 <p className="mt-5 text-xs leading-5 text-[color:var(--muted)]">
-                  Retrait à Galgon ou livraison selon votre projet.
+                  Retrait sur place à Galgon, sur rendez-vous.
                 </p>
               </div>
 
@@ -629,8 +625,7 @@ export default async function Home({
                   </p>
                   <div className="mt-2 space-y-2 text-sm font-medium">
                     <p>
-                      Retrait sur place ou livraison possible à partir de 1 EUR / km,
-                      selon la distance.
+                      Retrait et retour du matériel sur place à Galgon.
                     </p>
                     <p>Paiement possible par virement, chèque ou espèces.</p>
                     <p>
@@ -700,16 +695,16 @@ export default async function Home({
             <div className="mt-4 space-y-3 text-sm text-[color:var(--muted)]">
               <p>
                 Alternative Location accompagne mariages, anniversaires, fêtes
-                de famille et événements professionnels à Galgon (33133) et dans
-                un rayon de 150 km.
+                de famille et événements professionnels avec retrait à Galgon
+                (33133).
               </p>
               <p>
                 Nous proposons la location de vaisselle, décoration, mobilier,
                 ambiance et sonorisation avec un service simple et fiable.
               </p>
               <p>
-                Retrait sur place à Galgon ou livraison possible à partir de 1
-                EUR / km selon disponibilités.
+                Retrait et retour du matériel sur place à Galgon, aux horaires
+                convenus lors de la réservation.
               </p>
             </div>
           </div>

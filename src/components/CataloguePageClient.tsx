@@ -874,7 +874,7 @@ export default function CataloguePageClient({
           {formatEuro(totalCents)}
         </p>
         <p className="mt-2 text-xs leading-5 text-[color:var(--muted)]">
-          Estimation de location hors livraison et caution.
+          Estimation de location hors caution.
         </p>
         {requestMode && eventDateValue ? (
           <p className="mt-2 text-xs font-semibold leading-5 text-[color:var(--accent)]">

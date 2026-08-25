@@ -5,7 +5,6 @@
   city: "Galgon",
   postalCode: "33133",
   country: "FR",
-  serviceAreaKm: 150,
   phone: "06 21 20 54 32",
   whatsapp: "+33 6 21 20 54 32",
   email: "alternativelocation@free.fr",

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: `${siteConfig.name} | Location vaisselle, décoration et mobilier`,
   description:
-    "Location de vaisselle, décoration, mobilier, sonorisation et ambiance pour mariages, anniversaires et évènements festifs a Galgon (33) et dans un rayon de 100 km.",
+    "Location de vaisselle, décoration, mobilier, sonorisation et ambiance pour mariages, anniversaires et évènements festifs avec retrait sur place à Galgon (33).",
   keywords: [
     "location vaisselle",
     "location décoration",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     title: `${siteConfig.name} | Location vaisselle, decoration et mobilier`,
     description:
-      "Location de vaisselle, decoration, mobilier, sonorisation et ambiance pour mariages, anniversaires et evenements festifs a Galgon (33) et dans un rayon de 150 km.",
+      "Location de vaisselle, decoration, mobilier, sonorisation et ambiance pour mariages, anniversaires et evenements festifs avec retrait sur place a Galgon (33).",
     images: [
       {
         url: "/vitrine/hero.jpg",
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${siteConfig.name} | Location vaisselle, decoration et mobilier`,
     description:
-      "Location de vaisselle, decoration, mobilier, sonorisation et ambiance pour mariages, anniversaires et evenements festifs a Galgon (33) et dans un rayon de 150 km.",
+      "Location de vaisselle, decoration, mobilier, sonorisation et ambiance pour mariages, anniversaires et evenements festifs avec retrait sur place a Galgon (33).",
     images: ["/vitrine/hero.jpg"],
   },
   robots: {
