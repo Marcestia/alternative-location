@@ -40,8 +40,6 @@ export async function GET() {
     invoiceLines: await safeFetch(() => prisma.invoiceLine.findMany(), []),
     companySettings: await safeFetch(() => prisma.companySetting.findMany(), []),
     numberSequences: await safeFetch(() => prisma.numberSequence.findMany(), []),
-    reviews: await safeFetch(() => prisma.review.findMany(), []),
-    reviewImages: await safeFetch(() => prisma.reviewImage.findMany(), []),
   };
 
   const body = JSON.stringify(data, null, 2);

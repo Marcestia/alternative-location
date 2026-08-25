@@ -84,8 +84,6 @@ export async function saveCompanySettings(formData: FormData) {
 }
 
 export async function resetNonStockData() {
-  await prisma.reviewImage.deleteMany();
-  await prisma.review.deleteMany();
   await prisma.invoiceLine.deleteMany();
   await prisma.invoice.deleteMany();
   await prisma.reservationItem.deleteMany();

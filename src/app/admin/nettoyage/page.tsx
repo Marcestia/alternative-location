@@ -8,7 +8,6 @@ import {
   deleteInvoicePdf,
   deleteQuoteById,
   deleteQuotePdf,
-  deleteReviewById,
 } from "@/app/actions/maintenance";
 import { deleteSpotlight } from "@/app/actions/stock";
 
@@ -16,7 +15,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function NettoyagePage() {
-  const [clients, demandes, quotes, reservations, invoices, reviews, spotlights] =
+  const [clients, demandes, quotes, reservations, invoices, spotlights] =
     await Promise.all([
       prisma.client.findMany({ orderBy: { createdAt: "desc" }, take: 30 }),
       prisma.contactRequest.findMany({
@@ -37,10 +36,6 @@ export default async function NettoyagePage() {
       prisma.invoice.findMany({
         orderBy: { createdAt: "desc" },
         include: { client: true },
-        take: 30,
-      }),
-      prisma.review.findMany({
-        orderBy: { createdAt: "desc" },
         take: 30,
       }),
       prisma.spotlight.findMany({
@@ -254,36 +249,6 @@ export default async function NettoyagePage() {
                     className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-700"
                     type="submit"
                     data-confirm={`le client ${client.name}`}
-                  >
-                    Supprimer
-                  </button>
-                </form>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-black/5 bg-white/80 p-6">
-          <h2 className="text-lg font-semibold">Avis</h2>
-          <div className="mt-4 space-y-3 text-sm">
-            {reviews.length === 0 && (
-              <p className="text-[color:var(--muted)]">Aucun avis.</p>
-            )}
-            {reviews.map((review) => (
-              <div
-                key={review.id}
-                className="rounded-2xl border border-black/5 bg-white px-4 py-3"
-              >
-                <p className="font-semibold">{review.name}</p>
-                <p className="text-xs text-[color:var(--muted)]">
-                  Note: {review.rating}/5
-                </p>
-                <form action={deleteReviewById} className="mt-2">
-                  <input type="hidden" name="id" value={review.id} />
-                  <button
-                    className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-700"
-                    type="submit"
-                    data-confirm={`l'avis de ${review.name}`}
                   >
                     Supprimer
                   </button>

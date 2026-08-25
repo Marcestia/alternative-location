@@ -1,7 +1,5 @@
 ﻿import GalleryPreviewSection from "@/components/GalleryPreviewSection";
-import ReviewsSection from "@/components/ReviewsSection";
 import ContactRequestForm from "@/components/ContactRequestForm";
-import { submitReviewPublic } from "@/app/actions/reviews";
 import { CATEGORY_GROUP_META, CATEGORY_GROUP_ORDER } from "@/lib/catalog";
 import { prisma } from "@/lib/prisma";
 import { siteConfig } from "@/lib/site";
@@ -230,7 +228,7 @@ function UniverseCard({
 export default async function Home({
   searchParams,
 }: {
-  searchParams?: Promise<{ sent?: string; review?: string }>;
+  searchParams?: Promise<{ sent?: string }>;
 }) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const localBusinessSchema = {
@@ -283,21 +281,14 @@ export default async function Home({
 
   const resolvedParams = searchParams ? await searchParams : undefined;
   const sentStatus = resolvedParams?.sent;
-  const reviewStatus = resolvedParams?.review;
 
-  const [settings, categories, reviews, galleryMedia] = await Promise.all([
+  const [settings, categories, galleryMedia] = await Promise.all([
     prisma.companySetting.findUnique({
       where: { id: "company" },
       select: { catalogRequestEnabled: true },
     }),
     prisma.itemCategory.findMany({
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-    }),
-    prisma.review.findMany({
-      where: { status: { not: "REJECTED" } },
-      include: { images: true },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-      take: 6,
     }),
     prisma.galleryMedia.findMany({
       where: { active: true },
@@ -677,12 +668,6 @@ export default async function Home({
             </div>
           </div>
         </section>
-
-        <ReviewsSection
-          reviews={reviews}
-          reviewStatus={reviewStatus}
-          onSubmit={submitReviewPublic}
-        />
 
         <section className="sr-only">
           <div className="rounded-[32px] border border-black/5 bg-white/80 p-8">

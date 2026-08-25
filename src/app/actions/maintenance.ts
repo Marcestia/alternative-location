@@ -55,18 +55,6 @@ export async function deleteQuoteById(formData: FormData) {
   redirect("/admin/nettoyage");
 }
 
-export async function deleteReviewById(formData: FormData) {
-  const id = String(formData.get("id") || "").trim();
-  if (!id) {
-    redirect("/admin/nettoyage");
-  }
-
-  await prisma.reviewImage.deleteMany({ where: { reviewId: id } });
-  await prisma.review.delete({ where: { id } });
-
-  redirect("/admin/nettoyage");
-}
-
 export async function deleteQuotePdf(formData: FormData) {
   const id = String(formData.get("id") || "").trim();
   if (!id) {
