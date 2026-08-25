@@ -6,7 +6,11 @@ import { CATEGORY_GROUP_META, CATEGORY_GROUP_ORDER } from "@/lib/catalog";
 import { prisma } from "@/lib/prisma";
 import { siteConfig } from "@/lib/site";
 import { sampleGalleryItems } from "@/lib/gallery";
+import Image from "next/image";
+import Link from "next/link";
+import MomentOffersCarousel from "@/components/MomentOffersCarousel";
 import heroImage from "./hero.png";
+import logoImage from "../../public/logo.png";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -344,9 +348,9 @@ export default async function Home({
       <header className="px-4 pt-4 sm:px-6 sm:pt-6 lg:absolute lg:left-0 lg:right-0 lg:top-0 lg:z-20 lg:pt-0">
         <div className="mx-auto w-full max-w-6xl rounded-[28px] border border-white/70 bg-white/88 px-4 py-4 shadow-[0_20px_60px_rgba(36,26,18,0.08)] backdrop-blur sm:px-6 lg:mx-0 lg:max-w-none lg:rounded-b-[28px] lg:rounded-t-none lg:border-x-0 lg:border-t-0 lg:bg-white/72 lg:px-12 lg:py-6">
           <div className="flex items-center justify-between gap-4">
-            <a className="min-w-0 flex items-center gap-3" href="/">
-              <img
-                src="/logo.png"
+            <Link className="min-w-0 flex items-center gap-3" href="/">
+              <Image
+                src={logoImage}
                 alt="Alternative Location"
                 className="h-12 w-auto sm:h-14"
               />
@@ -358,7 +362,7 @@ export default async function Home({
                   {siteConfig.name}
                 </p>
               </div>
-            </a>
+            </Link>
 
             <nav className="hidden items-center gap-3 text-sm font-medium text-[color:var(--muted)] md:flex">
               <a
@@ -367,18 +371,18 @@ export default async function Home({
               >
                 Univers
               </a>
-              <a
+              <Link
                 className="rounded-full border border-black/10 bg-white/70 px-4 py-2 transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white hover:text-[color:var(--ink)] hover:shadow-[0_10px_24px_rgba(30,25,20,0.08)]"
                 href="/catalogue"
               >
                 Catalogue
-              </a>
-              <a
+              </Link>
+              <Link
                 className="rounded-full border border-black/10 bg-white/70 px-4 py-2 transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white hover:text-[color:var(--ink)] hover:shadow-[0_10px_24px_rgba(30,25,20,0.08)]"
                 href="/galerie"
               >
                 Galerie
-              </a>
+              </Link>
               <a
                 className="rounded-full border border-black/10 bg-white/70 px-4 py-2 transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white hover:text-[color:var(--ink)] hover:shadow-[0_10px_24px_rgba(30,25,20,0.08)]"
                 href="#contact"
@@ -396,18 +400,18 @@ export default async function Home({
               >
                 Univers
               </a>
-              <a
+              <Link
                 className="min-w-fit snap-start rounded-full border border-black/10 bg-white px-4 py-2 text-center transition active:scale-[0.98]"
                 href="/catalogue"
               >
                 Catalogue
-              </a>
-              <a
+              </Link>
+              <Link
                 className="min-w-fit snap-start rounded-full border border-black/10 bg-white px-4 py-2 text-center transition active:scale-[0.98]"
                 href="/galerie"
               >
                 Galerie
-              </a>
+              </Link>
               <a
                 className="min-w-fit snap-start rounded-full bg-[color:var(--ink)] px-4 py-2 text-center text-white transition active:scale-[0.98]"
                 href="#contact"
@@ -421,90 +425,49 @@ export default async function Home({
 
       <main className="pb-14 pt-4 sm:pt-6 lg:pt-0">
         <section className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:max-w-none lg:px-0">
-          <div className="lg:hidden">
-            <div className="relative overflow-hidden rounded-[34px] border border-white/70 bg-white/88 shadow-[0_28px_60px_rgba(30,25,20,0.12)]">
-              <img
-                src={heroImage.src}
-                alt="Alternative Location"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(250,245,240,0.06),rgba(248,241,234,0.26)_30%,rgba(244,236,228,0.88)_74%,rgba(244,236,228,0.98)_100%)]" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,125,106,0.14),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(216,111,63,0.18),transparent_42%)]" />
-              <div className="relative flex min-h-[74svh] flex-col justify-end px-4 py-4 sm:px-5 sm:py-5">
-                <div className="rounded-[28px] border border-white/80 bg-white/68 p-5 shadow-[0_24px_48px_rgba(30,25,20,0.12)] backdrop-blur-lg sm:p-6">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/88 px-4 py-2 text-[11px] uppercase tracking-[0.28em] text-[color:var(--accent)] shadow-[0_10px_22px_rgba(30,25,20,0.05)]">
-                    Location événementielle
-                  </div>
+          <div className="relative isolate overflow-hidden rounded-[34px] border border-white/70 bg-[#e9dfd4] shadow-[0_28px_70px_rgba(30,25,20,0.14)] lg:min-h-[100svh] lg:rounded-b-[42px] lg:rounded-t-none">
+            <Image
+              src={heroImage}
+              alt="Table de réception dressée par Alternative Location"
+              fill
+              priority
+              sizes="100vw"
+              className="-z-30 object-cover object-center"
+            />
+            <div className="absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(31,26,21,0.05)_0%,rgba(31,26,21,0.22)_32%,rgba(244,237,229,0.96)_72%,#f4ede5_100%)] lg:bg-[linear-gradient(90deg,rgba(247,241,234,0.98)_0%,rgba(247,241,234,0.9)_48%,rgba(35,29,24,0.28)_100%)]" />
+            <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_20%,rgba(216,111,63,0.2),transparent_34%),radial-gradient(circle_at_85%_78%,rgba(46,125,106,0.2),transparent_32%)]" />
 
-                  <div className="mt-5 space-y-5">
-                    <div className="space-y-3">
-                      <h1 className="max-w-[10ch] text-[3rem] font-semibold leading-[0.9] sm:max-w-[11ch] sm:text-[3.8rem]">
-                        Tout pour sublimer vos événements.
-                      </h1>
-                      <p className="max-w-[30rem] text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-                        {siteConfig.description}
-                      </p>
-                    </div>
-
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <a
-                        className="rounded-full bg-[color:var(--accent)] px-6 py-3 text-center text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.22)] transition active:scale-[0.99]"
-                        href="/catalogue"
-                      >
-                        Consulter le catalogue
-                      </a>
-                      <a
-                        className="rounded-full border border-[color:var(--ink)]/10 bg-white/90 px-6 py-3 text-center text-sm font-semibold text-[color:var(--ink)] shadow-[0_12px_24px_rgba(30,25,20,0.05)] backdrop-blur transition active:scale-[0.99]"
-                        href="#contact"
-                      >
-                        Nous contacter
-                      </a>
-                    </div>
-                    <div className="rounded-2xl border border-white/75 bg-white/72 px-4 py-3 text-sm leading-6 text-[color:var(--muted)] shadow-[0_10px_22px_rgba(30,25,20,0.05)]">
-                      À Galgon et alentours. Retrait sur place ou livraison selon vos besoins.
-                    </div>
-                  </div>
+            <div className="relative grid min-h-[calc(100svh-1.5rem)] items-end gap-8 px-4 pb-5 pt-[17rem] sm:px-7 sm:pb-7 lg:min-h-[100svh] lg:grid-cols-[minmax(0,0.85fr)_minmax(560px,1.15fr)] lg:items-center lg:gap-10 lg:px-12 lg:pb-12 lg:pt-32 xl:gap-16 xl:px-16">
+              <div className="max-w-2xl rounded-[30px] border border-white/75 bg-white/68 p-6 shadow-[0_28px_60px_rgba(30,25,20,0.12)] backdrop-blur-xl sm:p-8 lg:bg-white/58 lg:p-10">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/90 px-4 py-2 text-[11px] uppercase tracking-[0.28em] text-[color:var(--accent)] shadow-sm">
+                  Location événementielle · Galgon
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="hidden lg:block">
-            <div className="relative h-[100svh] w-full overflow-hidden rounded-b-[40px]">
-              <img
-                src={heroImage.src}
-                alt="Alternative Location"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(250,245,240,0.96)_0%,rgba(250,245,240,0.72)_42%,rgba(250,245,240,0.08)_100%)]" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(216,111,63,0.16),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(46,125,106,0.14),transparent_35%)]" />
-              <div className="relative z-10 flex h-full items-center px-12 pt-20 xl:px-16">
-                <div className="max-w-[720px] rounded-[36px] border border-white/75 bg-white/58 p-10 shadow-[0_28px_70px_rgba(30,25,20,0.14)] backdrop-blur-md xl:p-12">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/75 bg-white/82 px-4 py-2 text-xs uppercase tracking-[0.3em] text-[color:var(--accent)] shadow-[0_12px_30px_rgba(30,25,20,0.06)]">
-                    Location événementielle
-                  </div>
-                  <h1 className="mt-6 text-7xl font-semibold leading-[0.96] xl:text-[5.6rem]">
-                    Tout pour sublimer vos événements.
-                  </h1>
-                  <p className="mt-5 max-w-3xl text-xl leading-8 text-[color:var(--muted)]">
-                    {siteConfig.description}
-                  </p>
-                  <div className="mt-8 flex flex-wrap gap-4">
-                    <a
-                      className="rounded-full bg-[color:var(--accent)] px-8 py-4 text-center text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.25)] transition hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-[0_24px_40px_rgba(216,111,63,0.25)]"
-                      href="/catalogue"
-                    >
-                      Voir le catalogue
-                    </a>
-                    <a
-                      className="rounded-full border border-[color:var(--ink)]/15 bg-white/88 px-8 py-4 text-center text-sm font-semibold text-[color:var(--ink)] shadow-[0_14px_28px_rgba(30,25,20,0.06)] transition hover:-translate-y-0.5 hover:scale-[1.02] hover:border-[color:var(--ink)]/30"
-                      href="#contact"
-                    >
-                      Parler du projet
-                    </a>
-                  </div>
+                <h1 className="mt-5 max-w-[11ch] text-[3.15rem] font-semibold leading-[0.92] sm:text-[4rem] lg:text-[4.3rem] xl:text-[4.8rem]">
+                  Sublimez vos événements, simplement.
+                </h1>
+                <p className="mt-5 max-w-xl text-base leading-7 text-[color:var(--muted)] lg:text-lg lg:leading-8">
+                  Vaisselle, mobilier et ambiance pour composer un événement qui vous ressemble, simplement.
+                </p>
+                <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    className="rounded-full bg-[color:var(--accent)] px-7 py-3.5 text-center text-sm font-semibold text-white shadow-[0_18px_30px_rgba(216,111,63,0.26)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_40px_rgba(216,111,63,0.3)]"
+                    href="/catalogue"
+                  >
+                    Composer mon événement
+                  </Link>
+                  <a
+                    className="rounded-full border border-[color:var(--ink)]/12 bg-white/88 px-7 py-3.5 text-center text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-[color:var(--ink)]/25"
+                    href="#contact"
+                  >
+                    Demander un devis
+                  </a>
                 </div>
+                <p className="mt-5 text-xs leading-5 text-[color:var(--muted)]">
+                  Retrait à Galgon ou livraison selon votre projet.
+                </p>
               </div>
+
+              <MomentOffersCarousel />
             </div>
           </div>
         </section>

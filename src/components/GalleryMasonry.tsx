@@ -16,18 +16,22 @@ type GalleryMasonryProps = {
 function GalleryModal({
   item,
   onClose,
+  onPrevious,
+  onNext,
 }: {
   item: GalleryMediaView;
   onClose: () => void;
+  onPrevious: () => void;
+  onNext: () => void;
 }) {
-  const [mounted, setMounted] = useState(false);
   const embedUrl = item.type === "VIDEO" ? toVideoEmbedUrl(item.mediaUrl) : null;
   const previewUrl = getGalleryPreviewUrl(item);
 
   useEffect(() => {
-    setMounted(true);
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
+      if (event.key === "ArrowLeft") onPrevious();
+      if (event.key === "ArrowRight") onNext();
     };
     document.addEventListener("keydown", onKeyDown);
     document.body.style.overflow = "hidden";
@@ -35,89 +39,68 @@ function GalleryModal({
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = "";
     };
-  }, [onClose]);
-
-  if (!mounted) return null;
+  }, [onClose, onNext, onPrevious]);
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[220] flex items-center justify-center bg-[rgba(16,12,9,0.82)] p-4 backdrop-blur-md"
+      className="fixed inset-0 z-[220] flex items-center justify-center bg-black/92 p-3 backdrop-blur-md sm:p-6"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
+      aria-label={`Aperçu de ${item.title}`}
     >
       <div
-        className="relative w-full max-w-6xl overflow-hidden rounded-[28px] border border-white/10 bg-[#0f0c0a] shadow-[0_35px_120px_rgba(0,0,0,0.45)]"
+        className="relative flex max-h-[94vh] max-w-[96vw] items-center justify-center"
         onClick={(event) => event.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 z-10 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-[color:var(--ink)] transition hover:bg-white"
+          aria-label="Fermer l’image"
+          className="absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-black/55 text-2xl text-white shadow-lg backdrop-blur-md transition hover:scale-105 hover:bg-white hover:text-black sm:right-4 sm:top-4"
         >
-          Fermer
+          <span aria-hidden="true">×</span>
         </button>
-        <div className="grid gap-0 lg:grid-cols-[1.35fr_0.65fr]">
-          <div className="min-h-[48vh] bg-black">
-            {item.type === "IMAGE" && previewUrl ? (
-              <img
-                src={item.mediaUrl}
-                alt={item.title}
-                className="h-full max-h-[85vh] w-full object-contain"
-              />
-            ) : embedUrl ? (
-              <iframe
-                src={embedUrl}
-                title={item.title}
-                className="h-[48vh] w-full lg:h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            ) : (
-              <video
-                src={item.mediaUrl}
-                poster={item.posterUrl || undefined}
-                className="h-full max-h-[85vh] w-full object-contain"
-                controls
-                playsInline
-                preload="metadata"
-              />
-            )}
-          </div>
-          <div className="flex flex-col justify-between gap-6 bg-[linear-gradient(180deg,#f7f2ec_0%,#fdfbf8_100%)] p-6 sm:p-8">
-            <div>
-              <p className="text-xs uppercase tracking-[0.34em] text-[color:var(--accent-2)]">
-                Galerie
-              </p>
-              <h2 className="mt-4 text-3xl font-semibold leading-tight text-[color:var(--ink)]">
-                {item.title}
-              </h2>
-              {item.subtitle ? (
-                <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-                  {item.subtitle}
-                </p>
-              ) : (
-                <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-                  Une image de galerie pour montrer l&apos;ambiance, les détails et le rendu réel d&apos;une mise en scène.
-                </p>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <a
-                href="/catalogue"
-                className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20"
-              >
-                Voir le catalogue
-              </a>
-              <a
-                href="/#contact"
-                className="rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_30px_rgba(216,111,63,0.24)] transition hover:-translate-y-0.5"
-              >
-                Demander un devis
-              </a>
-            </div>
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={onPrevious}
+          aria-label="Image précédente"
+          className="fixed left-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/55 text-2xl text-white shadow-lg backdrop-blur-md transition hover:scale-105 hover:bg-white hover:text-black sm:left-6 sm:h-14 sm:w-14"
+        >
+          <span aria-hidden="true">←</span>
+        </button>
+        <button
+          type="button"
+          onClick={onNext}
+          aria-label="Image suivante"
+          className="fixed right-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/55 text-2xl text-white shadow-lg backdrop-blur-md transition hover:scale-105 hover:bg-white hover:text-black sm:right-6 sm:h-14 sm:w-14"
+        >
+          <span aria-hidden="true">→</span>
+        </button>
+        {item.type === "IMAGE" && previewUrl ? (
+          <img
+            src={item.mediaUrl}
+            alt={item.title}
+            className="max-h-[94vh] max-w-[96vw] rounded-xl object-contain shadow-[0_30px_100px_rgba(0,0,0,0.55)]"
+          />
+        ) : embedUrl ? (
+          <iframe
+            src={embedUrl}
+            title={item.title}
+            className="h-[80vh] w-[min(92vw,1200px)] rounded-xl bg-black"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        ) : (
+          <video
+            src={item.mediaUrl}
+            poster={item.posterUrl || undefined}
+            className="max-h-[94vh] max-w-[96vw] rounded-xl object-contain"
+            controls
+            playsInline
+            preload="metadata"
+          />
+        )}
       </div>
     </div>,
     document.body
@@ -132,6 +115,21 @@ export default function GalleryMasonry({ items }: GalleryMasonryProps) {
     () => items.find((item) => item.id === activeId) ?? null,
     [activeId, items]
   );
+  const activeIndex = activeItem
+    ? items.findIndex((item) => item.id === activeItem.id)
+    : -1;
+
+  const showPrevious = () => {
+    if (activeIndex < 0) return;
+    const previousIndex = (activeIndex - 1 + items.length) % items.length;
+    setActiveId(items[previousIndex].id);
+  };
+
+  const showNext = () => {
+    if (activeIndex < 0) return;
+    const nextIndex = (activeIndex + 1) % items.length;
+    setActiveId(items[nextIndex].id);
+  };
 
   useEffect(() => {
     const nodes = Array.from(document.querySelectorAll<HTMLElement>("[data-gallery-card]"));
@@ -214,7 +212,14 @@ export default function GalleryMasonry({ items }: GalleryMasonryProps) {
         })}
       </div>
 
-      {activeItem ? <GalleryModal item={activeItem} onClose={() => setActiveId(null)} /> : null}
+      {activeItem ? (
+        <GalleryModal
+          item={activeItem}
+          onClose={() => setActiveId(null)}
+          onPrevious={showPrevious}
+          onNext={showNext}
+        />
+      ) : null}
     </>
   );
 }
