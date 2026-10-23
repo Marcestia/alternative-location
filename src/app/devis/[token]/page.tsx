@@ -1,6 +1,6 @@
 ﻿import { submitQuote } from "@/app/actions/quotes";
 import { prisma } from "@/lib/prisma";
-import { QuoteStatus, ReservationStatus } from "@/generated/prisma";
+import { QuoteStatus } from "@/generated/prisma";
 
 export default async function DevisPage({
   params,
@@ -37,41 +37,11 @@ export default async function DevisPage({
     );
   }
 
-  const reservations = await prisma.reservationItem.findMany({
-    where: {
-      reservation: {
-        status: {
-          in: [
-            ReservationStatus.PENDING,
-            ReservationStatus.CONFIRMED,
-            ReservationStatus.IN_PROGRESS,
-          ],
-        },
-        startDate: { lte: quote.endDate },
-        endDate: { gte: quote.startDate },
-      },
-    },
-    include: { item: true },
-  });
-
-  const reservedMap = reservations.reduce<Record<string, number>>(
-    (acc, entry) => {
-      acc[entry.itemId] = (acc[entry.itemId] || 0) + entry.quantity;
-      return acc;
-    },
-    {}
-  );
-
   const items = await prisma.item.findMany({
     where: { active: true },
     orderBy: { name: "asc" },
   });
 
-  const catalogItems = items.map((item) => {
-    const reserved = reservedMap[item.id] || 0;
-    const available = Math.max(0, item.totalQty - reserved);
-    return { item, available, hasConflict: reserved > 0 };
-  });
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
@@ -83,8 +53,7 @@ export default async function DevisPage({
           Bonjour {quote.client.name}
         </h1>
         <p className="mt-2 text-sm text-[color:var(--muted)]">
-          Choisissez librement les articles souhaités. Les conflits éventuels
-          seront vérifiés par l&apos;entreprise.
+          Choisissez librement les articles souhaités pour votre période.
         </p>
         <p className="mt-3 text-sm text-[color:var(--muted)]">
           Période: {quote.startDate.toLocaleDateString("fr-FR")} → {" "}
@@ -96,7 +65,7 @@ export default async function DevisPage({
             Merci de sélectionner au moins un article.
           </div>
         )}
-        {catalogItems.length === 0 ? (
+        {items.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
             Aucun article n&apos;est actuellement présent dans le catalogue.
           </div>
@@ -104,7 +73,7 @@ export default async function DevisPage({
           <form action={submitQuote} className="mt-8 space-y-6">
           <input type="hidden" name="token" value={quote.token} />
           <div className="grid gap-4 md:grid-cols-2">
-            {catalogItems.map(({ item, available, hasConflict }) => (
+            {items.map((item) => (
               <div
                 key={item.id}
                 className="rounded-2xl border border-black/5 bg-white px-4 py-4"
@@ -112,16 +81,9 @@ export default async function DevisPage({
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold">{item.name}</p>
-                    {hasConflict ? (
-                      <p className="mt-1 rounded-lg bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-800">
-                        Déjà réservé sur cette période · disponibilité à confirmer
-                        {available < item.totalQty ? ` (${available} estimée)` : ""}
-                      </p>
-                    ) : (
-                      <p className="text-xs text-[color:var(--muted)]">
-                        Stock total : {item.totalQty}
-                      </p>
-                    )}
+                    <p className="text-xs text-[color:var(--muted)]">
+                      Stock total : {item.totalQty}
+                    </p>
                     <p className="text-xs text-[color:var(--muted)]">
                       {(item.rentalPriceCents / 100).toFixed(2)} € / unité
                     </p>

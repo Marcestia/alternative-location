@@ -16,7 +16,6 @@ type ItemVM = {
   description: string | null;
   rentalPriceCents: number;
   totalQty: number;
-  availableQty: number;
   imageUrl: string | null;
   images: { url: string; alt: string | null }[];
   categoryId: string | null;
@@ -423,41 +422,23 @@ function getSelectionLimit(item: ItemVM) {
   return Math.max(item.totalQty, 0);
 }
 
-function getAvailabilityLabel(item: ItemVM, requestMode: boolean) {
+function getAvailabilityLabel(item: ItemVM) {
   if (isFormulaCoverItem(item) && item.totalQty <= 0) {
     return "Sur demande";
-  }
-
-  if (requestMode && item.availableQty < item.totalQty) {
-    return "Déjà réservé à cette date · à confirmer";
   }
 
   return `${item.totalQty} disponible${item.totalQty > 1 ? "s" : ""}`;
 }
 
-function hasBookingConflict(item: ItemVM, requestMode: boolean) {
-  return requestMode && item.availableQty < item.totalQty;
-}
-
-function getConflictMessage(item: ItemVM, quantity: number) {
-  if (quantity > item.availableQty) {
-    return `Quantité disponible estimée : ${item.availableQty}. L’entreprise vérifiera votre demande.`;
-  }
-
-  return "Cet article est déjà réservé en partie à cette date. L’entreprise confirmera sa disponibilité.";
-}
-
 function CatalogueItemModal({
   item,
   quantity,
-  requestMode,
   onClose,
   onAdd,
   onRemove,
 }: {
   item: ItemVM;
   quantity: number;
-  requestMode: boolean;
   onClose: () => void;
   onAdd: (item: ItemVM) => void;
   onRemove: (item: ItemVM) => void;
@@ -468,7 +449,6 @@ function CatalogueItemModal({
     : [{ url: item.imageUrl || "/vitrine/hero.jpg", alt: item.name }];
   const selectionLimit = getSelectionLimit(item);
   const canIncrease = quantity < selectionLimit;
-  const hasConflict = hasBookingConflict(item, requestMode);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -521,15 +501,10 @@ function CatalogueItemModal({
               <h2 className="mt-3 text-3xl font-semibold leading-tight text-[color:var(--ink)]">{item.name}</h2>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="rounded-full bg-[color:var(--surface)] px-3 py-1 text-xs font-semibold text-[color:var(--ink)]">{formatEuro(item.rentalPriceCents)}</span>
-                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${hasConflict ? "bg-amber-100 text-amber-800" : "bg-[color:var(--ink)]/8 text-[color:var(--ink)]"}`}>{getAvailabilityLabel(item, requestMode)}</span>
+                <span className="rounded-full bg-[color:var(--ink)]/8 px-3 py-1 text-xs font-semibold text-[color:var(--ink)]">{getAvailabilityLabel(item)}</span>
                 <span className="rounded-full bg-[color:var(--accent)]/10 px-3 py-1 text-xs font-semibold text-[color:var(--accent)]">{images.length} photo{images.length > 1 ? "s" : ""}</span>
               </div>
               <p className="mt-5 whitespace-pre-wrap text-sm leading-7 text-[color:var(--muted)]">{item.description || "Consultez toutes les photos de cet article puis ajoutez la quantit\u00e9 souhait\u00e9e \u00e0 votre estimation."}</p>
-              {hasConflict ? (
-                <p className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium leading-6 text-amber-900">
-                  {getConflictMessage(item, Math.max(quantity, 1))}
-                </p>
-              ) : null}
             </div>
             <div className="space-y-4 rounded-[24px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,240,233,0.94))] p-4">
               <div className="flex items-center justify-between gap-3">
@@ -555,14 +530,12 @@ function CatalogueItemModal({
 function ItemCard({
   item,
   quantity,
-  requestMode,
   onAdd,
   onRemove,
   onOpenDetails,
 }: {
   item: ItemVM;
   quantity: number;
-  requestMode: boolean;
   onAdd: (item: ItemVM) => void;
   onRemove: (item: ItemVM) => void;
   onOpenDetails: (item: ItemVM) => void;
@@ -570,7 +543,6 @@ function ItemCard({
   const isSelected = quantity > 0;
   const selectionLimit = getSelectionLimit(item);
   const canIncrease = quantity < selectionLimit;
-  const hasConflict = hasBookingConflict(item, requestMode);
 
   return (
     <article className={`group flex h-full flex-col rounded-[32px] border bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(248,242,236,0.94))] p-4 shadow-[0_24px_50px_rgba(30,25,20,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_rgba(30,25,20,0.1)] sm:p-5 ${isSelected ? "border-emerald-500 ring-2 ring-emerald-100" : "border-black/5 hover:border-black/10"}`}>
@@ -606,13 +578,8 @@ function ItemCard({
           <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">{item.images.length > 1 ? `${item.images.length} photos disponibles. Ouvrez la fiche pour toutes les voir.` : "Location à l'unité. Ouvrez la fiche pour voir le détail."}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <span className="rounded-full bg-[color:var(--surface)] px-3 py-1 text-[11px] font-semibold text-[color:var(--ink)]">{formatEuro(item.rentalPriceCents)}</span>
-            <span className={`rounded-full px-3 py-1 text-[11px] font-semibold ${hasConflict ? "bg-amber-100 text-amber-800" : "bg-[color:var(--ink)]/8 text-[color:var(--ink)]"}`}>{getAvailabilityLabel(item, requestMode)}</span>
+            <span className="rounded-full bg-[color:var(--ink)]/8 px-3 py-1 text-[11px] font-semibold text-[color:var(--ink)]">{getAvailabilityLabel(item)}</span>
           </div>
-          {hasConflict ? (
-            <p className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium leading-5 text-amber-900">
-              L’entreprise confirmera la disponibilité après votre demande.
-            </p>
-          ) : null}
         </div>
         <div className="mt-5 pt-1">
           <button type="button" onClick={() => onOpenDetails(item)} className="mb-3 w-full rounded-full border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20">{"Voir le détail"}</button>
@@ -905,7 +872,7 @@ export default function CataloguePageClient({
         </p>
         {requestMode && eventDateValue ? (
           <p className="mt-2 text-xs font-semibold leading-5 text-[color:var(--accent)]">
-            Les éventuels conflits de réservation pour le {new Date(`${eventDateValue}T12:00:00`).toLocaleDateString("fr-FR")} sont signalés sans bloquer votre demande.
+            Sélection pour le {new Date(`${eventDateValue}T12:00:00`).toLocaleDateString("fr-FR")}.
           </p>
         ) : null}
 
@@ -924,11 +891,6 @@ export default function CataloguePageClient({
                     <p className="mt-0.5 text-[11px] text-[color:var(--muted)]">
                       {formatEuro(item.rentalPriceCents)} / unité
                     </p>
-                    {hasBookingConflict(item, requestMode) ? (
-                      <p className="mt-2 text-[11px] font-semibold leading-4 text-amber-800">
-                        {getConflictMessage(item, item.quantity)}
-                      </p>
-                    ) : null}
                   </div>
                   <p className="whitespace-nowrap text-[12px] font-semibold text-[color:var(--ink)]">
                     {formatEuro(item.rentalPriceCents * item.quantity)}
@@ -1228,7 +1190,6 @@ export default function CataloguePageClient({
                               key={item.id}
                               item={item}
                               quantity={selected[item.id]?.quantity || 0}
-                              requestMode={requestMode}
                               onAdd={addItem}
                               onRemove={removeItem}
                               onOpenDetails={(selectedItem) => setActiveItemId(selectedItem.id)}
@@ -1310,7 +1271,6 @@ export default function CataloguePageClient({
           key={activeItem.id}
           item={activeItem}
           quantity={selected[activeItem.id]?.quantity || 0}
-          requestMode={requestMode}
           onClose={() => setActiveItemId(null)}
           onAdd={addItem}
           onRemove={removeItem}

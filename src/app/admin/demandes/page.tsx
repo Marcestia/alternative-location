@@ -186,15 +186,27 @@ export default async function DemandesPage({
               </span>
             </div>
             <div className="mt-3 space-y-2">
-              {requestedSelection.map((item) => (
-                <div
-                  key={`${demande.id}-${item.itemId}`}
-                  className="flex items-center justify-between gap-3 text-sm text-[color:var(--muted)]"
-                >
-                  <span className="truncate">{item.name}</span>
-                  <span className="shrink-0 font-semibold text-[color:var(--ink)]">x{item.quantity}</span>
-                </div>
-              ))}
+              {requestedSelection.map((item) => {
+                const available = availableByItem[item.itemId] ?? 0;
+                const hasConflict = item.quantity > available;
+
+                return (
+                  <div
+                    key={`${demande.id}-${item.itemId}`}
+                    className={`rounded-xl px-3 py-2 text-sm ${hasConflict ? "border border-amber-200 bg-amber-50" : "bg-white/60"}`}
+                  >
+                    <div className="flex items-center justify-between gap-3 text-[color:var(--muted)]">
+                      <span className="truncate">{item.name}</span>
+                      <span className="shrink-0 font-semibold text-[color:var(--ink)]">x{item.quantity}</span>
+                    </div>
+                    {hasConflict ? (
+                      <p className="mt-1 text-xs font-semibold text-amber-800">
+                        Conflit de disponibilité : {available} disponible{available > 1 ? "s" : ""} pour {item.quantity} demandé{item.quantity > 1 ? "s" : ""}.
+                      </p>
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
             {!quote && (
               <p className="mt-3 text-xs text-[color:var(--muted)]">
@@ -308,6 +320,11 @@ export default async function DemandesPage({
                       <p className="text-xs text-[color:var(--muted)]">
                         Dispo: {availableByItem[item.itemId] ?? 0}
                       </p>
+                      {item.quantity > (availableByItem[item.itemId] ?? 0) ? (
+                        <p className="mt-1 text-xs font-semibold text-amber-800">
+                          Conflit : quantité demandée supérieure à la disponibilité.
+                        </p>
+                      ) : null}
                       <input type="hidden" name="itemId" value={item.itemId} />
                     </div>
                     <label className="grid gap-1 text-xs font-semibold text-[color:var(--muted)]">
