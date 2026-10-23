@@ -298,30 +298,6 @@ export async function submitQuote(formData: FormData) {
     redirect("/devis/merci");
   }
 
-  const reservations = await prisma.reservationItem.findMany({
-    where: {
-      reservation: {
-        status: {
-          in: [
-            ReservationStatus.PENDING,
-            ReservationStatus.CONFIRMED,
-            ReservationStatus.IN_PROGRESS,
-          ],
-        },
-        startDate: { lte: quote.endDate },
-        endDate: { gte: quote.startDate },
-      },
-    },
-  });
-
-  const reservedMap = reservations.reduce<Record<string, number>>(
-    (acc, entry) => {
-      acc[entry.itemId] = (acc[entry.itemId] || 0) + entry.quantity;
-      return acc;
-    },
-    {}
-  );
-
   const items = await prisma.item.findMany({
     where: { active: true },
   });
@@ -330,23 +306,17 @@ export async function submitQuote(formData: FormData) {
     .map((item) => {
       const raw = formData.get(`item_${item.id}`);
       const qty = Number(raw || 0);
-      const reserved = reservedMap[item.id] || 0;
-      const available = Math.max(0, item.totalQty - reserved);
       return {
         item,
-        quantity: Number.isFinite(qty) ? Math.max(0, qty) : 0,
-        available,
+        quantity: Number.isFinite(qty)
+          ? Math.min(Math.max(0, qty), item.totalQty)
+          : 0,
       };
     })
     .filter((entry) => entry.quantity > 0);
 
   if (selected.length === 0) {
     redirect(`/devis/${token}?error=1`);
-  }
-
-  const invalid = selected.find((entry) => entry.quantity > entry.available);
-  if (invalid) {
-    redirect(`/devis/${token}?error=2`);
   }
 
   await prisma.quoteItem.deleteMany({ where: { quoteId: quote.id } });
