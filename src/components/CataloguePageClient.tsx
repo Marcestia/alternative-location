@@ -545,7 +545,7 @@ function ItemCard({
   const canIncrease = quantity < selectionLimit;
 
   return (
-    <article className={`group flex h-full flex-col rounded-[32px] border bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(248,242,236,0.94))] p-4 shadow-[0_24px_50px_rgba(30,25,20,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_rgba(30,25,20,0.1)] sm:p-5 ${isSelected ? "border-emerald-500 ring-2 ring-emerald-100" : "border-black/5 hover:border-black/10"}`}>
+    <article className={`catalogue-item group flex h-full flex-col rounded-[32px] border bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(248,242,236,0.94))] p-4 shadow-[0_24px_50px_rgba(30,25,20,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_rgba(30,25,20,0.1)] sm:p-5 ${isSelected ? "border-emerald-500 ring-2 ring-emerald-100" : "border-black/5 hover:border-black/10"}`}>
       <div className="relative overflow-hidden rounded-[24px] bg-[color:var(--surface)]">
           <button type="button" onClick={() => onOpenDetails(item)} className="block h-44 w-full text-left sm:h-52" aria-label={`Voir le d\u00e9tail de ${item.name}`}>
           <img src={item.imageUrl || "/vitrine/hero.jpg"} alt={item.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" draggable={false} />
@@ -939,103 +939,26 @@ export default function CataloguePageClient({
   );
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(216,111,63,0.12),transparent_20%),radial-gradient(circle_at_top_right,rgba(203,182,160,0.18),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.92),rgba(247,240,233,0.98))] px-3 pb-28 pt-4 sm:px-5 sm:pb-32 lg:px-8 lg:pt-8">
-      <Link
-        href="/"
-        className="fixed left-4 top-4 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full border border-black/10 bg-white/92 text-xl font-semibold text-[color:var(--ink)] shadow-[0_16px_34px_rgba(30,25,20,0.16)] backdrop-blur transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white sm:left-5 sm:top-5"
-        aria-label="Revenir à l'accueil"
-      >
-        ←
-      </Link>
-
+    <div className="catalogue-page">
       <div className="mx-auto w-full max-w-[1680px] space-y-6 xl:space-y-8">
-        <header
-          id="contact"
-          className="relative overflow-hidden rounded-[40px] border border-black/5 bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(247,240,233,0.94))] px-5 py-6 shadow-[0_34px_70px_rgba(30,25,20,0.08)] sm:px-8 sm:py-8 xl:px-10 xl:py-10"
-        >
-          <div className="pointer-events-none absolute -left-20 top-0 h-56 w-56 rounded-full bg-[color:var(--accent)]/10 blur-3xl" />
-          <div className="pointer-events-none absolute right-0 top-0 h-48 w-48 rounded-full bg-[color:var(--accent-2)]/16 blur-3xl" />
-
-          <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_380px] xl:items-start">
+        <header id="contact" className="catalogue-intro">
+          <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-center">
             <div>
-              <p className="text-xs uppercase tracking-[0.34em] text-[color:var(--accent-2)]">
-                Catalogue
-              </p>
-              <h1 className="mt-3 max-w-4xl text-3xl font-semibold leading-tight sm:text-4xl xl:text-5xl">
-                Choisissez facilement les articles adaptés à votre événement.
-              </h1>
-              <p className="mt-4 max-w-3xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-                Parcourez chaque univers, agrandissez les visuels, ajoutez les
-                quantités dans votre simulation puis contactez-nous pour recevoir
-                un devis adapté à votre événement.
-              </p>
-
-              <div className="mt-6 rounded-[28px] border border-black/8 bg-white/85 p-5 shadow-[0_18px_36px_rgba(30,25,20,0.05)]">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[11px] uppercase tracking-[0.26em] text-[color:var(--muted)]">
-                      Organisation
-                    </p>
-                    <p className="mt-3 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-                      Parcourez les familles, ouvrez les fiches produits pour voir toutes les photos et ajoutez directement les quantités dans votre estimation.
-                    </p>
-                  </div>
-                  <div className="rounded-full border border-black/8 bg-[color:var(--surface)]/72 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]">
-                    {totalCatalogItems} article(s) disponibles
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  href="/"
-                  className="rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(217,119,55,0.35)] transition hover:-translate-y-0.5 hover:brightness-95"
-                >
-                  {"Retour à l'accueil"}
-                </Link>
-                <Link
-                  href="/#contact"
-                  className="rounded-full border border-black/10 bg-white/90 px-5 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20"
-                >
-                  Demander un devis
-                </Link>
+              <p className="eyebrow">LE CATALOGUE — À VOUS DE COMPOSER</p>
+              <h1 className="mt-5">Tout pour les<br /><em>beaux moments.</em></h1>
+              <p className="mt-5 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">Parcourez chaque univers, ouvrez les fiches pour découvrir toutes les photos et ajoutez les quantités souhaitées à votre estimation.</p>
+              <div className="mt-6 flex flex-wrap items-center gap-5">
+                <span className="rounded-md border border-black/10 bg-white/70 px-4 py-2 text-xs font-semibold">{totalCatalogItems} articles disponibles</span>
+                <Link href="/" className="text-xs font-semibold">← Retour à l’accueil</Link>
+                <Link href="/#contact" className="text-xs font-semibold underline underline-offset-4">Demander un devis ↗</Link>
               </div>
             </div>
-
-            <div className="grid gap-3 xl:grid-cols-1">
-              <div className="rounded-[28px] border border-white/80 bg-white/88 p-5 shadow-[0_18px_36px_rgba(30,25,20,0.06)]">
-                <p className="text-[11px] uppercase tracking-[0.26em] text-[color:var(--accent-2)]/80">
-                  Contact
-                </p>
-                <p className="mt-2 text-lg font-semibold text-[color:var(--ink)]">
-                  Téléphone, e-mail ou formulaire
-                </p>
-                <p className="mt-2 text-sm text-[color:var(--muted)]">
-                  Nous préparons le devis avec vous, selon les quantités et les dates.
-                </p>
-                <div className="mt-4 flex flex-col gap-2">
-                  <Link
-                    className="rounded-full bg-[color:var(--accent)] px-4 py-2.5 text-center text-xs font-semibold text-white shadow-[0_10px_22px_rgba(217,119,55,0.35)] transition hover:-translate-y-0.5 hover:brightness-95"
-                    href="/#contact"
-                  >
-                    Remplir le formulaire
-                  </Link>
-                  <div className="flex flex-col gap-2 sm:flex-row xl:flex-col">
-                    <a
-                      className="rounded-full border border-black/10 px-4 py-2.5 text-center text-xs font-semibold text-[color:var(--muted)] transition hover:-translate-y-0.5 hover:border-black/30 hover:bg-white"
-                      href="mailto:alternativelocation@free.fr"
-                    >
-                      Envoyer un e-mail
-                    </a>
-                    <a
-                      className="rounded-full border border-black/10 px-4 py-2.5 text-center text-xs font-semibold text-[color:var(--muted)] transition hover:-translate-y-0.5 hover:border-black/30 hover:bg-white"
-                      href="tel:+33621205432"
-                    >
-                      Appeler
-                    </a>
-                  </div>
-                </div>
-              </div>
+            <div className="rounded-lg border border-black/8 bg-white/65 p-6">
+              <p className="eyebrow">UN COUP DE MAIN ?</p>
+              <h2 className="mt-3 text-2xl font-normal">Composons ensemble.</h2>
+              <p className="mt-3 text-xs leading-6 text-[color:var(--muted)]">Nous préparons votre devis avec vous, selon vos quantités et vos dates.</p>
+              <Link href="/#contact" className="button button-primary mt-5 w-full">Remplir le formulaire <span aria-hidden="true">↗</span></Link>
+              <div className="mt-4 flex flex-wrap justify-between gap-3 text-xs font-semibold"><a href="mailto:alternativelocation@free.fr">Envoyer un e-mail ↗</a><a href="tel:+33621205432">Appeler ↗</a></div>
             </div>
           </div>
         </header>
@@ -1043,7 +966,7 @@ export default function CataloguePageClient({
         <div className="xl:grid xl:grid-cols-[230px_minmax(0,1fr)_360px] xl:gap-8">
           <aside className="hidden xl:block">
             <div className="sticky top-6 max-h-[calc(100vh-3rem)]">
-              <div className="flex max-h-[calc(100vh-3rem)] flex-col overflow-hidden rounded-[30px] border border-black/8 bg-white/95 p-5 shadow-[0_22px_45px_rgba(30,25,20,0.08)]">
+              <div className="catalogue-panel flex max-h-[calc(100vh-8rem)] flex-col overflow-hidden rounded-[30px] border border-black/8 bg-white/95 p-5 shadow-[0_22px_45px_rgba(30,25,20,0.08)]">
                 <p className="text-[11px] uppercase tracking-[0.28em] text-[color:var(--muted)]">
                   Navigation
                 </p>
@@ -1106,7 +1029,7 @@ export default function CataloguePageClient({
             ) : (
               sectionGroups.map((group) => (
                 <section key={group.slug} id={`group-${group.slug}`} className="scroll-mt-24 space-y-5">
-                  <div className="overflow-hidden rounded-[34px] border border-black/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(247,240,233,0.88))] shadow-[0_18px_40px_rgba(30,25,20,0.06)]">
+                  <div className="catalogue-group-heading overflow-hidden rounded-[34px] border border-black/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(247,240,233,0.88))] shadow-[0_18px_40px_rgba(30,25,20,0.06)]">
                     <button
                       type="button"
                       onClick={() => toggleGroup(group.slug)}
@@ -1145,7 +1068,7 @@ export default function CataloguePageClient({
                     <section
                       key={section.id}
                       id={section.id}
-                      className="scroll-mt-24 overflow-hidden rounded-[34px] border border-black/5 bg-white/88 shadow-[0_18px_40px_rgba(30,25,20,0.06)]"
+                      className="catalogue-section scroll-mt-32 overflow-hidden rounded-[34px] border border-black/5 bg-white/88 shadow-[0_18px_40px_rgba(30,25,20,0.06)]"
                     >
                       <button
                         type="button"
@@ -1207,7 +1130,7 @@ export default function CataloguePageClient({
 
           <aside className="mt-10 hidden xl:block xl:mt-0">
             <div className="sticky top-6">
-              <div className="rounded-[32px] border border-black/10 bg-white/96 p-4 shadow-[0_24px_50px_rgba(20,18,14,0.12)] backdrop-blur">
+              <div className="catalogue-panel rounded-[32px] border border-black/10 bg-white/96 p-4 shadow-[0_24px_50px_rgba(20,18,14,0.12)] backdrop-blur">
                 {summaryContent}
               </div>
             </div>

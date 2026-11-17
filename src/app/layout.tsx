@@ -1,20 +1,22 @@
 import type { Metadata } from "next";
-import { Fraunces, Manrope } from "next/font/google";
+import { DM_Sans, Nunito_Sans } from "next/font/google";
 import { siteConfig } from "@/lib/site";
+import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
+import ArtDirectionMotion from "@/components/ArtDirectionMotion";
 import "./globals.css";
+import "./art-direction.css";
 
-const fraunces = Fraunces({
+const displayFont = Nunito_Sans({
   variable: "--font-display",
   subsets: ["latin"],
 });
 
-const manrope = Manrope({
+const bodyFont = DM_Sans({
   variable: "--font-body",
   subsets: ["latin"],
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -79,18 +81,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className={`${fraunces.variable} ${manrope.variable} antialiased`}>
-        {children}
-        <footer className="px-5 pb-10 sm:px-6">
-          <div className="mx-auto w-full max-w-6xl border-t border-black/5 pt-6 text-xs text-[color:var(--muted)]">
-            <a
-              className="font-semibold text-[color:var(--ink)] hover:underline"
-              href="/conditions"
-            >
-              Conditions generales
-            </a>
-          </div>
-        </footer>
+      <body
+        className={`${displayFont.variable} ${bodyFont.variable} antialiased`}
+      >
+        <SiteHeader />
+        <ArtDirectionMotion />
+        <div id="site-content" tabIndex={-1}>
+          {children}
+        </div>
+        <SiteFooter />
       </body>
     </html>
   );

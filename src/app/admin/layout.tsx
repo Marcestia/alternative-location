@@ -7,6 +7,7 @@ import {
   ReservationStatus,
 } from "@/generated/prisma";
 import AutoRefresh from "@/components/AutoRefresh";
+import AdminNavigation from "@/components/AdminNavigation";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Script from "next/script";
@@ -33,16 +34,18 @@ export default async function AdminLayout({
     newReservations,
     newInvoices,
   ] = await Promise.all([
-      prisma.contactRequest.count({ where: { status: ContactStatus.NEW } }),
-      prisma.contactRequest.count({
-        where: { status: ContactStatus.QUOTE_RECEIVED },
-      }),
-      prisma.contactRequest.count({
-        where: { status: ContactStatus.PENDING },
-      }),
-      prisma.reservation.count({ where: { status: ReservationStatus.CONFIRMED } }),
-      prisma.invoice.count({ where: { status: InvoiceStatus.DRAFT } }),
-    ]);
+    prisma.contactRequest.count({ where: { status: ContactStatus.NEW } }),
+    prisma.contactRequest.count({
+      where: { status: ContactStatus.QUOTE_RECEIVED },
+    }),
+    prisma.contactRequest.count({
+      where: { status: ContactStatus.PENDING },
+    }),
+    prisma.reservation.count({
+      where: { status: ReservationStatus.CONFIRMED },
+    }),
+    prisma.invoice.count({ where: { status: InvoiceStatus.DRAFT } }),
+  ]);
 
   const demandesBadge = newDemandes + quoteReceived + quotePending;
 
@@ -66,12 +69,13 @@ export default async function AdminLayout({
       badge: newInvoices,
     },
     { label: "Performance", href: "/admin/performance" },
+    { label: "Rapports", href: "/admin/rapports" },
     { label: "Nettoyage", href: "/admin/nettoyage" },
     { label: "Paramètres", href: "/admin/parametres" },
   ];
 
   return (
-    <div className="min-h-screen bg-[color:var(--background)]">
+    <div className="admin-shell">
       <AutoRefresh intervalMs={30000} />
       <Script id="admin-loading" strategy="afterInteractive">
         {`
@@ -90,40 +94,35 @@ export default async function AdminLayout({
           });
         `}
       </Script>
-      <div className="mx-auto grid min-h-screen w-full max-w-7xl grid-cols-1 gap-6 px-6 py-8 lg:grid-cols-[240px_1fr]">
-        <aside className="h-fit rounded-3xl border border-black/5 bg-white/80 p-6 shadow-[0_15px_30px_rgba(22,18,14,0.08)]">
-          <div className="mb-6">
-            <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
-              Espace entreprise
-            </p>
-            <h2 className="text-2xl font-semibold">Alternative Location</h2>
+      <div className="admin-grid">
+        <aside className="admin-sidebar">
+          <Link
+            href="/admin"
+            className="admin-brand"
+            aria-label="Alternative Location — Tableau de bord"
+          >
+            <span>alternative.</span>
+            <small>VOTRE ESPACE ENTREPRISE</small>
+          </Link>
+          <AdminNavigation items={navItems} />
+          <div className="admin-sidebar-bottom">
+            <Link href="/" className="admin-site-link">
+              Voir le site public ↗
+            </Link>
+            <form action={adminLogout}>
+              <button className="admin-logout" type="submit">
+                Se déconnecter
+              </button>
+            </form>
           </div>
-          <nav className="space-y-2 text-sm font-medium">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                className="flex items-center justify-between rounded-2xl px-4 py-2 text-[color:var(--muted)] transition hover:bg-[color:var(--surface)] hover:text-[color:var(--ink)]"
-                href={item.href}
-              >
-                <span>{item.label}</span>
-                {item.badge && item.badge > 0 && (
-                  <span className="rounded-full bg-[color:var(--accent)] px-2 py-0.5 text-[10px] font-semibold text-white">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </nav>
-          <form action={adminLogout} className="mt-6">
-            <button
-              className="w-full rounded-2xl border border-black/10 px-4 py-2 text-xs font-semibold text-[color:var(--muted)] hover:border-black/20"
-              type="submit"
-            >
-              Se déconnecter
-            </button>
-          </form>
         </aside>
-        <div className="admin-actions-scope space-y-6">{children}</div>
+        <div className="admin-content">
+          <div className="admin-topbar">
+            <span>Alternative Location / Gestion</span>
+            <span className="admin-status">Espace entreprise</span>
+          </div>
+          <div className="admin-actions-scope space-y-6">{children}</div>
+        </div>
       </div>
     </div>
   );

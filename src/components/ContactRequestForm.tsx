@@ -212,6 +212,8 @@ export default function ContactRequestForm({
           <input
             className="rounded-2xl border border-black/10 bg-white px-4 py-3"
             name="name"
+            aria-label="Nom et prénom"
+            autoComplete="name"
             placeholder="Nom et prénom"
             value={draft.name}
             onChange={(event) => updateDraft("name", event.target.value)}
@@ -220,6 +222,8 @@ export default function ContactRequestForm({
           <input
             className="rounded-2xl border border-black/10 bg-white px-4 py-3"
             name="email"
+            aria-label="Email"
+            autoComplete="email"
             type="email"
             placeholder="Email"
             value={draft.email}
@@ -229,6 +233,9 @@ export default function ContactRequestForm({
           <input
             className="rounded-2xl border border-black/10 bg-white px-4 py-3"
             name="phone"
+            aria-label="Téléphone"
+            autoComplete="tel"
+            type="tel"
             placeholder="Téléphone"
             value={draft.phone}
             onChange={(event) => updateDraft("phone", event.target.value)}
@@ -236,6 +243,8 @@ export default function ContactRequestForm({
           <input
             className="rounded-2xl border border-black/10 bg-white px-4 py-3"
             name="address"
+            aria-label="Adresse postale"
+            autoComplete="street-address"
             placeholder="Adresse postale"
             value={draft.address}
             onChange={(event) => updateDraft("address", event.target.value)}
@@ -243,6 +252,7 @@ export default function ContactRequestForm({
           <input
             className="rounded-2xl border border-black/10 bg-white px-4 py-3"
             name="eventType"
+            aria-label="Type d’événement"
             placeholder="Type d'événement"
             value={draft.eventType}
             onChange={(event) => updateDraft("eventType", event.target.value)}
@@ -250,6 +260,7 @@ export default function ContactRequestForm({
           <input
             className="rounded-2xl border border-black/10 bg-white px-4 py-3"
             name="eventLocation"
+            aria-label="Lieu de l’événement"
             placeholder="Lieu de l'événement"
             value={draft.eventLocation}
             onChange={(event) => updateDraft("eventLocation", event.target.value)}
@@ -257,6 +268,7 @@ export default function ContactRequestForm({
           <input
             className="rounded-2xl border border-black/10 bg-white px-4 py-3"
             name="guestCount"
+            aria-label="Nombre d’invités"
             type="number"
             min="1"
             placeholder="Nombre d'invités"
@@ -266,14 +278,15 @@ export default function ContactRequestForm({
           <input
             className="rounded-2xl border border-black/10 bg-white px-4 py-3"
             name="budget"
-            placeholder="Budget estime (EUR)"
+            aria-label="Budget estimé en euros"
+            placeholder="Budget estimé (EUR)"
             value={draft.budget}
             onChange={(event) => updateDraft("budget", event.target.value)}
           />
           <div className="md:col-span-2">
             <EventDatePicker
               name="eventDate"
-              label="Jour de la fete"
+              label="Jour de la fête"
               defaultValue={draft.eventDate}
               onChange={(value) => updateDraft("eventDate", value)}
             />
@@ -345,6 +358,7 @@ export default function ContactRequestForm({
         <textarea
           className="min-h-[140px] rounded-2xl border border-black/10 bg-white px-4 py-3"
           name="message"
+            aria-label="Votre demande, les quantités et le style souhaité"
           placeholder="Expliquez votre demande, les quantités et le style souhaité."
           value={draft.message}
           onChange={(event) => updateDraft("message", event.target.value)}
