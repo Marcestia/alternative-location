@@ -1,25 +1,24 @@
-﻿import type { MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
+import { prisma } from "@/lib/prisma";
+import { categorySlug } from "@/lib/catalogue-paths";
+import { absoluteUrl } from "@/lib/seo";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const lastModified = new Date();
+export const dynamic = "force-dynamic";
 
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const categories = await prisma.itemCategory.findMany({
+    where: { items: { some: { active: true } } },
+    select: { name: true },
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+  });
   return [
-    {
-      url: siteUrl,
-      lastModified,
-    },
-    {
-      url: `${siteUrl}/catalogue`,
-      lastModified,
-    },
-    {
-      url: `${siteUrl}/galerie`,
-      lastModified,
-    },
-    {
-      url: `${siteUrl}/conditions`,
-      lastModified,
-    },
-  ];
+    "/",
+    "/location-vaisselle-gironde",
+    "/catalogue",
+    "/galerie",
+    "/conditions",
+    ...categories.map(
+      (category) => `/catalogue/${categorySlug(category.name)}`,
+    ),
+  ].map((path) => ({ url: absoluteUrl(path) }));
 }

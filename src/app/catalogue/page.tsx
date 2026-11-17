@@ -1,6 +1,16 @@
+import { publicPageMetadata } from "@/lib/seo";
+
 import CataloguePageClient from "@/components/CataloguePageClient";
 import { CATEGORY_GROUP_META, CATEGORY_GROUP_ORDER } from "@/lib/catalog";
 import { prisma } from "@/lib/prisma";
+
+export const metadata = publicPageMetadata({
+  title:
+    "Catalogue de location : vaisselle, déco & mobilier | Alternative Location",
+  description:
+    "Parcourez les articles et tarifs de location : vaisselle, couverts, décoration, mobilier et sono. Préparez votre devis, avec retrait à Galgon en Gironde.",
+  path: "/catalogue",
+});
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -25,7 +35,8 @@ export default async function CataloguePage({
   const eventDateValue = isValidIsoDate(resolvedParams?.eventDate)
     ? resolvedParams?.eventDate
     : undefined;
-  const requestModeEnabled = resolvedParams?.request === "1" && Boolean(eventDateValue);
+  const requestModeEnabled =
+    resolvedParams?.request === "1" && Boolean(eventDateValue);
 
   const [settings, items, categories] = await Promise.all([
     prisma.companySetting.findUnique({
@@ -80,8 +91,10 @@ export default async function CataloguePage({
           slug: CATEGORY_GROUP_META[group].slug,
           description: CATEGORY_GROUP_META[group].description,
         },
-        items: normalizeItems(items.filter((item) => item.categoryId === category.id)),
-      }))
+        items: normalizeItems(
+          items.filter((item) => item.categoryId === category.id),
+        ),
+      })),
   );
 
   return (

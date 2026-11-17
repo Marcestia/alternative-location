@@ -1,20 +1,19 @@
-﻿import type { Metadata } from "next";
+import { publicPageMetadata } from "@/lib/seo";
+
 import GalleryMasonry from "@/components/GalleryMasonry";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { sampleGalleryItems, type GalleryMediaView } from "@/lib/gallery";
 
+export const metadata = publicPageMetadata({
+  title: "Tables et décoration de réception en Gironde | Alternative Location",
+  description:
+    "Découvrez en photos et vidéos nos tables, décorations et ambiances pour vos mariages et fêtes en Gironde. Matériel à retirer à Galgon.",
+  path: "/galerie",
+});
+
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-
-export const metadata: Metadata = {
-  title: "Galerie | Alternative Location",
-  description:
-    "Une galerie simple de photos et vidéos pour découvrir les mises en scène, tables et ambiances d'Alternative Location.",
-  alternates: {
-    canonical: "/galerie",
-  },
-};
 
 export default async function GaleriePage() {
   const items = await prisma.galleryMedia.findMany({

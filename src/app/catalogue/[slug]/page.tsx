@@ -1,25 +1,16 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import ImageLightbox from "@/components/ImageLightbox";
-
-const slugify = (value: string) =>
-  value
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-zA-Z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .toLowerCase();
+import { cache } from "react";
+import Link from "next/link";
+import { categorySlug } from "@/lib/catalogue-paths";
+import { publicPageMetadata, privatePageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function CatalogueCategoryPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-  const categories = await prisma.itemCategory.findMany({
+const getCategories = cache(async () => {
+  return prisma.itemCategory.findMany({
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     include: {
       items: {
@@ -29,8 +20,34 @@ export default async function CatalogueCategoryPage({
       },
     },
   });
+});
 
-  const category = categories.find((item) => slugify(item.name) === slug);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const category = (await getCategories()).find(
+    (item) => categorySlug(item.name) === slug,
+  );
+  if (!category) return privatePageMetadata;
+  return publicPageMetadata({
+    title: `${category.name} en location à Galgon (33) | Alternative Location`,
+    description: `Découvrez notre sélection « ${category.name} » et ses tarifs pour vos événements en Gironde. Retrait et retour à Galgon, près de Libourne. Devis sur demande.`,
+    path: `/catalogue/${categorySlug(category.name)}`,
+  });
+}
+
+export default async function CatalogueCategoryPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const categories = await getCategories();
+
+  const category = categories.find((item) => categorySlug(item.name) === slug);
   if (!category) {
     notFound();
   }
@@ -57,24 +74,24 @@ export default async function CatalogueCategoryPage({
                 </p>
               )}
               <div className="mt-4 flex flex-wrap gap-3">
-                <a
+                <Link
                   className="rounded-full border border-black/10 px-5 py-2 text-xs font-semibold text-[color:var(--muted)]"
                   href="/catalogue"
                 >
                   Voir tout le catalogue
-                </a>
-                <a
+                </Link>
+                <Link
                   className="rounded-full bg-[color:var(--accent)] px-5 py-2 text-xs font-semibold text-white"
                   href="/#contact"
                 >
                   Nous contacter
-                </a>
-                <a
+                </Link>
+                <Link
                   className="rounded-full border border-black/10 px-5 py-2 text-xs font-semibold text-[color:var(--muted)]"
                   href="/"
                 >
-                  Retour à l'accueil
-                </a>
+                  Retour à l’accueil
+                </Link>
               </div>
             </div>
             <div className="w-full max-w-sm">
@@ -115,7 +132,8 @@ export default async function CatalogueCategoryPage({
                   </div>
                   <p className="mt-4 text-sm font-semibold">{item.name}</p>
                   <p className="mt-1 text-xs text-[color:var(--muted)]">
-                    {item.totalQty} dispo · {(item.rentalPriceCents / 100).toFixed(2)} €
+                    {item.totalQty} dispo ·{" "}
+                    {(item.rentalPriceCents / 100).toFixed(2)} €
                   </p>
                 </div>
               ))}

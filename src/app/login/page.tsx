@@ -1,6 +1,13 @@
-﻿import { adminLogin } from "@/app/actions/auth";
+import { privatePageMetadata } from "@/lib/seo";
+
+import { adminLogin } from "@/app/actions/auth";
 
 import Link from "next/link";
+
+export const metadata = {
+  ...privatePageMetadata,
+  title: "Connexion | Alternative Location",
+};
 
 export default async function LoginPage({
   searchParams,

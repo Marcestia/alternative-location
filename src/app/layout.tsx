@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Nunito_Sans } from "next/font/google";
 import { siteConfig } from "@/lib/site";
+import { siteUrl } from "@/lib/seo";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
 import ArtDirectionMotion from "@/components/ArtDirectionMotion";
 import "./globals.css";
@@ -16,27 +17,11 @@ const bodyFont = DM_Sans({
   subsets: ["latin"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: `${siteConfig.name} | Location vaisselle, décoration et mobilier`,
   description:
     "Location de vaisselle, décoration, mobilier, sonorisation et ambiance pour mariages, anniversaires et évènements festifs avec retrait sur place à Galgon (33).",
-  keywords: [
-    "location vaisselle",
-    "location décoration",
-    "location mobilier",
-    "location materiel évènementiel",
-    "location sono",
-    "location mariage",
-    "Galgon",
-    "Gironde",
-    "33133",
-  ],
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     type: "website",
     locale: "fr_FR",

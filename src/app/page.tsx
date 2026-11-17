@@ -1,13 +1,22 @@
-﻿import GalleryPreviewSection from "@/components/GalleryPreviewSection";
+import GalleryPreviewSection from "@/components/GalleryPreviewSection";
 import ContactRequestForm from "@/components/ContactRequestForm";
 import { CATEGORY_GROUP_META, CATEGORY_GROUP_ORDER } from "@/lib/catalog";
 import { prisma } from "@/lib/prisma";
 import { siteConfig } from "@/lib/site";
+import { jsonLd, localBusinessSchema, publicPageMetadata } from "@/lib/seo";
 import { sampleGalleryItems } from "@/lib/gallery";
 import Link from "next/link";
 import MomentOffersCarousel from "@/components/MomentOffersCarousel";
 import EventPlayground from "@/components/EventPlayground";
 import UniverseExplorer from "@/components/UniverseExplorer";
+
+export const metadata = publicPageMetadata({
+  title:
+    "Location événementielle à Galgon, près de Libourne | Alternative Location",
+  description:
+    "Vaisselle, décoration, mobilier et sonorisation pour mariages et fêtes en Gironde. Découvrez le catalogue Alternative Location, avec retrait à Galgon.",
+  path: "/",
+});
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -36,55 +45,6 @@ export default async function Home({
 }: {
   searchParams?: Promise<{ sent?: string }>;
 }) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const localBusinessSchema = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    name: siteConfig.name,
-    alternateName: siteConfig.alternateName,
-    url: siteUrl,
-    telephone: siteConfig.phone,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "14 impasse Moustron",
-      addressLocality: siteConfig.city,
-      postalCode: siteConfig.postalCode,
-      addressCountry: "FR",
-    },
-    areaServed: [
-      {
-        "@type": "Place",
-        name: "Galgon (33133)",
-      },
-    ],
-    description:
-      "Location de vaisselle, décoration, mobilier et sonorisation pour tous vos événements festifs.",
-    priceRange: "EUR",
-    makesOffer: [
-      {
-        "@type": "Offer",
-        itemOffered: {
-          "@type": "Service",
-          name: "Location de vaisselle",
-        },
-      },
-      {
-        "@type": "Offer",
-        itemOffered: {
-          "@type": "Service",
-          name: "Location de décoration et mobilier",
-        },
-      },
-      {
-        "@type": "Offer",
-        itemOffered: {
-          "@type": "Service",
-          name: "Location de sonorisation et ambiance",
-        },
-      },
-    ],
-  };
-
   const resolvedParams = searchParams ? await searchParams : undefined;
   const sentStatus = resolvedParams?.sent;
 
@@ -134,7 +94,10 @@ export default async function Home({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(localBusinessSchema),
+          __html: jsonLd({
+            "@context": "https://schema.org",
+            ...localBusinessSchema,
+          }),
         }}
       />
       <main>
@@ -152,6 +115,28 @@ export default async function Home({
             ))}
           </div>
         </div>
+        <section
+          className="site-container home-local-intro"
+          aria-labelledby="home-local-title"
+          data-reveal
+        >
+          <div>
+            <p className="micro-label">À GALGON, PRÈS DE LIBOURNE</p>
+            <h2 id="home-local-title">
+              Votre location de vaisselle en Gironde.
+            </h2>
+            <p>
+              Assiettes, verres, couverts et formules pour votre mariage,
+              anniversaire ou fête de famille. Choisissez votre table, puis
+              retirez et rapportez le matériel à Galgon, aux horaires convenus
+              ensemble.
+            </p>
+          </div>
+          <Link href="/location-vaisselle-gironde" className="text-link">
+            Vaisselle, formules et infos pratiques{" "}
+            <span aria-hidden="true">↗</span>
+          </Link>
+        </section>
         <UniverseExplorer categories={displayCategories} />
 
         <MomentOffersCarousel />

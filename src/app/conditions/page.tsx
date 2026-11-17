@@ -1,5 +1,14 @@
+import { publicPageMetadata } from "@/lib/seo";
+
 import ConditionsContent from "@/components/ConditionsContent";
 import { CG_VERSION } from "@/lib/conditions";
+
+export const metadata = publicPageMetadata({
+  title: "Conditions générales de location | Alternative Location",
+  description:
+    "Consultez les conditions de réservation, paiement, caution, retrait et retour du matériel loué chez Alternative Location à Galgon, en Gironde.",
+  path: "/conditions",
+});
 
 export default function ConditionsPage() {
   return (

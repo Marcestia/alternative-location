@@ -1,4 +1,6 @@
-﻿import Link from "next/link";
+import { privatePageMetadata } from "@/lib/seo";
+
+import Link from "next/link";
 import { adminLogout } from "@/app/actions/auth";
 import { prisma } from "@/lib/prisma";
 import {
@@ -11,6 +13,8 @@ import AdminNavigation from "@/components/AdminNavigation";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Script from "next/script";
+
+export const metadata = privatePageMetadata;
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

@@ -67,8 +67,7 @@ export default function EventPlayground() {
       <div className="party-hero-grid">
         <div className="party-hero-copy">
           <p className="micro-label hero-intro-label">
-            <span className="live-dot" /> LOCATION DE MATÉRIEL. FABRIQUE À
-            SOUVENIRS.
+            <span className="live-dot" /> VAISSELLE & ÉVÉNEMENTS EN GIRONDE
           </p>
           <h1 id="hero-title" className="party-title">
             <span>La fête.</span>
@@ -79,11 +78,10 @@ export default function EventPlayground() {
           </h1>
           <div className="hero-bottom-copy">
             <p>
-              La table. Le décor. Le son.
+              La vaisselle. Le décor. Le son.
               <br />
-              Vous avez les idées.
-              <br />
-              On a tout ce qu’il vous faut.
+              Pour vos mariages et vos fêtes.
+              <br />À retirer à Galgon, près de Libourne.
             </p>
             <Link href="/catalogue" className="round-cta" data-magnetic>
               <span>
