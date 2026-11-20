@@ -51,7 +51,12 @@ export default function ClientForm({ client }: { client?: EditableClient }) {
   };
 
   return (
-    <form action={action} className="mt-5 space-y-5" aria-busy={pending}>
+    <form
+      action={action}
+      data-managed-submit="true"
+      className="mt-5 space-y-5"
+      aria-busy={pending}
+    >
       {client && <input type="hidden" name="id" value={client.id} />}
       {state.message && (
         <div

@@ -7,10 +7,11 @@
     },
     "scripts": {
         "dev": "node scripts/run-next-with-project-env.js dev --webpack",
-        "build": "prisma generate && node scripts/run-next-with-project-env.js build",
+        "build": "prisma generate && node scripts/setup-indicators-storage.mjs && node scripts/run-next-with-project-env.js build",
         "start": "node scripts/run-next-with-project-env.js start",
         "lint": "eslint",
-        "catalog:reindex": "tsx scripts/reindexCatalogEmbeddings.ts"
+        "catalog:reindex": "tsx scripts/reindexCatalogEmbeddings.ts",
+        "setup:indicators": "node scripts/setup-indicators-storage.mjs"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.996.0",

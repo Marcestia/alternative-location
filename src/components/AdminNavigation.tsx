@@ -14,6 +14,7 @@ const icons: Record<string, string> = {
   "/admin/factures": "▤",
   "/admin/performance": "↗",
   "/admin/rapports": "▥",
+  "/admin/indicateurs": "▥",
   "/admin/nettoyage": "✧",
   "/admin/parametres": "⚙",
 };

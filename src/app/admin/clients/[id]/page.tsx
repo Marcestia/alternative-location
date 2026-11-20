@@ -2,33 +2,57 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ClientForm from "@/components/ClientForm";
+import ClientStatistics from "@/components/ClientStatistics";
+import { loadAnalyticsSnapshot } from "@/lib/analytics-data";
+import { readAnalyticsPeriod } from "@/lib/analytics-period";
+import { euro, shortDate, STATUS_LABELS } from "@/lib/analytics";
 
 export default async function ClientDetailPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ created?: string }>;
+  searchParams?: Promise<{
+    created?: string;
+    period?: string;
+    from?: string;
+    to?: string;
+  }>;
 }) {
   const [{ id }, resolvedParams] = await Promise.all([params, searchParams]);
-  const client = await prisma.client.findUnique({
-    where: { id },
-    include: {
-      quotes: {
-        orderBy: { createdAt: "desc" },
-        include: {
-          items: { include: { item: true } },
-          lines: true,
+  const { period, error } = readAnalyticsPeriod(resolvedParams);
+  const [client, snapshot] = await Promise.all([
+    prisma.client.findUnique({
+      where: { id },
+      include: {
+        invoices: {
+          orderBy: { issueDate: "desc" },
+          select: {
+            id: true,
+            number: true,
+            status: true,
+            issueDate: true,
+            totalAmountCents: true,
+            pdfUrl: true,
+          },
+        },
+        quotes: {
+          orderBy: { createdAt: "desc" },
+          include: {
+            items: { include: { item: true } },
+            lines: true,
+          },
+        },
+        reservations: {
+          orderBy: { createdAt: "desc" },
+          include: {
+            items: { include: { item: true } },
+          },
         },
       },
-      reservations: {
-        orderBy: { createdAt: "desc" },
-        include: {
-          items: { include: { item: true } },
-        },
-      },
-    },
-  });
+    }),
+    loadAnalyticsSnapshot(id),
+  ]);
 
   if (!client) {
     notFound();
@@ -67,6 +91,13 @@ export default async function ClientDetailPage({
           ci-dessous.
         </p>
       )}
+
+      <ClientStatistics
+        snapshot={snapshot}
+        clientId={id}
+        period={period}
+        error={error}
+      />
 
       <div
         id="coordonnees"
@@ -156,6 +187,44 @@ export default async function ClientDetailPage({
                     </div>
                   ))}
                 </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-3xl border border-black/5 bg-white/80 p-6">
+        <h2 className="text-xl font-semibold">Factures du client</h2>
+        {client.invoices.length === 0 ? (
+          <p className="mt-4 text-sm text-[color:var(--muted)]">
+            Aucune facture enregistrée.
+          </p>
+        ) : (
+          <div className="mt-4 space-y-3">
+            {client.invoices.map((invoice) => (
+              <div
+                key={invoice.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-black/5 bg-white p-4"
+              >
+                <div>
+                  <p className="text-sm font-semibold">
+                    {invoice.number} · {euro(invoice.totalAmountCents)}
+                  </p>
+                  <p className="mt-1 text-xs text-[color:var(--muted)]">
+                    {shortDate(invoice.issueDate)} ·{" "}
+                    {STATUS_LABELS[invoice.status]}
+                  </p>
+                </div>
+                {invoice.pdfUrl && (
+                  <a
+                    className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold"
+                    href={`/api/pdfs?key=${encodeURIComponent(invoice.pdfUrl)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Ouvrir le PDF
+                  </a>
+                )}
               </div>
             ))}
           </div>

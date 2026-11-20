@@ -73,6 +73,7 @@ export default async function AdminLayout({
       badge: newInvoices,
     },
     { label: "Performance", href: "/admin/performance" },
+    { label: "Indicateurs", href: "/admin/indicateurs" },
     { label: "Rapports", href: "/admin/rapports" },
     { label: "Nettoyage", href: "/admin/nettoyage" },
     { label: "Paramètres", href: "/admin/parametres" },
@@ -86,6 +87,7 @@ export default async function AdminLayout({
           document.addEventListener('submit', (event) => {
             const form = event.target;
             if (!(form instanceof HTMLFormElement)) return;
+            if (form.dataset.managedSubmit === 'true') return;
             const button = form.querySelector('button[type=\"submit\"]');
             if (!(button instanceof HTMLButtonElement)) return;
             button.disabled = true;
