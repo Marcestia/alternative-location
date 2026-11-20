@@ -1,12 +1,16 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import ClientForm from "@/components/ClientForm";
 
 export default async function ClientDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ created?: string }>;
 }) {
-  const { id } = await params;
+  const [{ id }, resolvedParams] = await Promise.all([params, searchParams]);
   const client = await prisma.client.findUnique({
     where: { id },
     include: {
@@ -33,6 +37,12 @@ export default async function ClientDetailPage({
   return (
     <section className="space-y-6">
       <header className="rounded-3xl border border-black/5 bg-white/80 p-8 shadow-[0_15px_30px_rgba(22,18,14,0.08)]">
+        <Link
+          href="/admin/clients"
+          className="mb-4 inline-block text-sm text-[color:var(--muted)] underline underline-offset-4"
+        >
+          ← Tous les clients
+        </Link>
         <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
           Fiche client
         </p>
@@ -47,6 +57,43 @@ export default async function ClientDetailPage({
           </p>
         )}
       </header>
+
+      {resolvedParams?.created === "1" && (
+        <p
+          role="status"
+          className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"
+        >
+          Client créé. Vous pouvez modifier ses coordonnées à tout moment
+          ci-dessous.
+        </p>
+      )}
+
+      <div
+        id="coordonnees"
+        className="rounded-3xl border border-black/5 bg-white/80 p-6"
+      >
+        <h2 className="text-xl font-semibold">Coordonnées du client</h2>
+        <p className="mt-2 text-sm text-[color:var(--muted)]">
+          Corrigez ses informations puis enregistrez vos modifications. Les
+          coordonnées sont également actualisées dans les demandes liées à ce
+          client.
+        </p>
+        <ClientForm
+          key={client.id}
+          client={{
+            id: client.id,
+            name: client.name,
+            email: client.email,
+            phone: client.phone,
+            address: client.address,
+            notes: client.notes,
+          }}
+        />
+        <p className="mt-4 text-xs text-[color:var(--muted)]">
+          Les PDF déjà générés conservent les coordonnées affichées lors de leur
+          création.
+        </p>
+      </div>
 
       <div className="rounded-3xl border border-black/5 bg-white/80 p-6">
         <h2 className="text-xl font-semibold">Devis</h2>
@@ -67,7 +114,8 @@ export default async function ClientDetailPage({
                       Devis {quote.quoteNumber || quote.id}
                     </p>
                     <p className="text-xs text-[color:var(--muted)]">
-                      {quote.createdAt.toLocaleDateString("fr-FR")} • {quote.status}
+                      {quote.createdAt.toLocaleDateString("fr-FR")} •{" "}
+                      {quote.status}
                     </p>
                   </div>
                   {quote.pdfUrl && (
@@ -90,7 +138,8 @@ export default async function ClientDetailPage({
                     >
                       <span>{item.item.name}</span>
                       <span>
-                        × {item.quantity} • {(item.unitPriceCents / 100).toFixed(2)} €
+                        × {item.quantity} •{" "}
+                        {(item.unitPriceCents / 100).toFixed(2)} €
                       </span>
                     </div>
                   ))}
@@ -101,7 +150,8 @@ export default async function ClientDetailPage({
                     >
                       <span>{line.label}</span>
                       <span>
-                        × {line.quantity} • {(line.unitPriceCents / 100).toFixed(2)} €
+                        × {line.quantity} •{" "}
+                        {(line.unitPriceCents / 100).toFixed(2)} €
                       </span>
                     </div>
                   ))}
@@ -142,7 +192,8 @@ export default async function ClientDetailPage({
                     >
                       <span>{item.item.name}</span>
                       <span>
-                        × {item.quantity} • {(item.unitPriceCents / 100).toFixed(2)} €
+                        × {item.quantity} •{" "}
+                        {(item.unitPriceCents / 100).toFixed(2)} €
                       </span>
                     </div>
                   ))}

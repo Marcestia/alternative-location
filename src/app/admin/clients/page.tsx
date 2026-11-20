@@ -1,4 +1,6 @@
-﻿import { addClient, deleteClient } from "@/app/actions/clients";
+import { deleteClient } from "@/app/actions/clients";
+import ClientForm from "@/components/ClientForm";
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -39,36 +41,7 @@ export default async function ClientsPage({
             Merci de renseigner un nom.
           </div>
         )}
-        <form action={addClient} className="mt-4 grid gap-3">
-          <input
-            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-            placeholder="Nom et prénom"
-            name="name"
-            required
-          />
-          <input
-            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-            placeholder="Email"
-            name="email"
-            type="email"
-          />
-          <input
-            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-            placeholder="Téléphone"
-            name="phone"
-          />
-          <input
-            className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-            placeholder="Adresse"
-            name="address"
-          />
-          <button
-            className="rounded-full bg-[color:var(--ink)] px-6 py-3 text-sm font-semibold text-white"
-            type="submit"
-          >
-            Enregistrer
-          </button>
-        </form>
+        <ClientForm />
       </div>
 
       <div className="rounded-3xl border border-black/5 bg-white/80 p-6">
@@ -97,12 +70,12 @@ export default async function ClientsPage({
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <a
+                  <Link
                     className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold text-[color:var(--muted)] hover:border-black/20"
                     href={`/admin/clients/${client.id}`}
                   >
-                    Voir fiche
-                  </a>
+                    Voir / modifier
+                  </Link>
                   <form action={deleteClient}>
                     <input type="hidden" name="id" value={client.id} />
                     <button
