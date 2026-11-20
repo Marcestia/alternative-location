@@ -9,7 +9,6 @@ import { siteConfig } from "@/lib/site";
 const links = [
   { href: "/#univers", label: "Nos univers" },
   { href: "/catalogue", label: "Le catalogue" },
-  { href: "/location-vaisselle-gironde", label: "Vaisselle · Gironde" },
   { href: "/#offres", label: "Nos formules" },
   { href: "/galerie", label: "Inspirations" },
 ];
@@ -30,7 +29,7 @@ export function SiteHeader() {
       }
     };
     const resize = () => {
-      if (window.innerWidth > 1180) setMenuOpen(false);
+      if (window.innerWidth > 1000) setMenuOpen(false);
     };
     document.addEventListener("keydown", close);
     window.addEventListener("resize", resize);
@@ -156,9 +155,6 @@ export function SiteFooter() {
         <div>
           <p className="footer-label">À DÉCOUVRIR</p>
           <Link href="/catalogue">Notre catalogue</Link>
-          <Link href="/location-vaisselle-gironde">
-            Location de vaisselle en Gironde
-          </Link>
           <Link href="/#offres">Les formules</Link>
           <Link href="/galerie">La galerie</Link>
           <Link href="/#contact">Contact & devis</Link>

@@ -115,28 +115,6 @@ export default async function Home({
             ))}
           </div>
         </div>
-        <section
-          className="site-container home-local-intro"
-          aria-labelledby="home-local-title"
-          data-reveal
-        >
-          <div>
-            <p className="micro-label">À GALGON, PRÈS DE LIBOURNE</p>
-            <h2 id="home-local-title">
-              Votre location de vaisselle en Gironde.
-            </h2>
-            <p>
-              Assiettes, verres, couverts et formules pour votre mariage,
-              anniversaire ou fête de famille. Choisissez votre table, puis
-              retirez et rapportez le matériel à Galgon, aux horaires convenus
-              ensemble.
-            </p>
-          </div>
-          <Link href="/location-vaisselle-gironde" className="text-link">
-            Vaisselle, formules et infos pratiques{" "}
-            <span aria-hidden="true">↗</span>
-          </Link>
-        </section>
         <UniverseExplorer categories={displayCategories} />
 
         <MomentOffersCarousel />

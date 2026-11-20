@@ -13,7 +13,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
   return [
     "/",
-    "/location-vaisselle-gironde",
     "/catalogue",
     "/galerie",
     "/conditions",
