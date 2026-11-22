@@ -119,7 +119,7 @@ export default function EventDatePicker({
   const canGoBack = monthCursor.getTime() > currentMonth.getTime();
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="event-date-picker relative">
       <label className="mb-2 block text-sm font-medium text-[color:var(--ink)]">
         {label}
       </label>
@@ -127,7 +127,7 @@ export default function EventDatePicker({
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="group flex w-full items-center justify-between rounded-[26px] border border-black/10 bg-white px-4 py-4 text-left shadow-[0_14px_40px_rgba(25,20,16,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-black/15 hover:shadow-[0_18px_44px_rgba(25,20,16,0.08)]"
+        className="event-date-trigger group flex w-full items-center justify-between rounded-[26px] border border-black/10 bg-white px-4 py-4 text-left shadow-[0_14px_40px_rgba(25,20,16,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-black/15 hover:shadow-[0_18px_44px_rgba(25,20,16,0.08)]"
       >
         <div className="min-w-0">
           <p className="text-[11px] uppercase tracking-[0.26em] text-[color:var(--accent-2)]/80">
@@ -158,7 +158,7 @@ export default function EventDatePicker({
       <input type="hidden" name={name} value={toIso(selectedDate)} required={required} />
 
       {open && (
-        <div className="absolute left-0 right-0 z-30 mt-3 rounded-[30px] border border-black/10 bg-white/98 p-4 shadow-[0_28px_60px_rgba(18,14,10,0.14)] backdrop-blur sm:p-5">
+        <div className="event-date-calendar absolute left-0 right-0 z-30 mt-3 rounded-[30px] border border-black/10 bg-white/98 p-4 shadow-[0_28px_60px_rgba(18,14,10,0.14)] backdrop-blur sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"

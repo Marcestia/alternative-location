@@ -71,7 +71,7 @@ export default function MomentOffersCarousel() {
         <div className="editorial-heading" data-reveal>
           <p className="micro-label">02 / LES FORMULES</p>
           <h2 id="offers-title">
-            La table
+            La table{" "}
             <br />
             <span>est mise.</span>
           </h2>

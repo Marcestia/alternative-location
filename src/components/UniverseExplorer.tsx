@@ -42,7 +42,7 @@ export default function UniverseExplorer({
       <div className="editorial-heading" data-reveal>
         <p className="micro-label">01 / L’INVENTAIRE DES POSSIBLES</p>
         <h2 id="universes-title">
-          Y’a tout.
+          Y’a tout.{" "}
           <br />
           <span className="outline-type">Surtout vous.</span>
         </h2>
@@ -89,6 +89,14 @@ export default function UniverseExplorer({
               data-reveal
             >
               <span className="universe-index-number">0{index + 1}</span>
+              <span className="universe-mobile-photo" aria-hidden="true">
+                <Image
+                  src={visuals[category.slug]?.image ?? "/vitrine/mobilier.jpg"}
+                  alt=""
+                  fill
+                  sizes="80px"
+                />
+              </span>
               <span className="universe-index-body">
                 <span className="universe-index-title">
                   {visuals[category.slug]?.title ?? category.name}

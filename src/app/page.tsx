@@ -9,6 +9,7 @@ import Link from "next/link";
 import MomentOffersCarousel from "@/components/MomentOffersCarousel";
 import EventPlayground from "@/components/EventPlayground";
 import UniverseExplorer from "@/components/UniverseExplorer";
+import "./home-mobile.css";
 
 export const metadata = publicPageMetadata({
   title:
@@ -129,7 +130,7 @@ export default async function Home({
             <div className="process-intro" data-reveal>
               <p className="micro-label">04 / DE L’IDÉE AU JOUR J</p>
               <h2 id="process-title">
-                C’est
+                C’est{" "}
                 <br />
                 parti<span className="mobile-decoration" aria-hidden="true">↗</span>
               </h2>
@@ -172,7 +173,7 @@ export default async function Home({
           <div className="contact-intro" data-reveal>
             <p className="micro-label">05 / À VOUS DE JOUER</p>
             <h2 id="contact-title">
-              Et
+              Et{" "}
               <br />
               maintenant<span className="contact-question">?</span>
             </h2>

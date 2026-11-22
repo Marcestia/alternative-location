@@ -20,7 +20,7 @@ export default function GalleryPreviewSection({
       <div className="editorial-heading" data-reveal>
         <p className="micro-label">03 / LES PREUVES EN IMAGES</p>
         <h2 id="gallery-title">
-          Ça donne
+          Ça donne{" "}
           <br />
           <span className="outline-type">ça.</span>
           <span className="gallery-heading-arrow mobile-decoration" aria-hidden="true">

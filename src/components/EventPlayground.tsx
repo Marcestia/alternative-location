@@ -84,13 +84,15 @@ export default function EventPlayground() {
               <br />À retirer à Galgon, près de Libourne.
             </p>
             <Link href="/catalogue" className="round-cta" data-magnetic>
-              <span>
+              <span className="hero-cta-desktop">
                 On fait
                 <br />
                 la fête ?
               </span>
+              <span className="hero-cta-mobile">Voir le catalogue</span>
               <span aria-hidden="true" className="link-decoration">↗</span>
             </Link>
+            <Link href="#contact" className="hero-mobile-quote">Demander un devis</Link>
           </div>
           <div className="hero-quick-links" data-stagger>
             <Link href="/catalogue#group-materiel-service" data-reveal>
