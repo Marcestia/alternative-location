@@ -59,15 +59,7 @@ export default function GalleryPreviewSection({
                   data-parallax={index % 2 ? "-0.035" : "0.035"}
                 />
               </div>
-              <span className="gallery-tile-arrow link-decoration" aria-hidden="true">
-                ↗
-              </span>
             </a>
-            <figcaption>
-              <span>FIG. 0{index + 1}</span>
-              <span>{item.title}</span>
-              {item.type === "VIDEO" ? <span>VIDÉO <span className="mobile-decoration" aria-hidden="true">↗</span></span> : null}
-            </figcaption>
           </figure>
         ))}
       </div>
