@@ -109,8 +109,8 @@ export default async function Home({
           <div className="party-marquee-track" aria-hidden="true">
             {[0, 1, 2, 3].map((copy) => (
               <span key={copy}>
-                LES GENS. LES TABLES. LES FÊTES. <span>✳</span> VAISSELLE /
-                DÉCORATION / MOBILIER / SON <span>✳</span>{" "}
+                LES GENS. LES TABLES. LES FÊTES. <span className="mobile-decoration" aria-hidden="true">✳</span> VAISSELLE /
+                DÉCORATION / MOBILIER / SON <span className="mobile-decoration" aria-hidden="true">✳</span>{" "}
               </span>
             ))}
           </div>
@@ -131,7 +131,7 @@ export default async function Home({
               <h2 id="process-title">
                 C’est
                 <br />
-                parti<span>↗</span>
+                parti<span className="mobile-decoration" aria-hidden="true">↗</span>
               </h2>
               <p>
                 Quatre étapes.

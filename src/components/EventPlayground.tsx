@@ -136,7 +136,7 @@ export default function EventPlayground() {
               {scene.caption}
             </p>
           </div>
-          <div className="orbit-stamp" aria-hidden="true">
+          <div className="orbit-stamp mobile-decoration" aria-hidden="true">
             <svg viewBox="0 0 120 120">
               <defs>
                 <path
@@ -153,10 +153,10 @@ export default function EventPlayground() {
             <span>✽</span>
           </div>
           <div className="hero-tape" aria-hidden="true">
-            PAS DE FÊTE SANS DÉTAILS. ↗
+            PAS DE FÊTE SANS DÉTAILS. <span className="mobile-decoration" aria-hidden="true">↗</span>
           </div>
           <div className="scene-selector">
-            <span className="micro-label">CHANGEZ D’AMBIANCE ↓</span>
+            <span className="micro-label">CHANGEZ D’AMBIANCE <span className="mobile-decoration" aria-hidden="true">↓</span></span>
             <div style={{ "--active-scene": activeScene } as CSSProperties}>
               <span className="scene-selector-indicator" aria-hidden="true" />
               {scenes.map((item, index) => (

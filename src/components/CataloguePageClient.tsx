@@ -1,5 +1,7 @@
 "use client";
 
+import ControlIcon from "@/components/ControlIcon";
+
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
@@ -480,8 +482,8 @@ function CatalogueItemModal({
               <img src={activeImage.url} alt={activeImage.alt || item.name} className="max-h-[68vh] w-full object-contain bg-white" />
               {images.length > 1 ? (
                 <>
-                  <button type="button" onClick={() => setActiveIndex((current) => (current - 1 + images.length) % images.length)} className="absolute left-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg font-semibold text-[color:var(--ink)] shadow-[0_12px_30px_rgba(0,0,0,0.12)] transition hover:bg-white" aria-label="Image précédente">{"←"}</button>
-                  <button type="button" onClick={() => setActiveIndex((current) => (current + 1) % images.length)} className="absolute right-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg font-semibold text-[color:var(--ink)] shadow-[0_12px_30px_rgba(0,0,0,0.12)] transition hover:bg-white" aria-label="Image suivante">{"→"}</button>
+                  <button type="button" onClick={() => setActiveIndex((current) => (current - 1 + images.length) % images.length)} className="absolute left-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg font-semibold text-[color:var(--ink)] shadow-[0_12px_30px_rgba(0,0,0,0.12)] transition hover:bg-white" aria-label="Image précédente"><ControlIcon kind="previous" /></button>
+                  <button type="button" onClick={() => setActiveIndex((current) => (current + 1) % images.length)} className="absolute right-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg font-semibold text-[color:var(--ink)] shadow-[0_12px_30px_rgba(0,0,0,0.12)] transition hover:bg-white" aria-label="Image suivante"><ControlIcon kind="next" /></button>
                 </>
               ) : null}
             </div>

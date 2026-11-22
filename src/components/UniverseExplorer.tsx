@@ -75,7 +75,7 @@ export default function UniverseExplorer({
               : "À DÉCOUVRIR"}
           </span>
           <span className="micro-label universe-preview-label">
-            SURVOLEZ LES UNIVERS. TROUVEZ LE VÔTRE. ↗
+            SURVOLEZ LES UNIVERS. TROUVEZ LE VÔTRE. <span className="mobile-decoration" aria-hidden="true">↗</span>
           </span>
         </div>
         <div className="universe-index" data-stagger>

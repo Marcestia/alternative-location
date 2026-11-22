@@ -23,7 +23,7 @@ export default function GalleryPreviewSection({
           Ça donne
           <br />
           <span className="outline-type">ça.</span>
-          <span className="gallery-heading-arrow" aria-hidden="true">
+          <span className="gallery-heading-arrow mobile-decoration" aria-hidden="true">
             ↘
           </span>
         </h2>
@@ -66,7 +66,7 @@ export default function GalleryPreviewSection({
             <figcaption>
               <span>FIG. 0{index + 1}</span>
               <span>{item.title}</span>
-              {item.type === "VIDEO" ? <span>VIDÉO ↗</span> : null}
+              {item.type === "VIDEO" ? <span>VIDÉO <span className="mobile-decoration" aria-hidden="true">↗</span></span> : null}
             </figcaption>
           </figure>
         ))}

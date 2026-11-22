@@ -1300,7 +1300,7 @@
   letter-spacing: -0.05em;
   font-weight: 600;
 }
-.footer-statement > span {
+.footer-statement > span:not(.mobile-decoration) {
   color: #e4cab5;
 }
 .footer-main {
@@ -2629,9 +2629,10 @@
   }
 }
 
-/* Mobile links keep their labels without ornamental emoji or arrow glyphs. */
+/* Mobile content keeps its labels without ornamental emoji or arrow glyphs. */
 @media (max-width: 1000px) {
-  .link-decoration {
+  .link-decoration,
+  .mobile-decoration {
     display: none !important;
   }
   .button,

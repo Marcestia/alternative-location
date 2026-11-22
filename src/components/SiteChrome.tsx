@@ -49,7 +49,7 @@ export function SiteHeader() {
       <div className="site-announcement">
         <span>LES FÊTES PASSENT. LES SOUVENIRS RESTENT.</span>
         <span className="announcement-location">
-          Galgon, Gironde <span aria-hidden="true">↗</span>
+          Galgon, Gironde <span className="mobile-decoration" aria-hidden="true">↗</span>
         </span>
       </div>
       <header className="site-header">
@@ -139,7 +139,7 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="footer-statement" aria-hidden="true">
-        À la prochaine <span>fête.</span>↗
+        À la prochaine <span>fête.</span><span className="mobile-decoration">↗</span>
       </div>
       <div className="site-container footer-main">
         <div>

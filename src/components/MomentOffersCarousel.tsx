@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import ControlIcon from "@/components/ControlIcon";
 import formuleBistrotImage from "../../public/formule_bistrot.jpg";
 import formuleEnfantImage from "../../public/formule_enfant.jpg";
 import formuleEpicureImage from "../../public/formule_epicure.jpg";
@@ -171,21 +172,21 @@ export default function MomentOffersCarousel() {
                     aria-pressed={!autoPlay}
                     onClick={() => setAutoPlay((current) => !current)}
                   >
-                    {autoPlay ? "Ⅱ" : "▷"}
+                    <ControlIcon kind={autoPlay ? "pause" : "play"} />
                   </button>
                   <button
                     type="button"
                     aria-label="Formule précédente"
                     onClick={previous}
                   >
-                    ←
+                    <ControlIcon kind="previous" />
                   </button>
                   <button
                     type="button"
                     aria-label="Formule suivante"
                     onClick={next}
                   >
-                    →
+                    <ControlIcon kind="next" />
                   </button>
                 </div>
               </div>

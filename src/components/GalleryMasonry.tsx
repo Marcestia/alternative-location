@@ -1,4 +1,6 @@
-﻿"use client";
+"use client";
+
+import ControlIcon from "@/components/ControlIcon";
 
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -59,7 +61,7 @@ function GalleryModal({
           aria-label="Fermer l’image"
           className="absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-black/55 text-2xl text-white shadow-lg backdrop-blur-md transition hover:scale-105 hover:bg-white hover:text-black sm:right-4 sm:top-4"
         >
-          <span aria-hidden="true">×</span>
+          <ControlIcon kind="close" />
         </button>
         <button
           type="button"
@@ -67,7 +69,7 @@ function GalleryModal({
           aria-label="Image précédente"
           className="fixed left-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/55 text-2xl text-white shadow-lg backdrop-blur-md transition hover:scale-105 hover:bg-white hover:text-black sm:left-6 sm:h-14 sm:w-14"
         >
-          <span aria-hidden="true">←</span>
+          <ControlIcon kind="previous" />
         </button>
         <button
           type="button"
@@ -75,7 +77,7 @@ function GalleryModal({
           aria-label="Image suivante"
           className="fixed right-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/55 text-2xl text-white shadow-lg backdrop-blur-md transition hover:scale-105 hover:bg-white hover:text-black sm:right-6 sm:h-14 sm:w-14"
         >
-          <span aria-hidden="true">→</span>
+          <ControlIcon kind="next" />
         </button>
         {item.type === "IMAGE" && previewUrl ? (
           <img
