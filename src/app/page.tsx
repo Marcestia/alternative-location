@@ -183,10 +183,10 @@ export default async function Home({
             </p>
             <div className="contact-direct">
               <a href={`tel:${siteConfig.phone.replace(/\s+/g, "")}`}>
-                {siteConfig.phone} <span aria-hidden="true">↗</span>
+                {siteConfig.phone} <span aria-hidden="true" className="link-decoration">↗</span>
               </a>
               <a href={`mailto:${siteConfig.email}`}>
-                {siteConfig.email} <span aria-hidden="true">↗</span>
+                {siteConfig.email} <span aria-hidden="true" className="link-decoration">↗</span>
               </a>
               <p>{siteConfig.address}</p>
             </div>
@@ -196,21 +196,21 @@ export default async function Home({
                 target="_blank"
                 rel="noreferrer"
               >
-                Facebook ↗
+                Facebook <span className="link-decoration" aria-hidden="true">↗</span>
               </a>
               <a
                 href={`https://wa.me/${whatsappNumber}`}
                 target="_blank"
                 rel="noreferrer"
               >
-                WhatsApp ↗
+                WhatsApp <span className="link-decoration" aria-hidden="true">↗</span>
               </a>
               <a
                 href="https://www.google.com/maps/search/?api=1&query=14+impasse+Moustron,+33133+Galgon,+France"
                 target="_blank"
                 rel="noreferrer"
               >
-                Nous trouver ↗
+                Nous trouver <span className="link-decoration" aria-hidden="true">↗</span>
               </a>
             </div>
             <details className="contact-detail" data-animated-details>
@@ -266,7 +266,7 @@ export default async function Home({
               La réservation est confirmée après validation du devis et
               versement d’un acompte de 30 % sous 7 jours.{" "}
               <Link href="/conditions">
-                Consulter les conditions de location ↗
+                Consulter les conditions de location <span className="link-decoration" aria-hidden="true">↗</span>
               </Link>
             </p>
           </div>

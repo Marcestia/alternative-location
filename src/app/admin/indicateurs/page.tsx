@@ -92,7 +92,7 @@ export default async function IndicatorsPage({
           href="/admin/clients"
           className="mt-4 inline-block text-sm font-semibold underline underline-offset-4"
         >
-          Voir le suivi des clients ↗
+          Voir le suivi des clients <span className="link-decoration" aria-hidden="true">↗</span>
         </Link>
       </header>
       {params?.saved === "1" && (

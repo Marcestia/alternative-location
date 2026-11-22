@@ -35,7 +35,7 @@ export default function AdminNavigation({ items }: { items: NavItem[] }) {
             className={active ? "is-active" : ""}
             aria-current={active ? "page" : undefined}
           >
-            <span className="admin-nav-icon" aria-hidden="true">
+            <span className="admin-nav-icon link-decoration" aria-hidden="true">
               {icons[item.href]}
             </span>
             <span>{item.label}</span>

@@ -949,16 +949,16 @@ export default function CataloguePageClient({
               <p className="mt-5 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">Parcourez chaque univers, ouvrez les fiches pour découvrir toutes les photos et ajoutez les quantités souhaitées à votre estimation.</p>
               <div className="mt-6 flex flex-wrap items-center gap-5">
                 <span className="rounded-md border border-black/10 bg-white/70 px-4 py-2 text-xs font-semibold">{totalCatalogItems} articles disponibles</span>
-                <Link href="/" className="text-xs font-semibold">← Retour à l’accueil</Link>
-                <Link href="/#contact" className="text-xs font-semibold underline underline-offset-4">Demander un devis ↗</Link>
+                <Link href="/" className="text-xs font-semibold"><span className="link-decoration" aria-hidden="true">←</span> Retour à l’accueil</Link>
+                <Link href="/#contact" className="text-xs font-semibold underline underline-offset-4">Demander un devis <span className="link-decoration" aria-hidden="true">↗</span></Link>
               </div>
             </div>
             <div className="rounded-lg border border-black/8 bg-white/65 p-6">
               <p className="eyebrow">UN COUP DE MAIN ?</p>
               <h2 className="mt-3 text-2xl font-normal">Composons ensemble.</h2>
               <p className="mt-3 text-xs leading-6 text-[color:var(--muted)]">Nous préparons votre devis avec vous, selon vos quantités et vos dates.</p>
-              <Link href="/#contact" className="button button-primary mt-5 w-full">Remplir le formulaire <span aria-hidden="true">↗</span></Link>
-              <div className="mt-4 flex flex-wrap justify-between gap-3 text-xs font-semibold"><a href="mailto:alternativelocation@free.fr">Envoyer un e-mail ↗</a><a href="tel:+33621205432">Appeler ↗</a></div>
+              <Link href="/#contact" className="button button-primary mt-5 w-full">Remplir le formulaire <span aria-hidden="true" className="link-decoration">↗</span></Link>
+              <div className="mt-4 flex flex-wrap justify-between gap-3 text-xs font-semibold"><a href="mailto:alternativelocation@free.fr">Envoyer un e-mail <span className="link-decoration" aria-hidden="true">↗</span></a><a href="tel:+33621205432">Appeler <span className="link-decoration" aria-hidden="true">↗</span></a></div>
             </div>
           </div>
         </header>

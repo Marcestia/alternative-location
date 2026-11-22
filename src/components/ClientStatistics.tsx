@@ -60,7 +60,7 @@ export default function ClientStatistics({
           href={`/admin/indicateurs?clientId=${encodeURIComponent(clientId)}`}
           className="rounded-full border border-black/10 px-4 py-2 text-sm font-semibold"
         >
-          Créer un indicateur pour ce client ↗
+          Créer un indicateur pour ce client <span className="link-decoration" aria-hidden="true">↗</span>
         </Link>
       </div>
       <AnalyticsPeriodFilter period={period} />

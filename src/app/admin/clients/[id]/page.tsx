@@ -65,7 +65,7 @@ export default async function ClientDetailPage({
           href="/admin/clients"
           className="mb-4 inline-block text-sm text-[color:var(--muted)] underline underline-offset-4"
         >
-          ← Tous les clients
+          <span className="link-decoration" aria-hidden="true">←</span> Tous les clients
         </Link>
         <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
           Fiche client

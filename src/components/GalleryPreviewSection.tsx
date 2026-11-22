@@ -34,7 +34,7 @@ export default function GalleryPreviewSection({
             Et de quoi imaginer la vôtre.
           </p>
           <a href="/galerie" className="text-link">
-            OUVRIR LA GALERIE <span aria-hidden="true">↗</span>
+            OUVRIR LA GALERIE <span aria-hidden="true" className="link-decoration">↗</span>
           </a>
         </div>
       </div>
@@ -59,7 +59,7 @@ export default function GalleryPreviewSection({
                   data-parallax={index % 2 ? "-0.035" : "0.035"}
                 />
               </div>
-              <span className="gallery-tile-arrow" aria-hidden="true">
+              <span className="gallery-tile-arrow link-decoration" aria-hidden="true">
                 ↗
               </span>
             </a>
@@ -73,7 +73,7 @@ export default function GalleryPreviewSection({
       </div>
       <a href="/galerie" className="gallery-all-link" data-reveal>
         <span>ON VOUS MONTRE LA SUITE ?</span>
-        <span aria-hidden="true">↗</span>
+        <span aria-hidden="true" className="link-decoration">↗</span>
       </a>
     </section>
   );

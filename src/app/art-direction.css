@@ -516,7 +516,7 @@
   font-size: 8px;
   letter-spacing: 0.04em;
 }
-.hero-baseline a > span {
+.hero-baseline a:first-child > span {
   display: inline-block;
   margin-left: 22px;
   font-size: 16px;
@@ -1910,7 +1910,7 @@
     font-size: 6px;
     margin-top: 18px;
   }
-  .hero-baseline a > span {
+  .hero-baseline a:first-child > span {
     margin-left: 9px;
     font-size: 13px;
   }
@@ -2615,7 +2615,7 @@
   }
   .party-marquee-track,
   .orbit-stamp svg,
-  .hero-baseline a > span {
+  .hero-baseline a:first-child > span {
     animation: none;
   }
   .hero-picture-frame {
@@ -2626,5 +2626,32 @@
   }
   .universe-preview {
     transform: rotate(-1.5deg);
+  }
+}
+
+/* Mobile links keep their labels without ornamental emoji or arrow glyphs. */
+@media (max-width: 1000px) {
+  .link-decoration {
+    display: none !important;
+  }
+  .button,
+  .round-cta {
+    justify-content: center;
+    gap: 0;
+  }
+  .round-cta {
+    text-align: center;
+  }
+  .text-link {
+    justify-content: flex-start;
+    gap: 0;
+  }
+  .universe-index-link {
+    grid-template-columns: 25px minmax(0, 1fr);
+  }
+  .scene-selector button,
+  .offers-tabs button {
+    justify-content: center;
+    gap: 8px;
   }
 }

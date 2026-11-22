@@ -131,7 +131,7 @@ export default function MomentOffersCarousel() {
               >
                 <span>0{index + 1}</span>
                 {item.name}
-                <span aria-hidden="true">↗</span>
+                <span className="link-decoration" aria-hidden="true">↗</span>
               </button>
             ))}
           </div>
@@ -152,7 +152,7 @@ export default function MomentOffersCarousel() {
                 </h3>
                 <p>{offer.description}</p>
                 <a href="#contact" className="button button-acid" data-magnetic>
-                  DEMANDER CETTE FORMULE <span aria-hidden="true">↗</span>
+                  DEMANDER CETTE FORMULE <span aria-hidden="true" className="link-decoration">↗</span>
                 </a>
               </div>
               <div className="offers-controls">

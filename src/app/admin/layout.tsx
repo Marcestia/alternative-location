@@ -113,7 +113,7 @@ export default async function AdminLayout({
           <AdminNavigation items={navItems} />
           <div className="admin-sidebar-bottom">
             <Link href="/" className="admin-site-link">
-              Voir le site public ↗
+              Voir le site public <span className="link-decoration" aria-hidden="true">↗</span>
             </Link>
             <form action={adminLogout}>
               <button className="admin-logout" type="submit">

@@ -147,7 +147,7 @@ export default async function ClientsPage({
             className="rounded-full border border-black/10 px-5 py-3 text-sm font-semibold"
             href="/admin/indicateurs"
           >
-            Mes indicateurs ↗
+            Mes indicateurs <span className="link-decoration" aria-hidden="true">↗</span>
           </Link>
         </div>
       </header>
@@ -337,7 +337,7 @@ export default async function ClientsPage({
                 href={pageUrl(page - 1)}
                 className="rounded-full border border-black/10 px-4 py-2"
               >
-                ← Précédents
+                <span className="link-decoration" aria-hidden="true">←</span> Précédents
               </Link>
             ) : (
               <span />
@@ -350,7 +350,7 @@ export default async function ClientsPage({
                 href={pageUrl(page + 1)}
                 className="rounded-full border border-black/10 px-4 py-2"
               >
-                Suivants →
+                Suivants <span className="link-decoration" aria-hidden="true">→</span>
               </Link>
             ) : (
               <span />

@@ -49,7 +49,7 @@ export default async function LoginPage({
           </button>
         </form>
         <Link href="/" className="login-back">
-          ← Retour au site
+          <span className="link-decoration" aria-hidden="true">←</span> Retour au site
         </Link>
       </div>
     </main>

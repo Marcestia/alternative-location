@@ -89,18 +89,18 @@ export default function EventPlayground() {
                 <br />
                 la fête ?
               </span>
-              <span aria-hidden="true">↗</span>
+              <span aria-hidden="true" className="link-decoration">↗</span>
             </Link>
           </div>
           <div className="hero-quick-links" data-stagger>
             <Link href="/catalogue#group-materiel-service" data-reveal>
-              À table <span aria-hidden="true">↗</span>
+              À table <span aria-hidden="true" className="link-decoration">↗</span>
             </Link>
             <Link href="/catalogue#group-decoration" data-reveal>
-              Le décor <span aria-hidden="true">↗</span>
+              Le décor <span aria-hidden="true" className="link-decoration">↗</span>
             </Link>
             <Link href="/catalogue#group-ambiance-son" data-reveal>
-              L’ambiance <span aria-hidden="true">↗</span>
+              L’ambiance <span aria-hidden="true" className="link-decoration">↗</span>
             </Link>
           </div>
         </div>
@@ -168,7 +168,7 @@ export default function EventPlayground() {
                 >
                   <span>0{index + 1}</span>
                   {item.name}
-                  <span aria-hidden="true">↗</span>
+                  <span className="link-decoration" aria-hidden="true">↗</span>
                 </button>
               ))}
             </div>
@@ -177,9 +177,9 @@ export default function EventPlayground() {
       </div>
       <div className="hero-baseline">
         <a href="#univers">
-          SCROLLEZ. LA FÊTE COMMENCE. <span aria-hidden="true">↓</span>
+          SCROLLEZ. LA FÊTE COMMENCE. <span aria-hidden="true" className="link-decoration">↓</span>
         </a>
-        <a href="#contact">UN PROJET ? PARLONS-EN ↗</a>
+        <a href="#contact">UN PROJET ? PARLONS-EN <span className="link-decoration" aria-hidden="true">↗</span></a>
         <span>RETRAIT SUR RENDEZ-VOUS À GALGON</span>
       </div>
     </section>

@@ -47,7 +47,7 @@ export default function UniverseExplorer({
           <span className="outline-type">Surtout vous.</span>
         </h2>
         <Link href="/catalogue" className="text-link">
-          TOUT LE CATALOGUE <span aria-hidden="true">↗</span>
+          TOUT LE CATALOGUE <span aria-hidden="true" className="link-decoration">↗</span>
         </Link>
       </div>
       <div className="universe-explorer-grid">
@@ -98,7 +98,7 @@ export default function UniverseExplorer({
                   {category.description}
                 </span>
               </span>
-              <span className="universe-index-arrow" aria-hidden="true">
+              <span className="universe-index-arrow link-decoration" aria-hidden="true">
                 ↗
               </span>
             </Link>

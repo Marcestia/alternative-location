@@ -86,7 +86,7 @@ export default async function StockItemPage({
           className="text-xs font-semibold uppercase tracking-[0.3em] text-[color:var(--muted)]"
           href="/admin/stock"
         >
-          ← Retour au stock
+          <span className="link-decoration" aria-hidden="true">←</span> Retour au stock
         </a>
         <h1 className="mt-4 text-3xl font-semibold">{item.name}</h1>
         <p className="mt-2 text-sm text-[color:var(--muted)]">

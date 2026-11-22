@@ -88,7 +88,7 @@ export function SiteHeader() {
             ))}
           </nav>
           <Link href="/#contact" className="button button-primary header-cta">
-            On en parle ? <span aria-hidden="true">↗</span>
+            On en parle ? <span aria-hidden="true" className="link-decoration">↗</span>
           </Link>
           <button
             type="button"
@@ -119,11 +119,11 @@ export function SiteHeader() {
                 onClick={() => setMenuOpen(false)}
               >
                 {link.label}
-                <span aria-hidden="true">↗</span>
+                <span aria-hidden="true" className="link-decoration">↗</span>
               </Link>
             ))}
             <Link href="/#contact" onClick={() => setMenuOpen(false)}>
-              Contact & devis<span aria-hidden="true">↗</span>
+              Contact & devis<span aria-hidden="true" className="link-decoration">↗</span>
             </Link>
           </nav>
         ) : null}
@@ -171,14 +171,14 @@ export function SiteFooter() {
             target="_blank"
             rel="noreferrer"
           >
-            Écrivez-nous sur WhatsApp ↗
+            Écrivez-nous sur WhatsApp <span className="link-decoration" aria-hidden="true">↗</span>
           </a>
         </div>
       </div>
       <div className="site-container footer-bottom">
         <p>© {new Date().getFullYear()} Alternative Location</p>
         <Link href="/conditions">Conditions générales de location</Link>
-        <Link href="/login">Espace entreprise ↗</Link>
+        <Link href="/login">Espace entreprise <span className="link-decoration" aria-hidden="true">↗</span></Link>
       </div>
     </footer>
   );
