@@ -1393,6 +1393,12 @@
 .catalogue-page .sticky {
   top: 110px;
 }
+.catalogue-mobile-title,
+.catalogue-mobile-navigation,
+.catalogue-mobile-contact,
+.catalogue-mobile-photo-hint {
+  display: none;
+}
 .gallery-page {
   padding-block: 55px 80px;
 }
@@ -2605,5 +2611,337 @@
   .offers-tabs button {
     justify-content: center;
     gap: 8px;
+  }
+}
+
+/* A compact catalogue for phones; the desktop composition stays intact. */
+@media (max-width: 760px) {
+  .catalogue-page {
+    padding: 18px 12px calc(100px + env(safe-area-inset-bottom));
+  }
+  .catalogue-layout > :not(:last-child) {
+    margin-block-end: 16px;
+  }
+  .catalogue-intro {
+    padding: 0 4px;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+  }
+  .catalogue-intro > div {
+    gap: 0;
+  }
+  .catalogue-intro .eyebrow,
+  .catalogue-desktop-title,
+  .catalogue-intro-description,
+  .catalogue-intro .catalogue-home-link,
+  .catalogue-intro .catalogue-help,
+  .catalogue-count-label {
+    display: none;
+  }
+  .catalogue-mobile-title {
+    display: inline;
+  }
+  .catalogue-intro h1 {
+    margin: 0;
+    font-size: 32px;
+    line-height: 1.15;
+  }
+  .catalogue-intro-links {
+    margin-top: 8px;
+    gap: 6px;
+    justify-content: space-between;
+  }
+  .catalogue-intro-links > span {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .catalogue-intro-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    font-size: 11px;
+  }
+  .catalogue-mobile-contact {
+    display: block;
+    position: relative;
+    z-index: 40;
+    margin-left: auto;
+  }
+  .catalogue-mobile-contact summary {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    list-style: none;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .catalogue-mobile-contact summary::-webkit-details-marker {
+    display: none;
+  }
+  .catalogue-mobile-contact > div {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    width: 180px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #fffcf8;
+    box-shadow: 0 10px 25px #413b361a;
+  }
+  .catalogue-mobile-contact a {
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+  }
+  .catalogue-mobile-navigation {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    top: 72px;
+    z-index: 35;
+    padding: 6px 10px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #f6f1ebf5;
+    box-shadow: 0 6px 18px #413b3608;
+    backdrop-filter: blur(12px);
+  }
+  .catalogue-mobile-navigation label {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .catalogue-mobile-navigation select {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 8px 2px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ink);
+    font-size: 16px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+  }
+  .catalogue-results > :not(:last-child),
+  .catalogue-group > :not(:last-child) {
+    margin-block-end: 10px;
+  }
+  .catalogue-group,
+  .catalogue-section {
+    scroll-margin-top: 42px;
+  }
+  .catalogue-page .catalogue-group-heading {
+    border-radius: 18px;
+  }
+  .catalogue-group-heading > button,
+  .catalogue-section > button {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    min-height: 44px;
+  }
+  .catalogue-group-heading > button > div:first-child,
+  .catalogue-section > button > div:first-child {
+    min-width: 0;
+  }
+  .catalogue-group-heading > button > div:first-child > p,
+  .catalogue-section > button > div:first-child > p + p {
+    display: none;
+  }
+  .catalogue-page .catalogue-group-heading h2 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+  }
+  .catalogue-section > button > div:first-child > p {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .catalogue-group-heading > button > div:last-child,
+  .catalogue-section > button > div:last-child {
+    flex-shrink: 0;
+    gap: 6px;
+  }
+  .catalogue-group-heading > button > div:last-child > div,
+  .catalogue-section > button > div:last-child > div {
+    padding: 4px 7px;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  .catalogue-group-heading > button > div:last-child > span,
+  .catalogue-section > button > div:last-child > span {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+  }
+  .catalogue-page .catalogue-section {
+    border-radius: 18px;
+  }
+  .catalogue-section[data-empty="true"]:has(> button[aria-expanded="false"]) {
+    display: none;
+    margin: 0;
+  }
+  .catalogue-products {
+    padding: 10px 8px;
+  }
+  .catalogue-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 8px;
+  }
+  .catalogue-page .catalogue-item {
+    min-width: 0;
+    padding: 8px;
+    border-radius: 16px;
+    background-image: none;
+  }
+  .catalogue-page .catalogue-item:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  .catalogue-page .catalogue-item > div:first-child {
+    border-radius: 11px;
+  }
+  .catalogue-item-photo {
+    position: relative;
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+  .catalogue-mobile-photo-hint {
+    display: block;
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    padding: 3px 7px;
+    border-radius: 20px;
+    background: #fffdf3eb;
+    color: var(--ink);
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .catalogue-item-photo-count {
+    top: 6px;
+    right: 6px;
+    padding: 3px 6px;
+    font-size: 9px;
+  }
+  .catalogue-item-photo-dots,
+  .catalogue-item-description,
+  .catalogue-item-details {
+    display: none;
+  }
+  .catalogue-item-body {
+    margin-top: 10px;
+  }
+  .catalogue-page .catalogue-item h3 {
+    font-size: 13px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+  .catalogue-item-meta {
+    margin-top: 7px;
+    gap: 4px 8px;
+    align-items: baseline;
+  }
+  .catalogue-item-meta > span {
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .catalogue-item-meta > span:first-child {
+    font-size: 15px;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .catalogue-item-actions {
+    margin-top: auto;
+    padding-top: 10px;
+  }
+  .catalogue-item-actions > button,
+  .catalogue-item-quantity > div {
+    min-height: 44px;
+  }
+  .catalogue-item-actions > button {
+    padding: 8px 4px;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+  .catalogue-item-quantity {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .catalogue-item-quantity > div {
+    gap: 0;
+    padding: 0;
+  }
+  .catalogue-item-quantity button {
+    flex-shrink: 0;
+    width: 40px;
+    height: 44px;
+    font-size: 16px;
+  }
+  .catalogue-item-quantity p:first-child {
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+  .catalogue-item-quantity p:last-child {
+    font-size: 13px;
+  }
+  .catalogue-summary-bar {
+    bottom: max(12px, env(safe-area-inset-bottom));
+    padding-inline: 12px;
+  }
+  .catalogue-summary-bar > div {
+    border-radius: 22px;
+    padding: 6px;
+  }
+  .catalogue-summary-open {
+    min-height: 44px;
+    padding-inline: 22px;
+    box-shadow: none;
+  }
+  .catalogue-summary-dialog {
+    z-index: 180;
+    padding: max(12px, env(safe-area-inset-top)) 12px
+      max(12px, env(safe-area-inset-bottom));
+  }
+  .catalogue-item-dialog-panel {
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .catalogue-item-dialog-close {
+    position: fixed;
+    top: max(24px, env(safe-area-inset-top));
+    right: 24px;
+    min-height: 44px;
+  }
+  .catalogue-item-dialog-photo {
+    max-height: 36dvh;
+  }
+}
+
+@media (min-width: 560px) and (max-width: 760px) {
+  .catalogue-product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

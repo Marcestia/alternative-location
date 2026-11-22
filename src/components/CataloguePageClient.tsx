@@ -471,15 +471,15 @@ function CatalogueItemModal({
   const activeImage = images[activeIndex];
 
   return createPortal(
-    <div className="fixed inset-0 z-[220] flex items-center justify-center bg-[rgba(16,12,9,0.76)] p-3 backdrop-blur-md sm:p-5" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="relative w-full max-w-6xl overflow-hidden rounded-[30px] border border-white/10 bg-[#fbf7f2] shadow-[0_35px_120px_rgba(0,0,0,0.35)]" onClick={(event) => event.stopPropagation()}>
-        <button type="button" onClick={onClose} className="absolute right-4 top-4 z-10 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-[color:var(--ink)] transition hover:bg-white">
+    <div className="fixed inset-0 z-[220] flex items-center justify-center bg-[rgba(16,12,9,0.76)] p-3 backdrop-blur-md sm:p-5" onClick={onClose} role="dialog" aria-modal="true" aria-label={item.name}>
+      <div className="catalogue-item-dialog-panel relative w-full max-w-6xl overflow-hidden rounded-[30px] border border-white/10 bg-[#fbf7f2] shadow-[0_35px_120px_rgba(0,0,0,0.35)]" onClick={(event) => event.stopPropagation()}>
+        <button type="button" onClick={onClose} className="catalogue-item-dialog-close absolute right-4 top-4 z-10 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-[color:var(--ink)] transition hover:bg-white">
           Fermer
         </button>
         <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
           <div className="bg-[#f1ebe4] p-4 sm:p-6">
             <div className="relative overflow-hidden rounded-[24px] bg-white shadow-[0_16px_35px_rgba(30,25,20,0.08)]">
-              <img src={activeImage.url} alt={activeImage.alt || item.name} className="max-h-[68vh] w-full object-contain bg-white" />
+              <img src={activeImage.url} alt={activeImage.alt || item.name} className="catalogue-item-dialog-photo max-h-[68vh] w-full object-contain bg-white" />
               {images.length > 1 ? (
                 <>
                   <button type="button" onClick={() => setActiveIndex((current) => (current - 1 + images.length) % images.length)} className="absolute left-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg font-semibold text-[color:var(--ink)] shadow-[0_12px_30px_rgba(0,0,0,0.12)] transition hover:bg-white" aria-label="Image précédente"><ControlIcon kind="previous" /></button>
@@ -549,15 +549,16 @@ function ItemCard({
   return (
     <article className={`catalogue-item group flex h-full flex-col rounded-[32px] border bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(248,242,236,0.94))] p-4 shadow-[0_24px_50px_rgba(30,25,20,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_rgba(30,25,20,0.1)] sm:p-5 ${isSelected ? "border-emerald-500 ring-2 ring-emerald-100" : "border-black/5 hover:border-black/10"}`}>
       <div className="relative overflow-hidden rounded-[24px] bg-[color:var(--surface)]">
-          <button type="button" onClick={() => onOpenDetails(item)} className="block h-44 w-full text-left sm:h-52" aria-label={`Voir le d\u00e9tail de ${item.name}`}>
-          <img src={item.imageUrl || "/vitrine/hero.jpg"} alt={item.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" draggable={false} />
+          <button type="button" onClick={() => onOpenDetails(item)} className="catalogue-item-photo block h-44 w-full text-left sm:h-52" aria-label={`Voir le d\u00e9tail de ${item.name}`}>
+          <img src={item.imageUrl || "/vitrine/hero.jpg"} alt={item.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" draggable={false} loading="lazy" decoding="async" />
+          <span className="catalogue-mobile-photo-hint">Voir la fiche</span>
         </button>
         {item.images.length > 1 ? (
           <>
-            <div className="pointer-events-none absolute right-3 top-3 rounded-full bg-[rgba(18,14,11,0.72)] px-3 py-1 text-[11px] font-semibold text-white shadow-[0_10px_18px_rgba(0,0,0,0.18)]">
+            <div className="catalogue-item-photo-count pointer-events-none absolute right-3 top-3 rounded-full bg-[rgba(18,14,11,0.72)] px-3 py-1 text-[11px] font-semibold text-white shadow-[0_10px_18px_rgba(0,0,0,0.18)]">
               {item.images.length} photos
             </div>
-            <div className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-2 shadow-[0_10px_18px_rgba(0,0,0,0.12)]">
+            <div className="catalogue-item-photo-dots pointer-events-none absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-2 shadow-[0_10px_18px_rgba(0,0,0,0.12)]">
               {item.images.slice(0, 3).map((image, index) => (
                 <span
                   key={`${item.id}-thumb-${index}`}
@@ -574,21 +575,21 @@ function ItemCard({
           </>
         ) : null}
       </div>
-      <div className="mt-4 flex flex-1 flex-col">
+      <div className="catalogue-item-body mt-4 flex flex-1 flex-col">
         <div>
           <h3 className="text-base font-semibold leading-tight text-[color:var(--ink)] sm:text-lg">{item.name}</h3>
-          <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">{item.images.length > 1 ? `${item.images.length} photos disponibles. Ouvrez la fiche pour toutes les voir.` : "Location à l'unité. Ouvrez la fiche pour voir le détail."}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <p className="catalogue-item-description mt-2 text-sm leading-6 text-[color:var(--muted)]">{item.images.length > 1 ? `${item.images.length} photos disponibles. Ouvrez la fiche pour toutes les voir.` : "Location à l'unité. Ouvrez la fiche pour voir le détail."}</p>
+          <div className="catalogue-item-meta mt-3 flex flex-wrap gap-2">
             <span className="rounded-full bg-[color:var(--surface)] px-3 py-1 text-[11px] font-semibold text-[color:var(--ink)]">{formatEuro(item.rentalPriceCents)}</span>
             <span className="rounded-full bg-[color:var(--ink)]/8 px-3 py-1 text-[11px] font-semibold text-[color:var(--ink)]">{getAvailabilityLabel(item)}</span>
           </div>
         </div>
-        <div className="mt-5 pt-1">
-          <button type="button" onClick={() => onOpenDetails(item)} className="mb-3 w-full rounded-full border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20">{"Voir le détail"}</button>
+        <div className="catalogue-item-actions mt-5 pt-1">
+          <button type="button" onClick={() => onOpenDetails(item)} className="catalogue-item-details mb-3 w-full rounded-full border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20">{"Voir le détail"}</button>
           {!isSelected ? (
             <button type="button" onClick={() => onAdd(item)} className="w-full rounded-full border border-black/10 bg-[color:var(--surface)]/65 px-4 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:-translate-y-0.5 hover:border-black/20 hover:bg-white">Ajouter au calcul</button>
           ) : (
-            <div className="rounded-[24px] border border-emerald-200 bg-emerald-50/90 p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+            <div className="catalogue-item-quantity rounded-[24px] border border-emerald-200 bg-emerald-50/90 p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
               <div className="flex items-center justify-between gap-2 rounded-full border border-emerald-200 bg-white/90 px-2 py-1.5">
                 <button type="button" onClick={() => onRemove(item)} className="h-9 w-9 rounded-full bg-emerald-50 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100" aria-label={`Retirer ${item.name}`}>-</button>
                 <div className="text-center">
@@ -613,6 +614,7 @@ export default function CataloguePageClient({
 }: CataloguePageClientProps) {
   const [selected, setSelected] = useState<Record<string, SelectedItemVM>>({});
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
+  const [mobileCategoryId, setMobileCategoryId] = useState("");
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
@@ -746,10 +748,14 @@ export default function CataloguePageClient({
       const next = { ...prev };
       let changed = false;
 
+      const isMobile = window.matchMedia("(max-width: 760px)").matches;
       for (const group of sectionGroups) {
-        for (const [index, section] of group.sections.entries()) {
+        const initialSection = isMobile
+          ? group.sections.find((section) => section.items.length > 0) ?? group.sections[0]
+          : group.sections[0];
+        for (const section of group.sections) {
           if (!(section.id in next)) {
-            next[section.id] = index === 0;
+            next[section.id] = section.id === initialSection?.id;
             changed = true;
           }
         }
@@ -775,6 +781,7 @@ export default function CataloguePageClient({
       const matchingSection = displaySections.find((section) => section.id === currentHash);
       if (!matchingSection) return;
 
+      setMobileCategoryId(matchingSection.id);
       setExpandedGroups((prev) => ({ ...prev, [matchingSection.group.slug]: true }));
       setExpandedSections((prev) => ({ ...prev, [matchingSection.id]: true }));
     };
@@ -799,6 +806,22 @@ export default function CataloguePageClient({
   const openSection = (sectionId: string, groupSlug: string) => {
     setExpandedGroups((prev) => ({ ...prev, [groupSlug]: true }));
     setExpandedSections((prev) => ({ ...prev, [sectionId]: true }));
+  };
+
+  const navigateMobileCategory = (sectionId: string) => {
+    const section = displaySections.find((entry) => entry.id === sectionId);
+    if (!section) return;
+    openSection(section.id, section.group.slug);
+    setMobileCategoryId(section.id);
+    window.history.pushState(null, "", `#${section.id}`);
+    window.requestAnimationFrame(() => {
+      document.getElementById(section.id)?.scrollIntoView({
+        block: "start",
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "instant"
+          : "smooth",
+      });
+    });
   };
 
   const addItem = (item: ItemVM) => {
@@ -942,20 +965,27 @@ export default function CataloguePageClient({
 
   return (
     <div className="catalogue-page">
-      <div className="mx-auto w-full max-w-[1680px] space-y-6 xl:space-y-8">
+      <div className="catalogue-layout mx-auto w-full max-w-[1680px] space-y-6 xl:space-y-8">
         <header id="contact" className="catalogue-intro">
           <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-center">
             <div>
               <p className="eyebrow">LE CATALOGUE — À VOUS DE COMPOSER</p>
-              <h1 className="mt-5">Tout pour les<br /><em>beaux moments.</em></h1>
-              <p className="mt-5 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">Parcourez chaque univers, ouvrez les fiches pour découvrir toutes les photos et ajoutez les quantités souhaitées à votre estimation.</p>
-              <div className="mt-6 flex flex-wrap items-center gap-5">
+              <h1 className="mt-5"><span className="catalogue-desktop-title">Tout pour les<br /><em>beaux moments.</em></span><span className="catalogue-mobile-title">Le catalogue<em>.</em></span></h1>
+              <p className="catalogue-intro-description mt-5 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">Parcourez chaque univers, ouvrez les fiches pour découvrir toutes les photos et ajoutez les quantités souhaitées à votre estimation.</p>
+              <div className="catalogue-intro-links mt-6 flex flex-wrap items-center gap-5">
                 <span className="rounded-md border border-black/10 bg-white/70 px-4 py-2 text-xs font-semibold">{totalCatalogItems} articles disponibles</span>
-                <Link href="/" className="text-xs font-semibold"><span className="link-decoration" aria-hidden="true">←</span> Retour à l’accueil</Link>
+                <Link href="/" className="catalogue-home-link text-xs font-semibold"><span className="link-decoration" aria-hidden="true">←</span> Retour à l’accueil</Link>
                 <Link href="/#contact" className="text-xs font-semibold underline underline-offset-4">Demander un devis <span className="link-decoration" aria-hidden="true">↗</span></Link>
+                <details className="catalogue-mobile-contact">
+                  <summary>Contact</summary>
+                  <div>
+                    <a href="mailto:alternativelocation@free.fr">Envoyer un e-mail</a>
+                    <a href="tel:+33621205432">Appeler</a>
+                  </div>
+                </details>
               </div>
             </div>
-            <div className="rounded-lg border border-black/8 bg-white/65 p-6">
+            <div className="catalogue-help rounded-lg border border-black/8 bg-white/65 p-6">
               <p className="eyebrow">UN COUP DE MAIN ?</p>
               <h2 className="mt-3 text-2xl font-normal">Composons ensemble.</h2>
               <p className="mt-3 text-xs leading-6 text-[color:var(--muted)]">Nous préparons votre devis avec vous, selon vos quantités et vos dates.</p>
@@ -964,6 +994,28 @@ export default function CataloguePageClient({
             </div>
           </div>
         </header>
+
+        {sectionGroups.length > 0 && (
+          <nav className="catalogue-mobile-navigation" aria-label="Catégories du catalogue">
+            <label htmlFor="catalogue-mobile-category">Catégories</label>
+            <select
+              id="catalogue-mobile-category"
+              value={mobileCategoryId}
+              onChange={(event) => navigateMobileCategory(event.target.value)}
+            >
+              <option value="" disabled>Choisir une catégorie</option>
+              {sectionGroups.map((group) => (
+                <optgroup key={group.slug} label={group.label}>
+                  {group.sections.map((section) => (
+                    <option key={section.id} value={section.id}>
+                      {section.label} ({section.items.length})
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          </nav>
+        )}
 
         <div className="xl:grid xl:grid-cols-[230px_minmax(0,1fr)_360px] xl:gap-8">
           <aside className="hidden xl:block">
@@ -1007,7 +1059,7 @@ export default function CataloguePageClient({
             </div>
           </aside>
 
-          <main className="space-y-6 sm:space-y-8 xl:space-y-10">
+          <main className="catalogue-results space-y-6 sm:space-y-8 xl:space-y-10">
             {sectionGroups.length === 0 ? (
               <section className="rounded-[34px] border border-dashed border-black/10 bg-white/88 p-6 shadow-[0_18px_40px_rgba(30,25,20,0.05)] sm:p-8">
                 <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--muted)]">
@@ -1030,7 +1082,7 @@ export default function CataloguePageClient({
               </section>
             ) : (
               sectionGroups.map((group) => (
-                <section key={group.slug} id={`group-${group.slug}`} className="scroll-mt-24 space-y-5">
+                <section key={group.slug} id={`group-${group.slug}`} className="catalogue-group scroll-mt-24 space-y-5">
                   <div className="catalogue-group-heading overflow-hidden rounded-[34px] border border-black/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(247,240,233,0.88))] shadow-[0_18px_40px_rgba(30,25,20,0.06)]">
                     <button
                       type="button"
@@ -1051,7 +1103,7 @@ export default function CataloguePageClient({
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="rounded-full border border-black/8 bg-white/80 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]">
-                          {group.sections.reduce((sum, section) => sum + section.items.length, 0)} article(s)
+                          {group.sections.reduce((sum, section) => sum + section.items.length, 0)}<span className="catalogue-count-label"> article(s)</span>
                         </div>
                         <span
                           className={`inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/8 bg-white/80 text-lg text-[color:var(--ink)] transition ${
@@ -1070,6 +1122,7 @@ export default function CataloguePageClient({
                     <section
                       key={section.id}
                       id={section.id}
+                      data-empty={section.items.length === 0}
                       className="catalogue-section scroll-mt-32 overflow-hidden rounded-[34px] border border-black/5 bg-white/88 shadow-[0_18px_40px_rgba(30,25,20,0.06)]"
                     >
                       <button
@@ -1090,7 +1143,7 @@ export default function CataloguePageClient({
                         </div>
                         <div className="flex items-center gap-3">
                           <div className="rounded-full border border-black/8 bg-[color:var(--surface)]/70 px-4 py-2 text-xs font-semibold text-[color:var(--muted)]">
-                            {section.items.length} article(s)
+                            {section.items.length}<span className="catalogue-count-label"> article(s)</span>
                           </div>
                           <span
                             className={`inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/8 bg-white text-lg text-[color:var(--ink)] transition ${
@@ -1108,8 +1161,8 @@ export default function CataloguePageClient({
                           Aucun article pour le moment.
                         </div>
                       ) : (
-                        <div className="border-t border-black/6 p-5 pt-6 sm:p-7 sm:pt-6">
-                          <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3 2xl:gap-6">
+                        <div className="catalogue-products border-t border-black/6 p-5 pt-6 sm:p-7 sm:pt-6">
+                          <div className="catalogue-product-grid grid gap-4 md:grid-cols-2 2xl:grid-cols-3 2xl:gap-6">
                           {section.items.map((item) => (
                             <ItemCard
                               key={item.id}
@@ -1140,7 +1193,7 @@ export default function CataloguePageClient({
         </div>
       </div>
 
-      <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 px-4 xl:hidden">
+      <div className="catalogue-summary-bar pointer-events-none fixed inset-x-0 bottom-4 z-30 px-4 xl:hidden">
         <div className="pointer-events-auto mx-auto max-w-xl rounded-full border border-black/10 bg-white/96 p-2 shadow-[0_20px_40px_rgba(20,18,14,0.16)] backdrop-blur">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 pl-2">
@@ -1154,7 +1207,8 @@ export default function CataloguePageClient({
             <button
               type="button"
               onClick={() => setMobileSummaryOpen(true)}
-              className="rounded-full bg-[color:var(--accent)] px-4 py-2 text-xs font-semibold text-white shadow-[0_10px_22px_rgba(217,119,55,0.35)]"
+              aria-haspopup="dialog"
+              className="catalogue-summary-open rounded-full bg-[color:var(--accent)] px-4 py-2 text-xs font-semibold text-white shadow-[0_10px_22px_rgba(217,119,55,0.35)]"
             >
               Voir
             </button>
@@ -1164,8 +1218,11 @@ export default function CataloguePageClient({
 
       {mobileSummaryOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 px-4 py-6 xl:hidden"
+          className="catalogue-summary-dialog fixed inset-0 z-40 bg-black/40 px-4 py-6 xl:hidden"
           onClick={() => setMobileSummaryOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Votre simulation"
         >
           <div
             className="mx-auto flex h-full max-w-lg flex-col rounded-[32px] bg-white p-4 shadow-[0_30px_70px_rgba(20,18,14,0.2)]"
