@@ -2,6 +2,8 @@
 import { approveQuote, rejectQuote, updateQuoteAdmin, generateQuotePdf } from "@/app/actions/quotes";
 import { prisma } from "@/lib/prisma";
 import { parseRequestedSelection } from "@/lib/requestSelection";
+import { RequestAcknowledgementButton } from "@/components/EmailForms";
+import Link from "next/link";
 import { ContactStatus, QuoteStatus } from "@/generated/prisma";
 import { headers } from "next/headers";
 import Script from "next/script";
@@ -151,6 +153,10 @@ export default async function DemandesPage({
         <p className="mt-3 text-sm text-[color:var(--muted)]">
           {demande.message}
         </p>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <RequestAcknowledgementButton requestId={demande.id} />
+          <Link href={`/admin/emails?${demande.clientId ? `client=${encodeURIComponent(demande.clientId)}` : `q=${encodeURIComponent(demande.email)}`}`} className="min-h-11 py-3 text-xs font-semibold underline">Suivi des e-mails</Link>
+        </div>
         {(demande.startDate || demande.endDate) && (
           <p className="mt-2 text-xs text-[color:var(--muted)]">
             Période:{" "}

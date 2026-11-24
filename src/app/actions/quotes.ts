@@ -631,6 +631,7 @@ export async function acceptQuoteByToken(formData: FormData) {
 
       await sendMail({
         to: recipient,
+        kind: "RESERVATION_CONFIRMATION", entityId: reservation.id, clientId: quote.clientId,
         subject,
         text,
         html,

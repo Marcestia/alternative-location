@@ -37,6 +37,7 @@ export default async function AdminLayout({
     quotePending,
     newReservations,
     newInvoices,
+    failedEmails,
   ] = await Promise.all([
     prisma.contactRequest.count({ where: { status: ContactStatus.NEW } }),
     prisma.contactRequest.count({
@@ -49,6 +50,7 @@ export default async function AdminLayout({
       where: { status: ReservationStatus.CONFIRMED },
     }),
     prisma.invoice.count({ where: { status: InvoiceStatus.DRAFT } }),
+    prisma.emailMessage.count({ where: { status: "FAILED" } }),
   ]);
 
   const demandesBadge = newDemandes + quoteReceived + quotePending;
@@ -67,6 +69,7 @@ export default async function AdminLayout({
     },
     { label: "Stock", href: "/admin/stock" },
     { label: "Clients", href: "/admin/clients" },
+    { label: "E-mails", href: "/admin/emails", badge: failedEmails },
     {
       label: "Factures",
       href: "/admin/factures",

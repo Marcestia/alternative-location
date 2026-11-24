@@ -96,6 +96,40 @@ model SavedIndicator {
   updatedAt  DateTime @default(now()) @updatedAt
 }
 
+model EmailSetting {
+  id          String   @id @default("company")
+  senderEmail String?
+  bccEmail    String?
+  updatedAt   DateTime @default(now()) @updatedAt
+}
+
+model EmailMessage {
+  id            String    @id @default(cuid())
+  dedupeKey     String?   @unique
+  kind          String    @default("OTHER")
+  entityId      String?
+  clientId      String?
+  to            String
+  subject       String
+  text          String
+  html          String?
+  attachments   Json?
+  status        String    @default("PENDING")
+  attempts      Int       @default(0)
+  from          String?
+  bcc           String?
+  messageId     String?
+  error         String?
+  bccError      String?
+  lastAttemptAt DateTime?
+  sentAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+
+  @@index([status, createdAt])
+  @@index([entityId, createdAt])
+}
+
 model ItemCategory {
   id          String @id @default(cuid())
   name        String @unique

@@ -164,6 +164,7 @@ export async function markConfirmationSent(formData: FormData) {
 
   await sendMail({
     to: reservation.client.email,
+    kind: "RESERVATION_CONFIRMATION", entityId: reservation.id, clientId: reservation.clientId,
     subject,
     text,
     html,

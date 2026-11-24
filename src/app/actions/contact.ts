@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { sendMail } from "@/lib/mailer";
+import { sendContactAcknowledgement } from "@/lib/contactEmail";
 import { parseRequestedSelection, stringifyRequestedSelection } from "@/lib/requestSelection";
 
 function toDate(value: string) {
@@ -14,26 +14,6 @@ function parseNumber(value: string) {
   const normalized = value.replace(",", ".").replace(/[^0-9.]/g, "");
   const parsed = Number.parseFloat(normalized);
   return Number.isNaN(parsed) ? null : parsed;
-}
-
-async function sendAcknowledgementEmail({
-  to,
-  name,
-}: {
-  to: string;
-  name: string;
-}) {
-  const host = process.env.SMTP_HOST;
-  const from = process.env.SMTP_FROM;
-  if (!host || !from) {
-    return;
-  }
-
-  await sendMail({
-    to,
-    subject: "Demande reçue - Alternative Location",
-    text: `Bonjour ${name},\n\nMerci pour votre demande. Nous l'avons bien reçue et revenons vers vous rapidement pour préciser les détails.\n\nÀ bientôt,\nAlternative Location`,
-  });
 }
 
 export async function createContactRequest(formData: FormData) {
@@ -114,7 +94,7 @@ export async function createContactRequest(formData: FormData) {
     });
   }
 
-  await prisma.contactRequest.create({
+  const request = await prisma.contactRequest.create({
     data: {
       name,
       email,
@@ -136,7 +116,7 @@ export async function createContactRequest(formData: FormData) {
   });
 
   try {
-    await sendAcknowledgementEmail({ to: email, name });
+    await sendContactAcknowledgement(request);
   } catch (error) {
     console.error("Contact acknowledgement failed", error);
   }

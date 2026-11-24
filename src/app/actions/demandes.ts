@@ -137,6 +137,7 @@ export async function refuseContact(formData: FormData) {
     `;
     await sendMail({
       to: request.email,
+      kind: "REQUEST_REFUSAL", entityId: request.id, clientId: request.clientId,
       subject,
       text,
       html,
@@ -335,6 +336,7 @@ export async function markQuoteSent(formData: FormData) {
   try {
     await sendMail({
       to: request.email,
+      kind: "QUOTE", entityId: request.id, clientId: request.clientId,
       subject,
       text,
       html,

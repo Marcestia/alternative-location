@@ -623,6 +623,7 @@ export async function markInvoiceSentAndEmail(formData: FormData) {
 
   await sendMail({
     to: invoice.client.email,
+    kind: "INVOICE", entityId: invoice.id, clientId: invoice.clientId,
     subject,
     text,
     html,
